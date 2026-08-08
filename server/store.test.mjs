@@ -20,3 +20,17 @@ test('a node saved by one client is visible to another', async () => {
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test('group event streams deduplicate events and advance a cursor', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'knowledge-ball-sync-'));
+  try {
+    const store = new KnowledgeStore(join(dir, 'knowledge.json'));
+    const first = { id: 'event-1', timestamp: 1 };
+    assert.deepEqual(await store.pushEvents('team-a', [first, first]), { cursor: '1' });
+    assert.deepEqual(await store.pullEvents('team-a', 0), { events: [first], cursor: '1' });
+    assert.deepEqual(await store.pullEvents('team-b', 0), { events: [], cursor: '0' });
+    assert.deepEqual(await store.pullEvents('team-a', 1), { events: [], cursor: '1' });
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});

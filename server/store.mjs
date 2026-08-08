@@ -55,6 +55,30 @@ export class KnowledgeStore {
     return this.writeQueue;
   }
 
+  async pullEvents(group, cursor = 0) {
+    const data = await this.read();
+    const stream = data.eventGroups?.[group] ?? { cursor: 0, events: [] };
+    return { events: stream.events.filter(item => item.cursor > cursor).map(item => item.event), cursor: String(stream.cursor) };
+  }
+
+  async pushEvents(group, events) {
+    let result;
+    this.writeQueue = this.writeQueue.then(async () => {
+      const data = await this.read();
+      const stream = (data.eventGroups ??= {})[group] ??= { cursor: 0, events: [] };
+      const ids = new Set(stream.events.map(item => item.event.id));
+      for (const event of events) {
+        if (ids.has(event.id)) continue;
+        ids.add(event.id);
+        stream.events.push({ cursor: ++stream.cursor, event });
+      }
+      await this.write(data);
+      result = { cursor: String(stream.cursor) };
+    });
+    await this.writeQueue;
+    return result;
+  }
+
   async write(data) {
     await mkdir(dirname(this.file), { recursive: true });
     const temporary = `${this.file}.${process.pid}.tmp`;

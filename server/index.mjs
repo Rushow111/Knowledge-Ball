@@ -2,11 +2,14 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, resolve, sep } from 'node:path';
 import { KnowledgeStore } from './store.mjs';
+import { createAuthenticator } from './auth.mjs';
 
 const port = Number(process.env.PORT ?? 8787);
 const root = resolve('dist');
 const store = new KnowledgeStore(resolve(process.env.KNOWLEDGE_DATA_FILE ?? 'data/knowledge.json'));
 const types = new Set(['axiom', 'definition', 'fact', 'theorem', 'hypothesis', 'prediction', 'opinion', 'value']);
+const eventTypes = new Set(['NodeCreated', 'NodeEdited', 'NodeFalsified', 'NodeSuspended', 'NodeDisputed', 'NodeResolved', 'NodeMasterySet']);
+const authenticate = createAuthenticator();
 
 function send(res, status, body) {
   const text = body === undefined ? '' : JSON.stringify(body);
@@ -31,6 +34,24 @@ function validNode(node) {
 }
 
 async function handleApi(req, res, url) {
+  if (url.pathname === '/api/sync/events') {
+    const identity = authenticate(req);
+    if (!identity) { send(res, 401, { error: 'Authentication required' }); return true; }
+    const body = req.method === 'POST' ? await readJson(req) : null;
+    const group = body?.group ?? url.searchParams.get('group');
+    if (typeof group !== 'string' || !identity.groups.includes(group)) {
+      send(res, 403, { error: 'Group access denied' }); return true;
+    }
+    if (req.method === 'GET') {
+      const cursor = Number(url.searchParams.get('cursor') ?? 0);
+      if (!Number.isSafeInteger(cursor) || cursor < 0) { send(res, 400, { error: 'Invalid cursor' }); return true; }
+      send(res, 200, await store.pullEvents(group, cursor)); return true;
+    }
+    if (req.method === 'POST' && Array.isArray(body.events) && body.events.every(validEvent)) {
+      send(res, 200, await store.pushEvents(group, body.events)); return true;
+    }
+    send(res, req.method === 'POST' ? 400 : 405, { error: 'Invalid sync request' }); return true;
+  }
   if (url.pathname === '/api/knowledge/drafts' && req.method === 'POST') {
     const body = await readJson(req);
     const namespace = body.namespace || 'default';
@@ -80,6 +101,12 @@ async function handleApi(req, res, url) {
   }
   send(res, 405, { error: 'Method not allowed' });
   return true;
+}
+
+function validEvent(event) {
+  return event && typeof event.id === 'string' && event.id.length <= 200 &&
+    eventTypes.has(event.type) && Number.isFinite(event.timestamp) &&
+    event.schemaVersion === 1 && event.payload && typeof event.payload === 'object';
 }
 
 const server = createServer(async (req, res) => {

@@ -17,3 +17,13 @@ For frontend development, run `npm run server` and `npm run dev` in separate ter
 ## Deployment
 
 Deploy the application as the Node service (`npm start`) with a persistent volume for `data/`. A static-only host such as GitHub Pages cannot accept user writes, so it cannot provide cross-user node sharing by itself. Put authentication and rate limiting at the hosting platform or reverse proxy before opening submissions to untrusted traffic.
+
+## Multi-user event sync
+
+Remote event sync is isolated by identity group. Configure the service with a JSON token map; tokens are deployment secrets and must not be committed:
+
+```bash
+KNOWLEDGE_IDENTITIES='{"token-from-secret-store":{"subject":"user-1","groups":["team-a"]}}' npm run server
+```
+
+Clients use `HttpSyncAdapter` with an `IdentityProvider`. The server authorizes group membership before reading or writing `/api/sync/events`; streams use cursors and event IDs for incremental, idempotent synchronization. `SyncEngine` applies a deterministic timestamp/event-ID ordering so last-write-wins projections converge.
