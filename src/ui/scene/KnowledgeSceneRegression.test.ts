@@ -14,6 +14,9 @@ for (const id of SUN_TRIAD_IDS) {
   assert(layerForNode(node(id, 'axiom')) === 'core', `${id} must stay in core layer`);
   assert(!shouldRenderEdge(id, 'ordinary'), `core edge ${id}->ordinary must be suppressed`);
   assert(!shouldRenderEdge('ordinary', id), `core edge ordinary->${id} must be suppressed`);
+  for (const otherCore of SUN_TRIAD_IDS) {
+    assert(!shouldRenderEdge(id, otherCore), `core-to-core edge ${id}->${otherCore} must be suppressed`);
+  }
 }
 assert(shouldRenderEdge('a', 'b'), 'ordinary dependency edges must remain visible');
 
@@ -37,5 +40,14 @@ for (const sample of samples) {
   }
 }
 assert(sawMeaningfulZ, 'layout regressed toward a flat XY disk');
+
+let positiveZ = 0;
+let negativeZ = 0;
+for (let i = 0; i < 200; i += 1) {
+  const p = initialNodePosition(node(`volume-${i}`, 'fact'));
+  if (p.z > 0) positiveZ += 1;
+  if (p.z < 0) negativeZ += 1;
+}
+assert(positiveZ > 60 && negativeZ > 60, '3D distribution must occupy both hemispheres instead of a disk/cap');
 
 console.log('Knowledge scene regression tests passed');
