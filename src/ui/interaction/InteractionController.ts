@@ -145,7 +145,9 @@ export class InteractionController {
       this.unbinders.push(() => this.personalButton?.removeEventListener('click', onPersonalClick));
     }
 
-    if (this.hideUntouchedButton) {
+    // app.ts currently supplies the same DOM button for both roles. Bind it only once;
+    // otherwise one click toggles false→true→false and appears to do nothing.
+    if (this.hideUntouchedButton && this.hideUntouchedButton !== this.personalButton) {
       const onHideToggle = () => this.setHideUntouched(!this.hideUntouched);
       this.hideUntouchedButton.addEventListener('click', onHideToggle);
       this.unbinders.push(() => this.hideUntouchedButton?.removeEventListener('click', onHideToggle));
