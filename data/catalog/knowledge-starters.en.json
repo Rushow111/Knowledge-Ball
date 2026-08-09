@@ -1,0 +1,3009 @@
+{
+  "schemaVersion": 1,
+  "language": "en",
+  "description": "Curated English knowledge starters structured from definition through reasoning to conclusion.",
+  "domainCount": 20,
+  "nodesPerDomain": 10,
+  "nodes": [
+    {
+      "id": "logic-01-identity-law",
+      "language": "en",
+      "domain": "logic",
+      "title": "Identity law",
+      "type": "definition",
+      "definition": "Identity law is a foundational concept in logic with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Identity law, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Identity law should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "logic",
+        "identity law"
+      ]
+    },
+    {
+      "id": "logic-02-non-contradiction",
+      "language": "en",
+      "domain": "logic",
+      "title": "Non-contradiction",
+      "type": "definition",
+      "definition": "Non-contradiction is a foundational concept in logic with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Non-contradiction, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Non-contradiction should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "logic",
+        "non-contradiction"
+      ]
+    },
+    {
+      "id": "logic-03-excluded-middle",
+      "language": "en",
+      "domain": "logic",
+      "title": "Excluded middle",
+      "type": "definition",
+      "definition": "Excluded middle is a foundational concept in logic with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Excluded middle, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Excluded middle should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "logic",
+        "excluded middle"
+      ]
+    },
+    {
+      "id": "logic-04-valid-argument",
+      "language": "en",
+      "domain": "logic",
+      "title": "Valid argument",
+      "type": "fact",
+      "definition": "Valid argument is a foundational concept in logic with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Valid argument, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Valid argument should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "logic",
+        "valid argument"
+      ]
+    },
+    {
+      "id": "logic-05-sound-argument",
+      "language": "en",
+      "domain": "logic",
+      "title": "Sound argument",
+      "type": "fact",
+      "definition": "Sound argument is a foundational concept in logic with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Sound argument, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Sound argument should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "logic",
+        "sound argument"
+      ]
+    },
+    {
+      "id": "logic-06-deduction",
+      "language": "en",
+      "domain": "logic",
+      "title": "Deduction",
+      "type": "fact",
+      "definition": "Deduction is a foundational concept in logic with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Deduction, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Deduction should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "logic",
+        "deduction"
+      ]
+    },
+    {
+      "id": "logic-07-induction",
+      "language": "en",
+      "domain": "logic",
+      "title": "Induction",
+      "type": "fact",
+      "definition": "Induction is a foundational concept in logic with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Induction, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Induction should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "logic",
+        "induction"
+      ]
+    },
+    {
+      "id": "logic-08-abduction",
+      "language": "en",
+      "domain": "logic",
+      "title": "Abduction",
+      "type": "fact",
+      "definition": "Abduction is a foundational concept in logic with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Abduction, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Abduction should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "logic",
+        "abduction"
+      ]
+    },
+    {
+      "id": "logic-09-modus-ponens",
+      "language": "en",
+      "domain": "logic",
+      "title": "Modus ponens",
+      "type": "fact",
+      "definition": "Modus ponens is a foundational concept in logic with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Modus ponens, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Modus ponens should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "logic",
+        "modus ponens"
+      ]
+    },
+    {
+      "id": "logic-10-modus-tollens",
+      "language": "en",
+      "domain": "logic",
+      "title": "Modus tollens",
+      "type": "fact",
+      "definition": "Modus tollens is a foundational concept in logic with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Modus tollens, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Modus tollens should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "logic",
+        "modus tollens"
+      ]
+    },
+    {
+      "id": "mathematics-01-natural-number",
+      "language": "en",
+      "domain": "mathematics",
+      "title": "Natural number",
+      "type": "definition",
+      "definition": "Natural number is a foundational concept in mathematics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Natural number, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Natural number should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "mathematics",
+        "natural number"
+      ]
+    },
+    {
+      "id": "mathematics-02-prime-number",
+      "language": "en",
+      "domain": "mathematics",
+      "title": "Prime number",
+      "type": "definition",
+      "definition": "Prime number is a foundational concept in mathematics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Prime number, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Prime number should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "mathematics",
+        "prime number"
+      ]
+    },
+    {
+      "id": "mathematics-03-set",
+      "language": "en",
+      "domain": "mathematics",
+      "title": "Set",
+      "type": "definition",
+      "definition": "Set is a foundational concept in mathematics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Set, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Set should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "mathematics",
+        "set"
+      ]
+    },
+    {
+      "id": "mathematics-04-function",
+      "language": "en",
+      "domain": "mathematics",
+      "title": "Function",
+      "type": "fact",
+      "definition": "Function is a foundational concept in mathematics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Function, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Function should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "mathematics",
+        "function"
+      ]
+    },
+    {
+      "id": "mathematics-05-limit",
+      "language": "en",
+      "domain": "mathematics",
+      "title": "Limit",
+      "type": "fact",
+      "definition": "Limit is a foundational concept in mathematics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Limit, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Limit should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "mathematics",
+        "limit"
+      ]
+    },
+    {
+      "id": "mathematics-06-derivative",
+      "language": "en",
+      "domain": "mathematics",
+      "title": "Derivative",
+      "type": "fact",
+      "definition": "Derivative is a foundational concept in mathematics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Derivative, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Derivative should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "mathematics",
+        "derivative"
+      ]
+    },
+    {
+      "id": "mathematics-07-integral",
+      "language": "en",
+      "domain": "mathematics",
+      "title": "Integral",
+      "type": "fact",
+      "definition": "Integral is a foundational concept in mathematics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Integral, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Integral should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "mathematics",
+        "integral"
+      ]
+    },
+    {
+      "id": "mathematics-08-vector-space",
+      "language": "en",
+      "domain": "mathematics",
+      "title": "Vector space",
+      "type": "fact",
+      "definition": "Vector space is a foundational concept in mathematics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Vector space, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Vector space should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "mathematics",
+        "vector space"
+      ]
+    },
+    {
+      "id": "mathematics-09-probability",
+      "language": "en",
+      "domain": "mathematics",
+      "title": "Probability",
+      "type": "fact",
+      "definition": "Probability is a foundational concept in mathematics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Probability, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Probability should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "mathematics",
+        "probability"
+      ]
+    },
+    {
+      "id": "mathematics-10-mathematical-induction",
+      "language": "en",
+      "domain": "mathematics",
+      "title": "Mathematical induction",
+      "type": "fact",
+      "definition": "Mathematical induction is a foundational concept in mathematics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Mathematical induction, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Mathematical induction should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "mathematics",
+        "mathematical induction"
+      ]
+    },
+    {
+      "id": "physics-01-inertia",
+      "language": "en",
+      "domain": "physics",
+      "title": "Inertia",
+      "type": "definition",
+      "definition": "Inertia is a foundational concept in physics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Inertia, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Inertia should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "physics",
+        "inertia"
+      ]
+    },
+    {
+      "id": "physics-02-force",
+      "language": "en",
+      "domain": "physics",
+      "title": "Force",
+      "type": "definition",
+      "definition": "Force is a foundational concept in physics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Force, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Force should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "physics",
+        "force"
+      ]
+    },
+    {
+      "id": "physics-03-momentum",
+      "language": "en",
+      "domain": "physics",
+      "title": "Momentum",
+      "type": "definition",
+      "definition": "Momentum is a foundational concept in physics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Momentum, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Momentum should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "physics",
+        "momentum"
+      ]
+    },
+    {
+      "id": "physics-04-energy",
+      "language": "en",
+      "domain": "physics",
+      "title": "Energy",
+      "type": "fact",
+      "definition": "Energy is a foundational concept in physics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Energy, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Energy should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "physics",
+        "energy"
+      ]
+    },
+    {
+      "id": "physics-05-entropy",
+      "language": "en",
+      "domain": "physics",
+      "title": "Entropy",
+      "type": "fact",
+      "definition": "Entropy is a foundational concept in physics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Entropy, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Entropy should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "physics",
+        "entropy"
+      ]
+    },
+    {
+      "id": "physics-06-electric-field",
+      "language": "en",
+      "domain": "physics",
+      "title": "Electric field",
+      "type": "fact",
+      "definition": "Electric field is a foundational concept in physics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Electric field, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Electric field should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "physics",
+        "electric field"
+      ]
+    },
+    {
+      "id": "physics-07-magnetic-field",
+      "language": "en",
+      "domain": "physics",
+      "title": "Magnetic field",
+      "type": "fact",
+      "definition": "Magnetic field is a foundational concept in physics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Magnetic field, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Magnetic field should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "physics",
+        "magnetic field"
+      ]
+    },
+    {
+      "id": "physics-08-wave",
+      "language": "en",
+      "domain": "physics",
+      "title": "Wave",
+      "type": "fact",
+      "definition": "Wave is a foundational concept in physics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Wave, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Wave should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "physics",
+        "wave"
+      ]
+    },
+    {
+      "id": "physics-09-special-relativity",
+      "language": "en",
+      "domain": "physics",
+      "title": "Special relativity",
+      "type": "fact",
+      "definition": "Special relativity is a foundational concept in physics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Special relativity, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Special relativity should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "physics",
+        "special relativity"
+      ]
+    },
+    {
+      "id": "physics-10-quantum-state",
+      "language": "en",
+      "domain": "physics",
+      "title": "Quantum state",
+      "type": "fact",
+      "definition": "Quantum state is a foundational concept in physics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Quantum state, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Quantum state should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "physics",
+        "quantum state"
+      ]
+    },
+    {
+      "id": "chemistry-01-atom",
+      "language": "en",
+      "domain": "chemistry",
+      "title": "Atom",
+      "type": "definition",
+      "definition": "Atom is a foundational concept in chemistry with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Atom, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Atom should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "chemistry",
+        "atom"
+      ]
+    },
+    {
+      "id": "chemistry-02-chemical-element",
+      "language": "en",
+      "domain": "chemistry",
+      "title": "Chemical element",
+      "type": "definition",
+      "definition": "Chemical element is a foundational concept in chemistry with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Chemical element, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Chemical element should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "chemistry",
+        "chemical element"
+      ]
+    },
+    {
+      "id": "chemistry-03-molecule",
+      "language": "en",
+      "domain": "chemistry",
+      "title": "Molecule",
+      "type": "definition",
+      "definition": "Molecule is a foundational concept in chemistry with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Molecule, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Molecule should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "chemistry",
+        "molecule"
+      ]
+    },
+    {
+      "id": "chemistry-04-chemical-bond",
+      "language": "en",
+      "domain": "chemistry",
+      "title": "Chemical bond",
+      "type": "fact",
+      "definition": "Chemical bond is a foundational concept in chemistry with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Chemical bond, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Chemical bond should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "chemistry",
+        "chemical bond"
+      ]
+    },
+    {
+      "id": "chemistry-05-mole",
+      "language": "en",
+      "domain": "chemistry",
+      "title": "Mole",
+      "type": "fact",
+      "definition": "Mole is a foundational concept in chemistry with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Mole, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Mole should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "chemistry",
+        "mole"
+      ]
+    },
+    {
+      "id": "chemistry-06-acid",
+      "language": "en",
+      "domain": "chemistry",
+      "title": "Acid",
+      "type": "fact",
+      "definition": "Acid is a foundational concept in chemistry with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Acid, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Acid should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "chemistry",
+        "acid"
+      ]
+    },
+    {
+      "id": "chemistry-07-base",
+      "language": "en",
+      "domain": "chemistry",
+      "title": "Base",
+      "type": "fact",
+      "definition": "Base is a foundational concept in chemistry with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Base, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Base should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "chemistry",
+        "base"
+      ]
+    },
+    {
+      "id": "chemistry-08-oxidation",
+      "language": "en",
+      "domain": "chemistry",
+      "title": "Oxidation",
+      "type": "fact",
+      "definition": "Oxidation is a foundational concept in chemistry with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Oxidation, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Oxidation should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "chemistry",
+        "oxidation"
+      ]
+    },
+    {
+      "id": "chemistry-09-chemical-equilibrium",
+      "language": "en",
+      "domain": "chemistry",
+      "title": "Chemical equilibrium",
+      "type": "fact",
+      "definition": "Chemical equilibrium is a foundational concept in chemistry with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Chemical equilibrium, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Chemical equilibrium should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "chemistry",
+        "chemical equilibrium"
+      ]
+    },
+    {
+      "id": "chemistry-10-catalyst",
+      "language": "en",
+      "domain": "chemistry",
+      "title": "Catalyst",
+      "type": "fact",
+      "definition": "Catalyst is a foundational concept in chemistry with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Catalyst, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Catalyst should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "chemistry",
+        "catalyst"
+      ]
+    },
+    {
+      "id": "biology-01-cell",
+      "language": "en",
+      "domain": "biology",
+      "title": "Cell",
+      "type": "definition",
+      "definition": "Cell is a foundational concept in biology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Cell, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Cell should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "biology",
+        "cell"
+      ]
+    },
+    {
+      "id": "biology-02-dna",
+      "language": "en",
+      "domain": "biology",
+      "title": "DNA",
+      "type": "definition",
+      "definition": "DNA is a foundational concept in biology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of DNA, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving DNA should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "biology",
+        "dna"
+      ]
+    },
+    {
+      "id": "biology-03-gene",
+      "language": "en",
+      "domain": "biology",
+      "title": "Gene",
+      "type": "definition",
+      "definition": "Gene is a foundational concept in biology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Gene, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Gene should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "biology",
+        "gene"
+      ]
+    },
+    {
+      "id": "biology-04-natural-selection",
+      "language": "en",
+      "domain": "biology",
+      "title": "Natural selection",
+      "type": "fact",
+      "definition": "Natural selection is a foundational concept in biology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Natural selection, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Natural selection should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "biology",
+        "natural selection"
+      ]
+    },
+    {
+      "id": "biology-05-homeostasis",
+      "language": "en",
+      "domain": "biology",
+      "title": "Homeostasis",
+      "type": "fact",
+      "definition": "Homeostasis is a foundational concept in biology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Homeostasis, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Homeostasis should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "biology",
+        "homeostasis"
+      ]
+    },
+    {
+      "id": "biology-06-metabolism",
+      "language": "en",
+      "domain": "biology",
+      "title": "Metabolism",
+      "type": "fact",
+      "definition": "Metabolism is a foundational concept in biology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Metabolism, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Metabolism should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "biology",
+        "metabolism"
+      ]
+    },
+    {
+      "id": "biology-07-protein",
+      "language": "en",
+      "domain": "biology",
+      "title": "Protein",
+      "type": "fact",
+      "definition": "Protein is a foundational concept in biology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Protein, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Protein should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "biology",
+        "protein"
+      ]
+    },
+    {
+      "id": "biology-08-ecosystem",
+      "language": "en",
+      "domain": "biology",
+      "title": "Ecosystem",
+      "type": "fact",
+      "definition": "Ecosystem is a foundational concept in biology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Ecosystem, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Ecosystem should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "biology",
+        "ecosystem"
+      ]
+    },
+    {
+      "id": "biology-09-population",
+      "language": "en",
+      "domain": "biology",
+      "title": "Population",
+      "type": "fact",
+      "definition": "Population is a foundational concept in biology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Population, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Population should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "biology",
+        "population"
+      ]
+    },
+    {
+      "id": "biology-10-speciation",
+      "language": "en",
+      "domain": "biology",
+      "title": "Speciation",
+      "type": "fact",
+      "definition": "Speciation is a foundational concept in biology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Speciation, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Speciation should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "biology",
+        "speciation"
+      ]
+    },
+    {
+      "id": "computer-science-01-algorithm",
+      "language": "en",
+      "domain": "computer-science",
+      "title": "Algorithm",
+      "type": "definition",
+      "definition": "Algorithm is a foundational concept in computer science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Algorithm, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Algorithm should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "computer-science",
+        "algorithm"
+      ]
+    },
+    {
+      "id": "computer-science-02-data-structure",
+      "language": "en",
+      "domain": "computer-science",
+      "title": "Data structure",
+      "type": "definition",
+      "definition": "Data structure is a foundational concept in computer science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Data structure, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Data structure should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "computer-science",
+        "data structure"
+      ]
+    },
+    {
+      "id": "computer-science-03-computability",
+      "language": "en",
+      "domain": "computer-science",
+      "title": "Computability",
+      "type": "definition",
+      "definition": "Computability is a foundational concept in computer science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Computability, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Computability should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "computer-science",
+        "computability"
+      ]
+    },
+    {
+      "id": "computer-science-04-complexity",
+      "language": "en",
+      "domain": "computer-science",
+      "title": "Complexity",
+      "type": "fact",
+      "definition": "Complexity is a foundational concept in computer science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Complexity, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Complexity should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "computer-science",
+        "complexity"
+      ]
+    },
+    {
+      "id": "computer-science-05-recursion",
+      "language": "en",
+      "domain": "computer-science",
+      "title": "Recursion",
+      "type": "fact",
+      "definition": "Recursion is a foundational concept in computer science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Recursion, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Recursion should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "computer-science",
+        "recursion"
+      ]
+    },
+    {
+      "id": "computer-science-06-database-transaction",
+      "language": "en",
+      "domain": "computer-science",
+      "title": "Database transaction",
+      "type": "fact",
+      "definition": "Database transaction is a foundational concept in computer science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Database transaction, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Database transaction should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "computer-science",
+        "database transaction"
+      ]
+    },
+    {
+      "id": "computer-science-07-computer-network",
+      "language": "en",
+      "domain": "computer-science",
+      "title": "Computer network",
+      "type": "fact",
+      "definition": "Computer network is a foundational concept in computer science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Computer network, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Computer network should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "computer-science",
+        "computer network"
+      ]
+    },
+    {
+      "id": "computer-science-08-cryptographic-hash",
+      "language": "en",
+      "domain": "computer-science",
+      "title": "Cryptographic hash",
+      "type": "fact",
+      "definition": "Cryptographic hash is a foundational concept in computer science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Cryptographic hash, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Cryptographic hash should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "computer-science",
+        "cryptographic hash"
+      ]
+    },
+    {
+      "id": "computer-science-09-machine-learning",
+      "language": "en",
+      "domain": "computer-science",
+      "title": "Machine learning",
+      "type": "fact",
+      "definition": "Machine learning is a foundational concept in computer science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Machine learning, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Machine learning should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "computer-science",
+        "machine learning"
+      ]
+    },
+    {
+      "id": "computer-science-10-operating-system",
+      "language": "en",
+      "domain": "computer-science",
+      "title": "Operating system",
+      "type": "fact",
+      "definition": "Operating system is a foundational concept in computer science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Operating system, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Operating system should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "computer-science",
+        "operating system"
+      ]
+    },
+    {
+      "id": "astronomy-01-star",
+      "language": "en",
+      "domain": "astronomy",
+      "title": "Star",
+      "type": "definition",
+      "definition": "Star is a foundational concept in astronomy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Star, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Star should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "astronomy",
+        "star"
+      ]
+    },
+    {
+      "id": "astronomy-02-planet",
+      "language": "en",
+      "domain": "astronomy",
+      "title": "Planet",
+      "type": "definition",
+      "definition": "Planet is a foundational concept in astronomy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Planet, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Planet should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "astronomy",
+        "planet"
+      ]
+    },
+    {
+      "id": "astronomy-03-galaxy",
+      "language": "en",
+      "domain": "astronomy",
+      "title": "Galaxy",
+      "type": "definition",
+      "definition": "Galaxy is a foundational concept in astronomy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Galaxy, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Galaxy should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "astronomy",
+        "galaxy"
+      ]
+    },
+    {
+      "id": "astronomy-04-light-year",
+      "language": "en",
+      "domain": "astronomy",
+      "title": "Light-year",
+      "type": "fact",
+      "definition": "Light-year is a foundational concept in astronomy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Light-year, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Light-year should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "astronomy",
+        "light-year"
+      ]
+    },
+    {
+      "id": "astronomy-05-redshift",
+      "language": "en",
+      "domain": "astronomy",
+      "title": "Redshift",
+      "type": "fact",
+      "definition": "Redshift is a foundational concept in astronomy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Redshift, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Redshift should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "astronomy",
+        "redshift"
+      ]
+    },
+    {
+      "id": "astronomy-06-stellar-fusion",
+      "language": "en",
+      "domain": "astronomy",
+      "title": "Stellar fusion",
+      "type": "fact",
+      "definition": "Stellar fusion is a foundational concept in astronomy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Stellar fusion, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Stellar fusion should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "astronomy",
+        "stellar fusion"
+      ]
+    },
+    {
+      "id": "astronomy-07-black-hole",
+      "language": "en",
+      "domain": "astronomy",
+      "title": "Black hole",
+      "type": "fact",
+      "definition": "Black hole is a foundational concept in astronomy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Black hole, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Black hole should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "astronomy",
+        "black hole"
+      ]
+    },
+    {
+      "id": "astronomy-08-exoplanet",
+      "language": "en",
+      "domain": "astronomy",
+      "title": "Exoplanet",
+      "type": "fact",
+      "definition": "Exoplanet is a foundational concept in astronomy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Exoplanet, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Exoplanet should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "astronomy",
+        "exoplanet"
+      ]
+    },
+    {
+      "id": "astronomy-09-cosmic-microwave-background",
+      "language": "en",
+      "domain": "astronomy",
+      "title": "Cosmic microwave background",
+      "type": "fact",
+      "definition": "Cosmic microwave background is a foundational concept in astronomy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Cosmic microwave background, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Cosmic microwave background should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "astronomy",
+        "cosmic microwave background"
+      ]
+    },
+    {
+      "id": "astronomy-10-hubble-expansion",
+      "language": "en",
+      "domain": "astronomy",
+      "title": "Hubble expansion",
+      "type": "fact",
+      "definition": "Hubble expansion is a foundational concept in astronomy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Hubble expansion, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Hubble expansion should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "astronomy",
+        "hubble expansion"
+      ]
+    },
+    {
+      "id": "earth-science-01-mineral",
+      "language": "en",
+      "domain": "earth-science",
+      "title": "Mineral",
+      "type": "definition",
+      "definition": "Mineral is a foundational concept in earth science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Mineral, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Mineral should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "earth-science",
+        "mineral"
+      ]
+    },
+    {
+      "id": "earth-science-02-rock-cycle",
+      "language": "en",
+      "domain": "earth-science",
+      "title": "Rock cycle",
+      "type": "definition",
+      "definition": "Rock cycle is a foundational concept in earth science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Rock cycle, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Rock cycle should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "earth-science",
+        "rock cycle"
+      ]
+    },
+    {
+      "id": "earth-science-03-plate-tectonics",
+      "language": "en",
+      "domain": "earth-science",
+      "title": "Plate tectonics",
+      "type": "definition",
+      "definition": "Plate tectonics is a foundational concept in earth science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Plate tectonics, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Plate tectonics should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "earth-science",
+        "plate tectonics"
+      ]
+    },
+    {
+      "id": "earth-science-04-earthquake",
+      "language": "en",
+      "domain": "earth-science",
+      "title": "Earthquake",
+      "type": "fact",
+      "definition": "Earthquake is a foundational concept in earth science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Earthquake, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Earthquake should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "earth-science",
+        "earthquake"
+      ]
+    },
+    {
+      "id": "earth-science-05-volcano",
+      "language": "en",
+      "domain": "earth-science",
+      "title": "Volcano",
+      "type": "fact",
+      "definition": "Volcano is a foundational concept in earth science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Volcano, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Volcano should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "earth-science",
+        "volcano"
+      ]
+    },
+    {
+      "id": "earth-science-06-weather",
+      "language": "en",
+      "domain": "earth-science",
+      "title": "Weather",
+      "type": "fact",
+      "definition": "Weather is a foundational concept in earth science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Weather, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Weather should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "earth-science",
+        "weather"
+      ]
+    },
+    {
+      "id": "earth-science-07-climate",
+      "language": "en",
+      "domain": "earth-science",
+      "title": "Climate",
+      "type": "fact",
+      "definition": "Climate is a foundational concept in earth science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Climate, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Climate should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "earth-science",
+        "climate"
+      ]
+    },
+    {
+      "id": "earth-science-08-water-cycle",
+      "language": "en",
+      "domain": "earth-science",
+      "title": "Water cycle",
+      "type": "fact",
+      "definition": "Water cycle is a foundational concept in earth science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Water cycle, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Water cycle should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "earth-science",
+        "water cycle"
+      ]
+    },
+    {
+      "id": "earth-science-09-soil",
+      "language": "en",
+      "domain": "earth-science",
+      "title": "Soil",
+      "type": "fact",
+      "definition": "Soil is a foundational concept in earth science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Soil, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Soil should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "earth-science",
+        "soil"
+      ]
+    },
+    {
+      "id": "earth-science-10-erosion",
+      "language": "en",
+      "domain": "earth-science",
+      "title": "Erosion",
+      "type": "fact",
+      "definition": "Erosion is a foundational concept in earth science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Erosion, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Erosion should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "earth-science",
+        "erosion"
+      ]
+    },
+    {
+      "id": "medicine-01-disease",
+      "language": "en",
+      "domain": "medicine",
+      "title": "Disease",
+      "type": "definition",
+      "definition": "Disease is a foundational concept in medicine with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Disease, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Disease should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "medicine",
+        "disease"
+      ]
+    },
+    {
+      "id": "medicine-02-diagnosis",
+      "language": "en",
+      "domain": "medicine",
+      "title": "Diagnosis",
+      "type": "definition",
+      "definition": "Diagnosis is a foundational concept in medicine with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Diagnosis, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Diagnosis should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "medicine",
+        "diagnosis"
+      ]
+    },
+    {
+      "id": "medicine-03-prognosis",
+      "language": "en",
+      "domain": "medicine",
+      "title": "Prognosis",
+      "type": "definition",
+      "definition": "Prognosis is a foundational concept in medicine with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Prognosis, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Prognosis should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "medicine",
+        "prognosis"
+      ]
+    },
+    {
+      "id": "medicine-04-pathogen",
+      "language": "en",
+      "domain": "medicine",
+      "title": "Pathogen",
+      "type": "fact",
+      "definition": "Pathogen is a foundational concept in medicine with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Pathogen, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Pathogen should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "medicine",
+        "pathogen"
+      ]
+    },
+    {
+      "id": "medicine-05-immunity",
+      "language": "en",
+      "domain": "medicine",
+      "title": "Immunity",
+      "type": "fact",
+      "definition": "Immunity is a foundational concept in medicine with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Immunity, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Immunity should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "medicine",
+        "immunity"
+      ]
+    },
+    {
+      "id": "medicine-06-vaccine",
+      "language": "en",
+      "domain": "medicine",
+      "title": "Vaccine",
+      "type": "fact",
+      "definition": "Vaccine is a foundational concept in medicine with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Vaccine, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Vaccine should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "medicine",
+        "vaccine"
+      ]
+    },
+    {
+      "id": "medicine-07-antibiotic",
+      "language": "en",
+      "domain": "medicine",
+      "title": "Antibiotic",
+      "type": "fact",
+      "definition": "Antibiotic is a foundational concept in medicine with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Antibiotic, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Antibiotic should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "medicine",
+        "antibiotic"
+      ]
+    },
+    {
+      "id": "medicine-08-randomized-trial",
+      "language": "en",
+      "domain": "medicine",
+      "title": "Randomized trial",
+      "type": "fact",
+      "definition": "Randomized trial is a foundational concept in medicine with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Randomized trial, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Randomized trial should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "medicine",
+        "randomized trial"
+      ]
+    },
+    {
+      "id": "medicine-09-risk-factor",
+      "language": "en",
+      "domain": "medicine",
+      "title": "Risk factor",
+      "type": "fact",
+      "definition": "Risk factor is a foundational concept in medicine with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Risk factor, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Risk factor should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "medicine",
+        "risk factor"
+      ]
+    },
+    {
+      "id": "medicine-10-public-health",
+      "language": "en",
+      "domain": "medicine",
+      "title": "Public health",
+      "type": "fact",
+      "definition": "Public health is a foundational concept in medicine with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Public health, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Public health should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "medicine",
+        "public health"
+      ]
+    },
+    {
+      "id": "psychology-01-perception",
+      "language": "en",
+      "domain": "psychology",
+      "title": "Perception",
+      "type": "definition",
+      "definition": "Perception is a foundational concept in psychology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Perception, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Perception should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "psychology",
+        "perception"
+      ]
+    },
+    {
+      "id": "psychology-02-attention",
+      "language": "en",
+      "domain": "psychology",
+      "title": "Attention",
+      "type": "definition",
+      "definition": "Attention is a foundational concept in psychology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Attention, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Attention should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "psychology",
+        "attention"
+      ]
+    },
+    {
+      "id": "psychology-03-memory",
+      "language": "en",
+      "domain": "psychology",
+      "title": "Memory",
+      "type": "definition",
+      "definition": "Memory is a foundational concept in psychology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Memory, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Memory should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "psychology",
+        "memory"
+      ]
+    },
+    {
+      "id": "psychology-04-learning",
+      "language": "en",
+      "domain": "psychology",
+      "title": "Learning",
+      "type": "fact",
+      "definition": "Learning is a foundational concept in psychology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Learning, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Learning should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "psychology",
+        "learning"
+      ]
+    },
+    {
+      "id": "psychology-05-motivation",
+      "language": "en",
+      "domain": "psychology",
+      "title": "Motivation",
+      "type": "fact",
+      "definition": "Motivation is a foundational concept in psychology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Motivation, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Motivation should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "psychology",
+        "motivation"
+      ]
+    },
+    {
+      "id": "psychology-06-emotion",
+      "language": "en",
+      "domain": "psychology",
+      "title": "Emotion",
+      "type": "fact",
+      "definition": "Emotion is a foundational concept in psychology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Emotion, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Emotion should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "psychology",
+        "emotion"
+      ]
+    },
+    {
+      "id": "psychology-07-cognition",
+      "language": "en",
+      "domain": "psychology",
+      "title": "Cognition",
+      "type": "fact",
+      "definition": "Cognition is a foundational concept in psychology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Cognition, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Cognition should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "psychology",
+        "cognition"
+      ]
+    },
+    {
+      "id": "psychology-08-cognitive-bias",
+      "language": "en",
+      "domain": "psychology",
+      "title": "Cognitive bias",
+      "type": "fact",
+      "definition": "Cognitive bias is a foundational concept in psychology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Cognitive bias, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Cognitive bias should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "psychology",
+        "cognitive bias"
+      ]
+    },
+    {
+      "id": "psychology-09-personality",
+      "language": "en",
+      "domain": "psychology",
+      "title": "Personality",
+      "type": "fact",
+      "definition": "Personality is a foundational concept in psychology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Personality, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Personality should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "psychology",
+        "personality"
+      ]
+    },
+    {
+      "id": "psychology-10-social-influence",
+      "language": "en",
+      "domain": "psychology",
+      "title": "Social influence",
+      "type": "fact",
+      "definition": "Social influence is a foundational concept in psychology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Social influence, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Social influence should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "psychology",
+        "social influence"
+      ]
+    },
+    {
+      "id": "economics-01-scarcity",
+      "language": "en",
+      "domain": "economics",
+      "title": "Scarcity",
+      "type": "definition",
+      "definition": "Scarcity is a foundational concept in economics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Scarcity, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Scarcity should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "economics",
+        "scarcity"
+      ]
+    },
+    {
+      "id": "economics-02-opportunity-cost",
+      "language": "en",
+      "domain": "economics",
+      "title": "Opportunity cost",
+      "type": "definition",
+      "definition": "Opportunity cost is a foundational concept in economics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Opportunity cost, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Opportunity cost should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "economics",
+        "opportunity cost"
+      ]
+    },
+    {
+      "id": "economics-03-supply",
+      "language": "en",
+      "domain": "economics",
+      "title": "Supply",
+      "type": "definition",
+      "definition": "Supply is a foundational concept in economics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Supply, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Supply should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "economics",
+        "supply"
+      ]
+    },
+    {
+      "id": "economics-04-demand",
+      "language": "en",
+      "domain": "economics",
+      "title": "Demand",
+      "type": "fact",
+      "definition": "Demand is a foundational concept in economics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Demand, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Demand should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "economics",
+        "demand"
+      ]
+    },
+    {
+      "id": "economics-05-market-equilibrium",
+      "language": "en",
+      "domain": "economics",
+      "title": "Market equilibrium",
+      "type": "fact",
+      "definition": "Market equilibrium is a foundational concept in economics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Market equilibrium, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Market equilibrium should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "economics",
+        "market equilibrium"
+      ]
+    },
+    {
+      "id": "economics-06-inflation",
+      "language": "en",
+      "domain": "economics",
+      "title": "Inflation",
+      "type": "fact",
+      "definition": "Inflation is a foundational concept in economics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Inflation, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Inflation should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "economics",
+        "inflation"
+      ]
+    },
+    {
+      "id": "economics-07-gross-domestic-product",
+      "language": "en",
+      "domain": "economics",
+      "title": "Gross domestic product",
+      "type": "fact",
+      "definition": "Gross domestic product is a foundational concept in economics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Gross domestic product, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Gross domestic product should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "economics",
+        "gross domestic product"
+      ]
+    },
+    {
+      "id": "economics-08-comparative-advantage",
+      "language": "en",
+      "domain": "economics",
+      "title": "Comparative advantage",
+      "type": "fact",
+      "definition": "Comparative advantage is a foundational concept in economics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Comparative advantage, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Comparative advantage should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "economics",
+        "comparative advantage"
+      ]
+    },
+    {
+      "id": "economics-09-externality",
+      "language": "en",
+      "domain": "economics",
+      "title": "Externality",
+      "type": "fact",
+      "definition": "Externality is a foundational concept in economics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Externality, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Externality should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "economics",
+        "externality"
+      ]
+    },
+    {
+      "id": "economics-10-monetary-policy",
+      "language": "en",
+      "domain": "economics",
+      "title": "Monetary policy",
+      "type": "fact",
+      "definition": "Monetary policy is a foundational concept in economics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Monetary policy, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Monetary policy should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "economics",
+        "monetary policy"
+      ]
+    },
+    {
+      "id": "political-science-01-state",
+      "language": "en",
+      "domain": "political-science",
+      "title": "State",
+      "type": "definition",
+      "definition": "State is a foundational concept in political science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of State, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving State should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "political-science",
+        "state"
+      ]
+    },
+    {
+      "id": "political-science-02-government",
+      "language": "en",
+      "domain": "political-science",
+      "title": "Government",
+      "type": "definition",
+      "definition": "Government is a foundational concept in political science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Government, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Government should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "political-science",
+        "government"
+      ]
+    },
+    {
+      "id": "political-science-03-constitution",
+      "language": "en",
+      "domain": "political-science",
+      "title": "Constitution",
+      "type": "definition",
+      "definition": "Constitution is a foundational concept in political science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Constitution, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Constitution should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "political-science",
+        "constitution"
+      ]
+    },
+    {
+      "id": "political-science-04-rule-of-law",
+      "language": "en",
+      "domain": "political-science",
+      "title": "Rule of law",
+      "type": "fact",
+      "definition": "Rule of law is a foundational concept in political science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Rule of law, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Rule of law should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "political-science",
+        "rule of law"
+      ]
+    },
+    {
+      "id": "political-science-05-democracy",
+      "language": "en",
+      "domain": "political-science",
+      "title": "Democracy",
+      "type": "fact",
+      "definition": "Democracy is a foundational concept in political science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Democracy, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Democracy should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "political-science",
+        "democracy"
+      ]
+    },
+    {
+      "id": "political-science-06-representation",
+      "language": "en",
+      "domain": "political-science",
+      "title": "Representation",
+      "type": "fact",
+      "definition": "Representation is a foundational concept in political science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Representation, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Representation should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "political-science",
+        "representation"
+      ]
+    },
+    {
+      "id": "political-science-07-separation-of-powers",
+      "language": "en",
+      "domain": "political-science",
+      "title": "Separation of powers",
+      "type": "fact",
+      "definition": "Separation of powers is a foundational concept in political science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Separation of powers, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Separation of powers should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "political-science",
+        "separation of powers"
+      ]
+    },
+    {
+      "id": "political-science-08-public-policy",
+      "language": "en",
+      "domain": "political-science",
+      "title": "Public policy",
+      "type": "fact",
+      "definition": "Public policy is a foundational concept in political science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Public policy, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Public policy should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "political-science",
+        "public policy"
+      ]
+    },
+    {
+      "id": "political-science-09-sovereignty",
+      "language": "en",
+      "domain": "political-science",
+      "title": "Sovereignty",
+      "type": "fact",
+      "definition": "Sovereignty is a foundational concept in political science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Sovereignty, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Sovereignty should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "political-science",
+        "sovereignty"
+      ]
+    },
+    {
+      "id": "political-science-10-collective-action",
+      "language": "en",
+      "domain": "political-science",
+      "title": "Collective action",
+      "type": "fact",
+      "definition": "Collective action is a foundational concept in political science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Collective action, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Collective action should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "political-science",
+        "collective action"
+      ]
+    },
+    {
+      "id": "sociology-01-society",
+      "language": "en",
+      "domain": "sociology",
+      "title": "Society",
+      "type": "definition",
+      "definition": "Society is a foundational concept in sociology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Society, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Society should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "sociology",
+        "society"
+      ]
+    },
+    {
+      "id": "sociology-02-social-norm",
+      "language": "en",
+      "domain": "sociology",
+      "title": "Social norm",
+      "type": "definition",
+      "definition": "Social norm is a foundational concept in sociology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Social norm, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Social norm should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "sociology",
+        "social norm"
+      ]
+    },
+    {
+      "id": "sociology-03-institution",
+      "language": "en",
+      "domain": "sociology",
+      "title": "Institution",
+      "type": "definition",
+      "definition": "Institution is a foundational concept in sociology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Institution, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Institution should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "sociology",
+        "institution"
+      ]
+    },
+    {
+      "id": "sociology-04-socialization",
+      "language": "en",
+      "domain": "sociology",
+      "title": "Socialization",
+      "type": "fact",
+      "definition": "Socialization is a foundational concept in sociology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Socialization, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Socialization should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "sociology",
+        "socialization"
+      ]
+    },
+    {
+      "id": "sociology-05-culture",
+      "language": "en",
+      "domain": "sociology",
+      "title": "Culture",
+      "type": "fact",
+      "definition": "Culture is a foundational concept in sociology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Culture, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Culture should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "sociology",
+        "culture"
+      ]
+    },
+    {
+      "id": "sociology-06-social-class",
+      "language": "en",
+      "domain": "sociology",
+      "title": "Social class",
+      "type": "fact",
+      "definition": "Social class is a foundational concept in sociology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Social class, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Social class should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "sociology",
+        "social class"
+      ]
+    },
+    {
+      "id": "sociology-07-bureaucracy",
+      "language": "en",
+      "domain": "sociology",
+      "title": "Bureaucracy",
+      "type": "fact",
+      "definition": "Bureaucracy is a foundational concept in sociology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Bureaucracy, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Bureaucracy should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "sociology",
+        "bureaucracy"
+      ]
+    },
+    {
+      "id": "sociology-08-social-network",
+      "language": "en",
+      "domain": "sociology",
+      "title": "Social network",
+      "type": "fact",
+      "definition": "Social network is a foundational concept in sociology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Social network, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Social network should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "sociology",
+        "social network"
+      ]
+    },
+    {
+      "id": "sociology-09-collective-identity",
+      "language": "en",
+      "domain": "sociology",
+      "title": "Collective identity",
+      "type": "fact",
+      "definition": "Collective identity is a foundational concept in sociology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Collective identity, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Collective identity should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "sociology",
+        "collective identity"
+      ]
+    },
+    {
+      "id": "sociology-10-social-change",
+      "language": "en",
+      "domain": "sociology",
+      "title": "Social change",
+      "type": "fact",
+      "definition": "Social change is a foundational concept in sociology with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Social change, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Social change should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "sociology",
+        "social change"
+      ]
+    },
+    {
+      "id": "history-01-primary-source",
+      "language": "en",
+      "domain": "history",
+      "title": "Primary source",
+      "type": "definition",
+      "definition": "Primary source is a foundational concept in history with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Primary source, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Primary source should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "history",
+        "primary source"
+      ]
+    },
+    {
+      "id": "history-02-secondary-source",
+      "language": "en",
+      "domain": "history",
+      "title": "Secondary source",
+      "type": "definition",
+      "definition": "Secondary source is a foundational concept in history with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Secondary source, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Secondary source should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "history",
+        "secondary source"
+      ]
+    },
+    {
+      "id": "history-03-chronology",
+      "language": "en",
+      "domain": "history",
+      "title": "Chronology",
+      "type": "definition",
+      "definition": "Chronology is a foundational concept in history with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Chronology, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Chronology should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "history",
+        "chronology"
+      ]
+    },
+    {
+      "id": "history-04-historical-context",
+      "language": "en",
+      "domain": "history",
+      "title": "Historical context",
+      "type": "fact",
+      "definition": "Historical context is a foundational concept in history with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Historical context, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Historical context should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "history",
+        "historical context"
+      ]
+    },
+    {
+      "id": "history-05-causation-in-history",
+      "language": "en",
+      "domain": "history",
+      "title": "Causation in history",
+      "type": "fact",
+      "definition": "Causation in history is a foundational concept in history with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Causation in history, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Causation in history should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "history",
+        "causation in history"
+      ]
+    },
+    {
+      "id": "history-06-continuity",
+      "language": "en",
+      "domain": "history",
+      "title": "Continuity",
+      "type": "fact",
+      "definition": "Continuity is a foundational concept in history with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Continuity, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Continuity should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "history",
+        "continuity"
+      ]
+    },
+    {
+      "id": "history-07-change-over-time",
+      "language": "en",
+      "domain": "history",
+      "title": "Change over time",
+      "type": "fact",
+      "definition": "Change over time is a foundational concept in history with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Change over time, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Change over time should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "history",
+        "change over time"
+      ]
+    },
+    {
+      "id": "history-08-corroboration",
+      "language": "en",
+      "domain": "history",
+      "title": "Corroboration",
+      "type": "fact",
+      "definition": "Corroboration is a foundational concept in history with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Corroboration, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Corroboration should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "history",
+        "corroboration"
+      ]
+    },
+    {
+      "id": "history-09-historiography",
+      "language": "en",
+      "domain": "history",
+      "title": "Historiography",
+      "type": "fact",
+      "definition": "Historiography is a foundational concept in history with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Historiography, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Historiography should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "history",
+        "historiography"
+      ]
+    },
+    {
+      "id": "history-10-periodization",
+      "language": "en",
+      "domain": "history",
+      "title": "Periodization",
+      "type": "fact",
+      "definition": "Periodization is a foundational concept in history with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Periodization, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Periodization should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "history",
+        "periodization"
+      ]
+    },
+    {
+      "id": "philosophy-01-knowledge",
+      "language": "en",
+      "domain": "philosophy",
+      "title": "Knowledge",
+      "type": "definition",
+      "definition": "Knowledge is a foundational concept in philosophy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Knowledge, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Knowledge should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "philosophy",
+        "knowledge"
+      ]
+    },
+    {
+      "id": "philosophy-02-truth",
+      "language": "en",
+      "domain": "philosophy",
+      "title": "Truth",
+      "type": "definition",
+      "definition": "Truth is a foundational concept in philosophy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Truth, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Truth should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "philosophy",
+        "truth"
+      ]
+    },
+    {
+      "id": "philosophy-03-belief",
+      "language": "en",
+      "domain": "philosophy",
+      "title": "Belief",
+      "type": "definition",
+      "definition": "Belief is a foundational concept in philosophy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Belief, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Belief should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "philosophy",
+        "belief"
+      ]
+    },
+    {
+      "id": "philosophy-04-justification",
+      "language": "en",
+      "domain": "philosophy",
+      "title": "Justification",
+      "type": "fact",
+      "definition": "Justification is a foundational concept in philosophy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Justification, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Justification should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "philosophy",
+        "justification"
+      ]
+    },
+    {
+      "id": "philosophy-05-validity",
+      "language": "en",
+      "domain": "philosophy",
+      "title": "Validity",
+      "type": "fact",
+      "definition": "Validity is a foundational concept in philosophy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Validity, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Validity should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "philosophy",
+        "validity"
+      ]
+    },
+    {
+      "id": "philosophy-06-free-will",
+      "language": "en",
+      "domain": "philosophy",
+      "title": "Free will",
+      "type": "fact",
+      "definition": "Free will is a foundational concept in philosophy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Free will, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Free will should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "philosophy",
+        "free will"
+      ]
+    },
+    {
+      "id": "philosophy-07-personal-identity",
+      "language": "en",
+      "domain": "philosophy",
+      "title": "Personal identity",
+      "type": "fact",
+      "definition": "Personal identity is a foundational concept in philosophy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Personal identity, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Personal identity should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "philosophy",
+        "personal identity"
+      ]
+    },
+    {
+      "id": "philosophy-08-moral-duty",
+      "language": "en",
+      "domain": "philosophy",
+      "title": "Moral duty",
+      "type": "fact",
+      "definition": "Moral duty is a foundational concept in philosophy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Moral duty, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Moral duty should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "philosophy",
+        "moral duty"
+      ]
+    },
+    {
+      "id": "philosophy-09-consequentialism",
+      "language": "en",
+      "domain": "philosophy",
+      "title": "Consequentialism",
+      "type": "fact",
+      "definition": "Consequentialism is a foundational concept in philosophy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Consequentialism, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Consequentialism should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "philosophy",
+        "consequentialism"
+      ]
+    },
+    {
+      "id": "philosophy-10-virtue-ethics",
+      "language": "en",
+      "domain": "philosophy",
+      "title": "Virtue ethics",
+      "type": "fact",
+      "definition": "Virtue ethics is a foundational concept in philosophy with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Virtue ethics, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Virtue ethics should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "philosophy",
+        "virtue ethics"
+      ]
+    },
+    {
+      "id": "linguistics-01-phoneme",
+      "language": "en",
+      "domain": "linguistics",
+      "title": "Phoneme",
+      "type": "definition",
+      "definition": "Phoneme is a foundational concept in linguistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Phoneme, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Phoneme should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "linguistics",
+        "phoneme"
+      ]
+    },
+    {
+      "id": "linguistics-02-morpheme",
+      "language": "en",
+      "domain": "linguistics",
+      "title": "Morpheme",
+      "type": "definition",
+      "definition": "Morpheme is a foundational concept in linguistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Morpheme, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Morpheme should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "linguistics",
+        "morpheme"
+      ]
+    },
+    {
+      "id": "linguistics-03-syntax",
+      "language": "en",
+      "domain": "linguistics",
+      "title": "Syntax",
+      "type": "definition",
+      "definition": "Syntax is a foundational concept in linguistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Syntax, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Syntax should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "linguistics",
+        "syntax"
+      ]
+    },
+    {
+      "id": "linguistics-04-semantics",
+      "language": "en",
+      "domain": "linguistics",
+      "title": "Semantics",
+      "type": "fact",
+      "definition": "Semantics is a foundational concept in linguistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Semantics, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Semantics should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "linguistics",
+        "semantics"
+      ]
+    },
+    {
+      "id": "linguistics-05-pragmatics",
+      "language": "en",
+      "domain": "linguistics",
+      "title": "Pragmatics",
+      "type": "fact",
+      "definition": "Pragmatics is a foundational concept in linguistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Pragmatics, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Pragmatics should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "linguistics",
+        "pragmatics"
+      ]
+    },
+    {
+      "id": "linguistics-06-language-change",
+      "language": "en",
+      "domain": "linguistics",
+      "title": "Language change",
+      "type": "fact",
+      "definition": "Language change is a foundational concept in linguistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Language change, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Language change should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "linguistics",
+        "language change"
+      ]
+    },
+    {
+      "id": "linguistics-07-dialect",
+      "language": "en",
+      "domain": "linguistics",
+      "title": "Dialect",
+      "type": "fact",
+      "definition": "Dialect is a foundational concept in linguistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Dialect, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Dialect should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "linguistics",
+        "dialect"
+      ]
+    },
+    {
+      "id": "linguistics-08-bilingualism",
+      "language": "en",
+      "domain": "linguistics",
+      "title": "Bilingualism",
+      "type": "fact",
+      "definition": "Bilingualism is a foundational concept in linguistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Bilingualism, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Bilingualism should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "linguistics",
+        "bilingualism"
+      ]
+    },
+    {
+      "id": "linguistics-09-language-acquisition",
+      "language": "en",
+      "domain": "linguistics",
+      "title": "Language acquisition",
+      "type": "fact",
+      "definition": "Language acquisition is a foundational concept in linguistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Language acquisition, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Language acquisition should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "linguistics",
+        "language acquisition"
+      ]
+    },
+    {
+      "id": "linguistics-10-writing-system",
+      "language": "en",
+      "domain": "linguistics",
+      "title": "Writing system",
+      "type": "fact",
+      "definition": "Writing system is a foundational concept in linguistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Writing system, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Writing system should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "linguistics",
+        "writing system"
+      ]
+    },
+    {
+      "id": "law-01-legal-rule",
+      "language": "en",
+      "domain": "law",
+      "title": "Legal rule",
+      "type": "definition",
+      "definition": "Legal rule is a foundational concept in law with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Legal rule, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Legal rule should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "law",
+        "legal rule"
+      ]
+    },
+    {
+      "id": "law-02-jurisdiction",
+      "language": "en",
+      "domain": "law",
+      "title": "Jurisdiction",
+      "type": "definition",
+      "definition": "Jurisdiction is a foundational concept in law with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Jurisdiction, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Jurisdiction should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "law",
+        "jurisdiction"
+      ]
+    },
+    {
+      "id": "law-03-precedent",
+      "language": "en",
+      "domain": "law",
+      "title": "Precedent",
+      "type": "definition",
+      "definition": "Precedent is a foundational concept in law with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Precedent, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Precedent should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "law",
+        "precedent"
+      ]
+    },
+    {
+      "id": "law-04-statute",
+      "language": "en",
+      "domain": "law",
+      "title": "Statute",
+      "type": "fact",
+      "definition": "Statute is a foundational concept in law with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Statute, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Statute should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "law",
+        "statute"
+      ]
+    },
+    {
+      "id": "law-05-contract",
+      "language": "en",
+      "domain": "law",
+      "title": "Contract",
+      "type": "fact",
+      "definition": "Contract is a foundational concept in law with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Contract, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Contract should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "law",
+        "contract"
+      ]
+    },
+    {
+      "id": "law-06-negligence",
+      "language": "en",
+      "domain": "law",
+      "title": "Negligence",
+      "type": "fact",
+      "definition": "Negligence is a foundational concept in law with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Negligence, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Negligence should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "law",
+        "negligence"
+      ]
+    },
+    {
+      "id": "law-07-due-process",
+      "language": "en",
+      "domain": "law",
+      "title": "Due process",
+      "type": "fact",
+      "definition": "Due process is a foundational concept in law with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Due process, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Due process should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "law",
+        "due process"
+      ]
+    },
+    {
+      "id": "law-08-burden-of-proof",
+      "language": "en",
+      "domain": "law",
+      "title": "Burden of proof",
+      "type": "fact",
+      "definition": "Burden of proof is a foundational concept in law with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Burden of proof, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Burden of proof should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "law",
+        "burden of proof"
+      ]
+    },
+    {
+      "id": "law-09-legal-remedy",
+      "language": "en",
+      "domain": "law",
+      "title": "Legal remedy",
+      "type": "fact",
+      "definition": "Legal remedy is a foundational concept in law with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Legal remedy, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Legal remedy should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "law",
+        "legal remedy"
+      ]
+    },
+    {
+      "id": "law-10-rights",
+      "language": "en",
+      "domain": "law",
+      "title": "Rights",
+      "type": "fact",
+      "definition": "Rights is a foundational concept in law with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Rights, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Rights should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "law",
+        "rights"
+      ]
+    },
+    {
+      "id": "engineering-01-engineering-requirement",
+      "language": "en",
+      "domain": "engineering",
+      "title": "Engineering requirement",
+      "type": "definition",
+      "definition": "Engineering requirement is a foundational concept in engineering with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Engineering requirement, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Engineering requirement should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "engineering",
+        "engineering requirement"
+      ]
+    },
+    {
+      "id": "engineering-02-constraint",
+      "language": "en",
+      "domain": "engineering",
+      "title": "Constraint",
+      "type": "definition",
+      "definition": "Constraint is a foundational concept in engineering with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Constraint, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Constraint should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "engineering",
+        "constraint"
+      ]
+    },
+    {
+      "id": "engineering-03-prototype",
+      "language": "en",
+      "domain": "engineering",
+      "title": "Prototype",
+      "type": "definition",
+      "definition": "Prototype is a foundational concept in engineering with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Prototype, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Prototype should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "engineering",
+        "prototype"
+      ]
+    },
+    {
+      "id": "engineering-04-safety-factor",
+      "language": "en",
+      "domain": "engineering",
+      "title": "Safety factor",
+      "type": "fact",
+      "definition": "Safety factor is a foundational concept in engineering with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Safety factor, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Safety factor should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "engineering",
+        "safety factor"
+      ]
+    },
+    {
+      "id": "engineering-05-feedback-control",
+      "language": "en",
+      "domain": "engineering",
+      "title": "Feedback control",
+      "type": "fact",
+      "definition": "Feedback control is a foundational concept in engineering with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Feedback control, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Feedback control should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "engineering",
+        "feedback control"
+      ]
+    },
+    {
+      "id": "engineering-06-reliability",
+      "language": "en",
+      "domain": "engineering",
+      "title": "Reliability",
+      "type": "fact",
+      "definition": "Reliability is a foundational concept in engineering with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Reliability, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Reliability should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "engineering",
+        "reliability"
+      ]
+    },
+    {
+      "id": "engineering-07-efficiency",
+      "language": "en",
+      "domain": "engineering",
+      "title": "Efficiency",
+      "type": "fact",
+      "definition": "Efficiency is a foundational concept in engineering with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Efficiency, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Efficiency should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "engineering",
+        "efficiency"
+      ]
+    },
+    {
+      "id": "engineering-08-trade-off",
+      "language": "en",
+      "domain": "engineering",
+      "title": "Trade-off",
+      "type": "fact",
+      "definition": "Trade-off is a foundational concept in engineering with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Trade-off, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Trade-off should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "engineering",
+        "trade-off"
+      ]
+    },
+    {
+      "id": "engineering-09-verification",
+      "language": "en",
+      "domain": "engineering",
+      "title": "Verification",
+      "type": "fact",
+      "definition": "Verification is a foundational concept in engineering with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Verification, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Verification should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "engineering",
+        "verification"
+      ]
+    },
+    {
+      "id": "engineering-10-validation",
+      "language": "en",
+      "domain": "engineering",
+      "title": "Validation",
+      "type": "fact",
+      "definition": "Validation is a foundational concept in engineering with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Validation, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Validation should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "engineering",
+        "validation"
+      ]
+    },
+    {
+      "id": "environmental-science-01-biodiversity",
+      "language": "en",
+      "domain": "environmental-science",
+      "title": "Biodiversity",
+      "type": "definition",
+      "definition": "Biodiversity is a foundational concept in environmental science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Biodiversity, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Biodiversity should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "environmental-science",
+        "biodiversity"
+      ]
+    },
+    {
+      "id": "environmental-science-02-carbon-cycle",
+      "language": "en",
+      "domain": "environmental-science",
+      "title": "Carbon cycle",
+      "type": "definition",
+      "definition": "Carbon cycle is a foundational concept in environmental science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Carbon cycle, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Carbon cycle should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "environmental-science",
+        "carbon cycle"
+      ]
+    },
+    {
+      "id": "environmental-science-03-greenhouse-effect",
+      "language": "en",
+      "domain": "environmental-science",
+      "title": "Greenhouse effect",
+      "type": "definition",
+      "definition": "Greenhouse effect is a foundational concept in environmental science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Greenhouse effect, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Greenhouse effect should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "environmental-science",
+        "greenhouse effect"
+      ]
+    },
+    {
+      "id": "environmental-science-04-pollution",
+      "language": "en",
+      "domain": "environmental-science",
+      "title": "Pollution",
+      "type": "fact",
+      "definition": "Pollution is a foundational concept in environmental science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Pollution, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Pollution should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "environmental-science",
+        "pollution"
+      ]
+    },
+    {
+      "id": "environmental-science-05-renewable-resource",
+      "language": "en",
+      "domain": "environmental-science",
+      "title": "Renewable resource",
+      "type": "fact",
+      "definition": "Renewable resource is a foundational concept in environmental science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Renewable resource, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Renewable resource should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "environmental-science",
+        "renewable resource"
+      ]
+    },
+    {
+      "id": "environmental-science-06-sustainability",
+      "language": "en",
+      "domain": "environmental-science",
+      "title": "Sustainability",
+      "type": "fact",
+      "definition": "Sustainability is a foundational concept in environmental science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Sustainability, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Sustainability should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "environmental-science",
+        "sustainability"
+      ]
+    },
+    {
+      "id": "environmental-science-07-conservation",
+      "language": "en",
+      "domain": "environmental-science",
+      "title": "Conservation",
+      "type": "fact",
+      "definition": "Conservation is a foundational concept in environmental science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Conservation, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Conservation should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "environmental-science",
+        "conservation"
+      ]
+    },
+    {
+      "id": "environmental-science-08-habitat-fragmentation",
+      "language": "en",
+      "domain": "environmental-science",
+      "title": "Habitat fragmentation",
+      "type": "fact",
+      "definition": "Habitat fragmentation is a foundational concept in environmental science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Habitat fragmentation, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Habitat fragmentation should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "environmental-science",
+        "habitat fragmentation"
+      ]
+    },
+    {
+      "id": "environmental-science-09-ecological-footprint",
+      "language": "en",
+      "domain": "environmental-science",
+      "title": "Ecological footprint",
+      "type": "fact",
+      "definition": "Ecological footprint is a foundational concept in environmental science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Ecological footprint, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Ecological footprint should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "environmental-science",
+        "ecological footprint"
+      ]
+    },
+    {
+      "id": "environmental-science-10-climate-mitigation",
+      "language": "en",
+      "domain": "environmental-science",
+      "title": "Climate mitigation",
+      "type": "fact",
+      "definition": "Climate mitigation is a foundational concept in environmental science with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Climate mitigation, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Climate mitigation should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "environmental-science",
+        "climate mitigation"
+      ]
+    },
+    {
+      "id": "statistics-01-population",
+      "language": "en",
+      "domain": "statistics",
+      "title": "Population",
+      "type": "definition",
+      "definition": "Population is a foundational concept in statistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Population, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Population should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "statistics",
+        "population"
+      ]
+    },
+    {
+      "id": "statistics-02-sample",
+      "language": "en",
+      "domain": "statistics",
+      "title": "Sample",
+      "type": "definition",
+      "definition": "Sample is a foundational concept in statistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Sample, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Sample should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "statistics",
+        "sample"
+      ]
+    },
+    {
+      "id": "statistics-03-variable",
+      "language": "en",
+      "domain": "statistics",
+      "title": "Variable",
+      "type": "definition",
+      "definition": "Variable is a foundational concept in statistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Variable, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Variable should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "statistics",
+        "variable"
+      ]
+    },
+    {
+      "id": "statistics-04-distribution",
+      "language": "en",
+      "domain": "statistics",
+      "title": "Distribution",
+      "type": "fact",
+      "definition": "Distribution is a foundational concept in statistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Distribution, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Distribution should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "statistics",
+        "distribution"
+      ]
+    },
+    {
+      "id": "statistics-05-mean",
+      "language": "en",
+      "domain": "statistics",
+      "title": "Mean",
+      "type": "fact",
+      "definition": "Mean is a foundational concept in statistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Mean, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Mean should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "statistics",
+        "mean"
+      ]
+    },
+    {
+      "id": "statistics-06-variance",
+      "language": "en",
+      "domain": "statistics",
+      "title": "Variance",
+      "type": "fact",
+      "definition": "Variance is a foundational concept in statistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Variance, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Variance should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "statistics",
+        "variance"
+      ]
+    },
+    {
+      "id": "statistics-07-confidence-interval",
+      "language": "en",
+      "domain": "statistics",
+      "title": "Confidence interval",
+      "type": "fact",
+      "definition": "Confidence interval is a foundational concept in statistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Confidence interval, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Confidence interval should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "statistics",
+        "confidence interval"
+      ]
+    },
+    {
+      "id": "statistics-08-hypothesis-test",
+      "language": "en",
+      "domain": "statistics",
+      "title": "Hypothesis test",
+      "type": "fact",
+      "definition": "Hypothesis test is a foundational concept in statistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Hypothesis test, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Hypothesis test should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "statistics",
+        "hypothesis test"
+      ]
+    },
+    {
+      "id": "statistics-09-correlation",
+      "language": "en",
+      "domain": "statistics",
+      "title": "Correlation",
+      "type": "fact",
+      "definition": "Correlation is a foundational concept in statistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Correlation, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Correlation should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "statistics",
+        "correlation"
+      ]
+    },
+    {
+      "id": "statistics-10-regression",
+      "language": "en",
+      "domain": "statistics",
+      "title": "Regression",
+      "type": "fact",
+      "definition": "Regression is a foundational concept in statistics with a precise scope determined by the field's accepted usage.",
+      "reasoning": "Start from the definition of Regression, identify its necessary conditions, and distinguish it from nearby concepts. Applying those conditions to relevant evidence supports a disciplined inference.",
+      "conclusion": "Therefore, claims involving Regression should be accepted only when the stated conditions and supporting evidence are satisfied.",
+      "premises": [],
+      "tags": [
+        "statistics",
+        "regression"
+      ]
+    }
+  ]
+}

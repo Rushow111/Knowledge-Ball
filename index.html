@@ -136,6 +136,9 @@
   .form-field input:focus,.form-field textarea:focus,.form-field select:focus{outline:none;border-color:var(--brass-dim);}
   .form-field textarea{min-height:58px;}
   .form-hint{font-size:10.5px; color:var(--brass); margin-bottom:8px;}
+  .translation-review{padding:12px;border:1px solid var(--brass-dim);border-radius:7px;background:rgba(201,162,39,.05);}
+  .translation-review[hidden]{display:none;}
+  .translation-review pre{white-space:pre-wrap;color:var(--ink);font:12px/1.6 'Inter',sans-serif;margin:0 0 10px;}
   .premise-list{max-height:130px;overflow-y:auto;border:1px solid var(--panel-border);border-radius:6px;padding:6px;}
   .premise-item{display:flex;align-items:center;gap:8px;padding:5px 6px;font-size:12px;border-radius:4px;}
   .premise-item:hover{background:rgba(255,255,255,0.03);}
@@ -251,6 +254,13 @@
       <div class="form-field">
         <label>最小推理过程（完整内容写这里）</label>
         <textarea id="fReasoning" placeholder="从前提节点推导出该结论的最小推理链…"></textarea>
+      </div>
+      <div class="form-field translation-review" id="fTranslationReview" hidden>
+        <label>English canonical version</label>
+        <pre id="fTranslationPreview"></pre>
+        <div class="checkbox-field">
+          <label><input type="checkbox" id="fTranslationConfirm"> I reviewed the English translation and confirm that it preserves my meaning.</label>
+        </div>
       </div>
       <div class="form-field">
         <label>前置知识点（依赖边，可多选）</label>

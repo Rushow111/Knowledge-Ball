@@ -23,6 +23,22 @@ async function readJson(req) {
   return JSON.parse(body || '{}');
 }
 
+async function translateText(text) {
+  const endpoint = process.env.TRANSLATION_API_URL;
+  if (!endpoint) throw Object.assign(new Error('Translation service is not configured'), { statusCode: 503 });
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ q: text, source: 'auto', target: 'en', format: 'text' }),
+  });
+  if (!response.ok) throw Object.assign(new Error(`Translation provider returned ${response.status}`), { statusCode: 502 });
+  const body = await response.json();
+  if (typeof body.translatedText !== 'string' || !body.translatedText.trim()) {
+    throw Object.assign(new Error('Translation provider returned an invalid response'), { statusCode: 502 });
+  }
+  return body.translatedText.trim();
+}
+
 function validNode(node) {
   return node && typeof node.id === 'string' && node.id.length <= 100 &&
     typeof node.title === 'string' && Boolean(node.title.trim()) && node.title.length <= 200 &&
@@ -31,6 +47,18 @@ function validNode(node) {
 }
 
 async function handleApi(req, res, url) {
+  if (url.pathname === '/api/translate' && req.method === 'POST') {
+    const body = await readJson(req);
+    const fields = body.fields;
+    if (body.target !== 'en' || !fields || typeof fields.title !== 'string' || typeof fields.reasoning !== 'string' ||
+      !fields.title.trim() || !fields.reasoning.trim() || fields.title.length > 200 || fields.reasoning.length > 10_000) {
+      send(res, 400, { error: 'Invalid translation request' });
+      return true;
+    }
+    const [title, reasoning] = await Promise.all([translateText(fields.title), translateText(fields.reasoning)]);
+    send(res, 200, { fields: { title, reasoning } });
+    return true;
+  }
   if (url.pathname === '/api/knowledge/drafts' && req.method === 'POST') {
     const body = await readJson(req);
     const namespace = body.namespace || 'default';
@@ -97,7 +125,7 @@ const server = createServer(async (req, res) => {
   } catch (error) {
     if (error?.code === 'ENOENT') return send(res, 404, { error: 'Not found' });
     console.error(error);
-    send(res, 500, { error: 'Internal server error' });
+    send(res, error?.statusCode ?? 500, { error: error?.message ?? 'Internal server error' });
   }
 });
 

@@ -338,6 +338,9 @@ panel = new PanelController({
   fReasoning: must<HTMLTextAreaElement>('fReasoning'),
   fPremises: must<HTMLElement>('fPremises'),
   fLogicConfirm: must<HTMLInputElement>('fLogicConfirm'),
+  fTranslationReview: opt<HTMLElement>('fTranslationReview'),
+  fTranslationPreview: opt<HTMLElement>('fTranslationPreview'),
+  fTranslationConfirm: opt<HTMLInputElement>('fTranslationConfirm'),
 
   accountOverlay: opt<HTMLElement>('accountOverlay'),
   accountClose: opt<HTMLElement>('accountClose'),

@@ -8,6 +8,7 @@ import {
   type KnowledgeNodeStatus,
   type KnowledgeNodeType,
 } from '../config/KnowledgeUiConfig';
+import { needsEnglishTranslation, translateKnowledgeDraftToEnglish } from '../language/KnowledgeLanguage';
 
 export interface PanelNodeSummary {
   id: string;
@@ -73,6 +74,9 @@ export interface PanelControllerElements {
   fReasoning: HTMLTextAreaElement;
   fPremises: HTMLElement;
   fLogicConfirm: HTMLInputElement;
+  fTranslationReview?: HTMLElement;
+  fTranslationPreview?: HTMLElement;
+  fTranslationConfirm?: HTMLInputElement;
 
   accountOverlay?: HTMLElement;
   accountClose?: HTMLElement;
@@ -145,6 +149,9 @@ export class PanelController {
   private readonly fReasoning: HTMLTextAreaElement;
   private readonly fPremises: HTMLElement;
   private readonly fLogicConfirm: HTMLInputElement;
+  private readonly fTranslationReview?: HTMLElement;
+  private readonly fTranslationPreview?: HTMLElement;
+  private readonly fTranslationConfirm?: HTMLInputElement;
 
   private readonly accountOverlay?: HTMLElement;
   private readonly accountClose?: HTMLElement;
@@ -170,6 +177,7 @@ export class PanelController {
   private editMode = false;
   private prefillPremise: string | null = null;
   private toastTimer: number | null = null;
+  private translatedDraft: { title: string; reasoning: string } | null = null;
 
   constructor(options: PanelControllerCallbacks & PanelControllerElements) {
     this.getNodes = options.getNodes;
@@ -203,6 +211,9 @@ export class PanelController {
     this.fReasoning = options.fReasoning;
     this.fPremises = options.fPremises;
     this.fLogicConfirm = options.fLogicConfirm;
+    this.fTranslationReview = options.fTranslationReview;
+    this.fTranslationPreview = options.fTranslationPreview;
+    this.fTranslationConfirm = options.fTranslationConfirm;
 
     this.accountOverlay = options.accountOverlay;
     this.accountClose = options.accountClose;
@@ -346,6 +357,9 @@ export class PanelController {
     this.fType.value = 'fact';
     this.fReasoning.value = '';
     this.fLogicConfirm.checked = false;
+    this.translatedDraft = null;
+    if (this.fTranslationReview) this.fTranslationReview.hidden = true;
+    if (this.fTranslationConfirm) this.fTranslationConfirm.checked = false;
     this.modalSubmit.disabled = true;
     this.renderPremiseList();
     this.modalOverlay.classList.add('show');
@@ -454,9 +468,17 @@ export class PanelController {
       this.modalSubmit.disabled = !this.fLogicConfirm.checked;
     });
 
+    const clearTranslation = () => {
+      this.translatedDraft = null;
+      if (this.fTranslationReview) this.fTranslationReview.hidden = true;
+      if (this.fTranslationConfirm) this.fTranslationConfirm.checked = false;
+    };
+    this.fTitle.addEventListener('input', clearTranslation);
+    this.fReasoning.addEventListener('input', clearTranslation);
+
     this.modalSubmit.addEventListener('click', async () => {
-      const title = this.fTitle.value.trim();
-      const reasoning = this.fReasoning.value.trim();
+      let title = this.fTitle.value.trim();
+      let reasoning = this.fReasoning.value.trim();
       const type = this.fType.value as KnowledgeNodeType;
       const premises = Array.from(this.fPremises.querySelectorAll<HTMLInputElement>('input[type="checkbox"]:checked'))
         .map(el => el.value);
@@ -465,9 +487,39 @@ export class PanelController {
 this.showToast('请填写节点结论标题。');
         return;
       }
+      if (!reasoning) {
+        this.showToast('Please provide the reasoning that supports the conclusion.');
+        return;
+      }
       if (!this.fLogicConfirm.checked) {
         this.showToast('请先确认符合逻辑三大基本定律。');
         return;
+      }
+
+      if (needsEnglishTranslation({ title, reasoning })) {
+        if (!this.translatedDraft) {
+          this.modalSubmit.disabled = true;
+          try {
+            this.translatedDraft = await translateKnowledgeDraftToEnglish({ title, reasoning });
+            if (this.fTranslationPreview) {
+              this.fTranslationPreview.textContent = `${this.translatedDraft.title}\n\n${this.translatedDraft.reasoning}`;
+            }
+            if (this.fTranslationReview) this.fTranslationReview.hidden = false;
+            this.showToast('The draft was translated to English. Please review and confirm it.');
+          } catch (error) {
+            console.error('[Knowledge-Ball] translation failed:', error);
+            this.showToast('Translation failed. Please retry or enter the node in English.');
+          } finally {
+            this.modalSubmit.disabled = false;
+          }
+          return;
+        }
+        if (!this.fTranslationConfirm?.checked) {
+          this.showToast('Please confirm the English translation before submission.');
+          return;
+        }
+        title = this.translatedDraft.title;
+        reasoning = this.translatedDraft.reasoning;
       }
 
       this.modalSubmit.disabled = true;
