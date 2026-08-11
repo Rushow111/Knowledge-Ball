@@ -1,0 +1,14 @@
+{
+  "name": "knowledge-ball-promo",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "render": "remotion render src/index.ts KnowledgeBall out/knowledge-ball-promo.mp4 --codec=h264 --crf=20 --concurrency=2"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.506",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "remotion": "4.0.506"
+  }
+}
