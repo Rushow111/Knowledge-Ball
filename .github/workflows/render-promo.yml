@@ -35,6 +35,11 @@ jobs:
         working-directory: promo/remotion
         run: npm install --no-audit --no-fund
 
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
       - name: Generate restrained soundtrack
         working-directory: promo/remotion
         run: node scripts/generate-audio.mjs
