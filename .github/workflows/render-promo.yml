@@ -7,6 +7,12 @@ on:
     paths:
       - 'promo/remotion/**'
       - '.github/workflows/render-promo.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'promo/remotion/**'
+      - '.github/workflows/render-promo.yml'
   workflow_dispatch:
 
 permissions:
