@@ -1,0 +1,7 @@
+Knowledge should be more than stored information. It should be inspectable.
+
+Knowledge Ball turns definitions, facts, premises, reasoning, conclusions, and counterexamples into an explicit three-dimensional structure.
+
+You can see how a claim is built, trace what supports it, challenge what fails, and improve what remains.
+
+Knowledge Ball. A map for understanding.
