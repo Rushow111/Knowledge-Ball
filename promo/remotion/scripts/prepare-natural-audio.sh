@@ -31,13 +31,12 @@ fi
 echo "Using neural voice: $VOICE"
 edge-tts \
   --voice "$VOICE" \
-  --rate="-2%" \
-  --pitch="-4Hz" \
+  --rate="+3%" \
+  --pitch="-2Hz" \
   --file narration-natural.txt \
   --write-media out/narration-natural.mp3
 
-# Use a CC0/public-domain music corpus hosted on GitHub so CI can download it reproducibly.
-# Prefer a restrained documentary-style cue; fall back to other subdued electronic cues.
+# CC0/public-domain background music hosted on GitHub for reproducible CI rendering.
 MUSIC_URLS=(
   "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Asking%20Questions.mp3"
   "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Circuit.mp3"
