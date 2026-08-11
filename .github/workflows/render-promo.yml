@@ -35,14 +35,36 @@ jobs:
         working-directory: promo/remotion
         run: npm install --no-audit --no-fund
 
-      - name: Render MP4
+      - name: Generate restrained soundtrack
+        working-directory: promo/remotion
+        run: node scripts/generate-audio.mjs
+
+      - name: Render visual MP4
         working-directory: promo/remotion
         run: npm run render
+
+      - name: Mix soundtrack into MP4
+        working-directory: promo/remotion
+        run: |
+          mv out/knowledge-ball-promo.mp4 out/knowledge-ball-promo-silent.mp4
+          ffmpeg -hide_banner -loglevel error -y \
+            -i out/knowledge-ball-promo-silent.mp4 \
+            -i public/knowledge-ball-soundtrack.wav \
+            -map 0:v:0 -map 1:a:0 \
+            -c:v copy -c:a aac -b:a 192k \
+            -af "volume=0.92" -shortest \
+            out/knowledge-ball-promo.mp4
+
+      - name: Validate final media streams
+        working-directory: promo/remotion
+        run: |
+          ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate -of default=nw=1 out/knowledge-ball-promo.mp4
+          ffprobe -v error -select_streams a:0 -show_entries stream=codec_name,sample_rate,channels -of default=nw=1 out/knowledge-ball-promo.mp4
 
       - name: Upload rendered promo
         uses: actions/upload-artifact@v4
         with:
-          name: knowledge-ball-promo
+          name: knowledge-ball-promo-with-audio
           path: promo/remotion/out/knowledge-ball-promo.mp4
           if-no-files-found: error
           retention-days: 7
