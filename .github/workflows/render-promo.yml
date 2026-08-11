@@ -48,7 +48,7 @@ jobs:
         working-directory: promo/remotion
         run: npm run render
 
-      - name: Mix natural narration and ducked professional background
+      - name: Mix natural narration and quiet ducked background
         working-directory: promo/remotion
         run: |
           mv out/knowledge-ball-promo.mp4 out/knowledge-ball-promo-silent.mp4
@@ -57,10 +57,10 @@ jobs:
             -ss 8 -t 24 -i out/background-professional.mp3 \
             -i out/narration-natural.mp3 \
             -filter_complex "\
-              [1:a]atrim=0:24,asetpts=PTS-STARTPTS,loudnorm=I=-30:TP=-3:LRA=7,afade=t=in:st=0:d=1.2,afade=t=out:st=21.5:d=2.5[bg];\
-              [2:a]loudnorm=I=-16:TP=-1.5:LRA=7,highpass=f=75,lowpass=f=12000,adelay=700|700,apad=whole_dur=24,atrim=0:24[vo];\
-              [bg][vo]sidechaincompress=threshold=0.018:ratio=7:attack=25:release=450[ducked];\
-              [ducked][vo]amix=inputs=2:normalize=0,alimiter=limit=0.88:level=disabled[mix]" \
+              [1:a]atrim=0:24,asetpts=PTS-STARTPTS,loudnorm=I=-32:TP=-4:LRA=7,afade=t=in:st=0:d=1.2,afade=t=out:st=21.5:d=2.5[bg];\
+              [2:a]loudnorm=I=-16:TP=-1.5:LRA=7,highpass=f=75,lowpass=f=12000,adelay=500|500,apad=whole_dur=24,atrim=0:24,asplit=2[vo_sc][vo_mix];\
+              [bg][vo_sc]sidechaincompress=threshold=0.018:ratio=7:attack=25:release=450[ducked];\
+              [ducked][vo_mix]amix=inputs=2:normalize=0,alimiter=limit=0.88:level=disabled[mix]" \
             -map 0:v:0 -map "[mix]" \
             -c:v copy -c:a aac -b:a 192k -t 24 \
             out/knowledge-ball-promo-natural.mp4
