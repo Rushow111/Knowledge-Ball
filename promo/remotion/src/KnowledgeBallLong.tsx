@@ -1,219 +1,115 @@
 import React from 'react';
 import {AbsoluteFill, Easing, interpolate, Sequence, useCurrentFrame, useVideoConfig} from 'remotion';
 
-const clamp = {extrapolateLeft: 'clamp' as const, extrapolateRight: 'clamp' as const};
 const W = 1280;
 const H = 720;
+const clamp = {extrapolateLeft: 'clamp' as const, extrapolateRight: 'clamp' as const};
+const P = {bg:'#02030a', white:'#f7fbff', cyan:'#5be9ff', blue:'#4f7cff', violet:'#8b6dff', magenta:'#ff79d8', dim:'#8aa0c8', green:'#75f0c6', red:'#ff8bb8'};
 
-const palette = {
-  bg: '#02030a',
-  bg2: '#071024',
-  white: '#f7fbff',
-  cyan: '#5be9ff',
-  blue: '#4f7cff',
-  violet: '#8b6dff',
-  magenta: '#ff79d8',
-  dim: '#8aa0c8',
-};
+type Mode = 'chaos'|'orb'|'chain'|'cards'|'counter'|'decompose'|'merge'|'layers'|'matrix'|'timeline'|'domains'|'protocol'|'final';
+type SceneDef = {chapter:string; kicker:string; title:string; subtitle:string; mode:Mode; labels?:string[]; accent?:number; note?:string};
 
-type Node = {x: number; y: number; z: number; r: number; label?: string};
-const nodeLabels = ['DEFINITION', 'FACT', 'PREMISE', 'REASONING', 'CONCLUSION', 'COUNTEREXAMPLE'];
-const sphereNodes: Node[] = Array.from({length: 86}, (_, i) => {
-  const golden = Math.PI * (3 - Math.sqrt(5));
-  const y = 1 - (i / 85) * 2;
-  const radius = Math.sqrt(Math.max(0, 1 - y * y));
-  const theta = golden * i;
-  return {
-    x: Math.cos(theta) * radius,
-    y,
-    z: Math.sin(theta) * radius,
-    r: i % 13 === 0 ? 7 : i % 5 === 0 ? 4.8 : 3.1,
-    label: i < nodeLabels.length ? nodeLabels[i] : undefined,
-  };
-});
+const scenes: SceneDef[] = [
+  {chapter:'THE PROBLEM',kicker:'01 / 60',title:'Knowledge is everywhere.',subtitle:'Books, papers, databases, videos, conversations, and AI systems.',mode:'chaos',labels:['BOOKS','PAPERS','DATABASES','VIDEOS','AI'],accent:1},
+  {chapter:'THE PROBLEM',kicker:'02 / 60',title:'Access is no longer the hardest problem.',subtitle:'Information is abundant. Structure is scarce.',mode:'cards',labels:['SEARCH','STORE','GENERATE','SHARE'],accent:2},
+  {chapter:'THE PROBLEM',kicker:'03 / 60',title:'Definitions disappear inside pages.',subtitle:'A key concept may be buried hundreds of lines away from the claim that depends on it.',mode:'timeline',labels:['PAGE 12','PAGE 48','PAGE 121','PAGE 203'],accent:3},
+  {chapter:'THE PROBLEM',kicker:'04 / 60',title:'Assumptions hide in context.',subtitle:'The reasoning chain is often compressed, implied, or omitted.',mode:'chain',labels:['ASSUMPTION','IMPLICIT STEP','CLAIM'],accent:4},
+  {chapter:'THE PROBLEM',kicker:'05 / 60',title:'Contradictions live somewhere else.',subtitle:'Another paper, another field, another language.',mode:'counter',labels:['CLAIM','CONTRADICTION'],accent:5},
+  {chapter:'THE PROBLEM',kicker:'06 / 60',title:'We can store almost everything.',subtitle:'But we still struggle to inspect how knowledge is built.',mode:'orb',labels:['STORE ≠ UNDERSTAND'],accent:6},
+  {chapter:'STRUCTURE',kicker:'07 / 60',title:'Knowledge Ball starts from structure.',subtitle:'Represent knowledge as explicit, navigable parts.',mode:'orb',labels:['STRUCTURE'],accent:7},
+  {chapter:'STRUCTURE',kicker:'08 / 60',title:'The document is not the smallest unit.',subtitle:'A document contains many different logical roles.',mode:'decompose',labels:['DOCUMENT','NODES'],accent:8},
+  {chapter:'STRUCTURE',kicker:'09 / 60',title:'A definition is one kind of node.',subtitle:'It states what a concept means.',mode:'cards',labels:['DEFINITION','TERM','MEANING'],accent:9},
+  {chapter:'STRUCTURE',kicker:'10 / 60',title:'A fact is another.',subtitle:'It can support or constrain later reasoning.',mode:'cards',labels:['FACT','EVIDENCE','SOURCE'],accent:10},
+  {chapter:'STRUCTURE',kicker:'11 / 60',title:'Premises feed reasoning.',subtitle:'Conclusions should expose what they depend on.',mode:'chain',labels:['PREMISE A','PREMISE B','REASONING','CONCLUSION'],accent:11},
+  {chapter:'STRUCTURE',kicker:'12 / 60',title:'Counterexamples are first-class knowledge.',subtitle:'Disagreement should be inspectable, not buried in comments.',mode:'counter',labels:['CLAIM','COUNTEREXAMPLE'],accent:12},
+  {chapter:'TRACEABILITY',kicker:'13 / 60',title:'Start from a conclusion.',subtitle:'Then move backward through its dependencies.',mode:'chain',labels:['CONCLUSION','REASONING','PREMISE','DEFINITION'],accent:13},
+  {chapter:'TRACEABILITY',kicker:'14 / 60',title:'Trace the reasoning step.',subtitle:'See the operation that transforms premises into an intermediate result.',mode:'protocol',labels:['INPUT','RULE','RESULT'],accent:14},
+  {chapter:'TRACEABILITY',kicker:'15 / 60',title:'Trace the premises.',subtitle:'Each premise can itself have supporting knowledge.',mode:'orb',labels:['PREMISE 1','PREMISE 2','PREMISE 3'],accent:15},
+  {chapter:'TRACEABILITY',kicker:'16 / 60',title:'Trace the definitions.',subtitle:'Meaning becomes part of the dependency path.',mode:'matrix',labels:['TERM','DEFINITION','SCOPE'],accent:16},
+  {chapter:'TRACEABILITY',kicker:'17 / 60',title:'Trace the evidence.',subtitle:'Facts and sources can sit below the argument instead of outside it.',mode:'cards',labels:['SOURCE A','FACT','SOURCE B','FACT'],accent:17},
+  {chapter:'TRACEABILITY',kicker:'18 / 60',title:'The result is not just an answer.',subtitle:'It is an inspectable path showing why the answer exists.',mode:'orb',labels:['WHY'],accent:18},
+  {chapter:'CORRECTION',kicker:'19 / 60',title:'Knowledge changes.',subtitle:'Some claims are stable. Others are disputed or incomplete.',mode:'matrix',labels:['ESTABLISHED','DISPUTED','INCOMPLETE'],accent:19},
+  {chapter:'CORRECTION',kicker:'20 / 60',title:'A counterexample challenges a claim.',subtitle:'The challenge enters the graph as structured knowledge.',mode:'counter',labels:['CLAIM','COUNTEREXAMPLE'],accent:20},
+  {chapter:'CORRECTION',kicker:'21 / 60',title:'Do not simply delete the old idea.',subtitle:'Keep the failure and the reason for the failure visible.',mode:'timeline',labels:['ORIGINAL CLAIM','CHALLENGE','REVISION'],accent:21},
+  {chapter:'CORRECTION',kicker:'22 / 60',title:'Show downstream impact.',subtitle:'A failed premise may affect many later conclusions.',mode:'orb',labels:['DEPENDENCY IMPACT'],accent:22},
+  {chapter:'CORRECTION',kicker:'23 / 60',title:'Correction becomes knowledge history.',subtitle:'The graph can preserve both the old state and the improved state.',mode:'timeline',labels:['V1','COUNTEREXAMPLE','V2'],accent:23},
+  {chapter:'CORRECTION',kicker:'24 / 60',title:'Criticism becomes part of the system.',subtitle:'A serious knowledge platform should improve because it can be challenged.',mode:'final',labels:['CHALLENGE → IMPROVE'],accent:24},
+  {chapter:'DECOMPOSITION',kicker:'25 / 60',title:'Large theories hide many steps.',subtitle:'Complexity should be decomposable.',mode:'decompose',labels:['THEORY','STEP 1','STEP 2','STEP 3'],accent:25},
+  {chapter:'DECOMPOSITION',kicker:'26 / 60',title:'Splitting text is not enough.',subtitle:'The logical connection must survive the decomposition.',mode:'chain',labels:['PREMISE','STEP','STEP','CONCLUSION'],accent:26},
+  {chapter:'DECOMPOSITION',kicker:'27 / 60',title:'Intermediate conclusions become explicit.',subtitle:'Each bridge can be inspected independently.',mode:'decompose',labels:['P','I₁','I₂','C'],accent:27},
+  {chapter:'DECOMPOSITION',kicker:'28 / 60',title:'Reasoning stays attached to each bridge.',subtitle:'Not just what changed — how it changed.',mode:'protocol',labels:['P → I₁','I₁ → I₂','I₂ → C'],accent:28},
+  {chapter:'DECOMPOSITION',kicker:'29 / 60',title:'The original path must reconnect.',subtitle:'A decomposition is complete only when premise still reaches conclusion.',mode:'chain',labels:['ORIGINAL PREMISE','REBUILT PATH','ORIGINAL CONCLUSION'],accent:29},
+  {chapter:'DECOMPOSITION',kicker:'30 / 60',title:'Smaller nodes make verification easier.',subtitle:'Errors become local instead of being buried inside an entire theory.',mode:'orb',labels:['LOCAL VERIFICATION'],accent:30},
+  {chapter:'MERGE + VALIDATION',kicker:'31 / 60',title:'Two descriptions may mean the same thing.',subtitle:'Equivalent knowledge should be mergeable.',mode:'merge',labels:['DESCRIPTION A','DESCRIPTION B','ONE DEFINITION'],accent:31},
+  {chapter:'MERGE + VALIDATION',kicker:'32 / 60',title:'Similarity is not equivalence.',subtitle:'Close wording can still encode different scope or assumptions.',mode:'matrix',labels:['EQUIVALENT','SIMILAR','DIFFERENT'],accent:32},
+  {chapter:'MERGE + VALIDATION',kicker:'33 / 60',title:'Definitions require semantic validation.',subtitle:'Do both nodes actually define the same concept?',mode:'protocol',labels:['COMPARE','VALIDATE','MERGE'],accent:33},
+  {chapter:'MERGE + VALIDATION',kicker:'34 / 60',title:'Theories require deeper validation.',subtitle:'Match reasoning structure before merging conclusions.',mode:'chain',labels:['REASONING A','REASONING B','CONCLUSION'],accent:34},
+  {chapter:'MERGE + VALIDATION',kicker:'35 / 60',title:'Every edit should have explicit rules.',subtitle:'Add, challenge, decompose, and merge become commands, not vague UI actions.',mode:'protocol',labels:['ADD','CHALLENGE','DECOMPOSE','MERGE'],accent:35},
+  {chapter:'MERGE + VALIDATION',kicker:'36 / 60',title:'One action. One meaning.',subtitle:'The same operation should behave consistently everywhere in the system.',mode:'matrix',labels:['UI','SERVER','EVENTS','PROJECTION'],accent:36},
+  {chapter:'TWO LAYERS',kicker:'37 / 60',title:'Shared knowledge is not personal mastery.',subtitle:'Truth should not depend on whether one user understands it.',mode:'layers',labels:['PUBLIC KNOWLEDGE','PRIVATE STATE'],accent:37},
+  {chapter:'TWO LAYERS',kicker:'38 / 60',title:'The public layer describes knowledge.',subtitle:'Definitions, claims, relationships, challenges, and history.',mode:'orb',labels:['PUBLIC GRAPH'],accent:38},
+  {chapter:'TWO LAYERS',kicker:'39 / 60',title:'The private layer describes you.',subtitle:'Studied, understood, forgotten, uncertain, revisit.',mode:'cards',labels:['STUDIED','UNDERSTOOD','FORGOTTEN','REVISIT'],accent:39},
+  {chapter:'TWO LAYERS',kicker:'40 / 60',title:'Two users can see the same graph differently.',subtitle:'Same shared knowledge. Different learning state.',mode:'layers',labels:['USER A','USER B'],accent:40},
+  {chapter:'TWO LAYERS',kicker:'41 / 60',title:'Mastery can change without rewriting truth.',subtitle:'Personal progress becomes an overlay, not a mutation of public knowledge.',mode:'timeline',labels:['LEARN','FORGET','REVIEW','MASTER'],accent:41},
+  {chapter:'TWO LAYERS',kicker:'42 / 60',title:'This separation is foundational.',subtitle:'It prevents shared semantics from being polluted by personal state.',mode:'matrix',labels:['SEMANTICS','PERSONAL STATE'],accent:42},
+  {chapter:'WHAT THIS ENABLES',kicker:'43 / 60',title:'A student can trace missing prerequisites.',subtitle:'Follow a concept backward until the exact gap becomes visible.',mode:'chain',labels:['TARGET','PREREQUISITE','MISSING NODE'],accent:43},
+  {chapter:'WHAT THIS ENABLES',kicker:'44 / 60',title:'A researcher can compare theories.',subtitle:'See precisely where premises or reasoning diverge.',mode:'merge',labels:['THEORY A','THEORY B','DIVERGENCE'],accent:44},
+  {chapter:'WHAT THIS ENABLES',kicker:'45 / 60',title:'An AI can return dependency paths.',subtitle:'Not only a paragraph — an answer plus the structure behind it.',mode:'protocol',labels:['QUESTION','PATH','ANSWER'],accent:45},
+  {chapter:'WHAT THIS ENABLES',kicker:'46 / 60',title:'A community can correct shared knowledge.',subtitle:'Improve the graph without erasing the history of correction.',mode:'timeline',labels:['CONTRIBUTE','CHALLENGE','REVIEW','IMPROVE'],accent:46},
+  {chapter:'WHAT THIS ENABLES',kicker:'47 / 60',title:'Disciplines can connect through shared concepts.',subtitle:'Mathematics, physics, biology, economics, logic, philosophy.',mode:'domains',labels:['MATH','PHYSICS','BIOLOGY','ECONOMICS','LOGIC','PHILOSOPHY'],accent:47},
+  {chapter:'WHAT THIS ENABLES',kicker:'48 / 60',title:'Knowledge becomes computationally navigable.',subtitle:'A graph can be queried, traversed, validated, and analyzed.',mode:'orb',labels:['QUERY','TRAVERSE','VALIDATE'],accent:48},
+  {chapter:'THE INTERFACE',kicker:'49 / 60',title:'The three-dimensional sphere is an interface.',subtitle:'It is not the goal by itself.',mode:'orb',labels:['INTERFACE'],accent:49},
+  {chapter:'THE INTERFACE',kicker:'50 / 60',title:'Clusters reveal conceptual neighborhoods.',subtitle:'Related ideas become spatially legible.',mode:'domains',labels:['CLUSTER A','CLUSTER B','BRIDGE'],accent:50},
+  {chapter:'THE INTERFACE',kicker:'51 / 60',title:'Density reveals complexity.',subtitle:'Some areas are simple. Others contain deep dependency structure.',mode:'orb',labels:['DENSITY'],accent:51},
+  {chapter:'THE INTERFACE',kicker:'52 / 60',title:'Gaps become visible.',subtitle:'Missing links and unsupported conclusions can stand out spatially.',mode:'counter',labels:['GAP','UNSUPPORTED'],accent:52},
+  {chapter:'THE INTERFACE',kicker:'53 / 60',title:'Zoom changes the level of abstraction.',subtitle:'From the whole sphere to one reasoning step.',mode:'decompose',labels:['GLOBAL','CLUSTER','NODE','STEP'],accent:53},
+  {chapter:'THE INTERFACE',kicker:'54 / 60',title:'The interface should serve verification.',subtitle:'Beauty matters only if it helps users understand structure.',mode:'final',labels:['SEE STRUCTURE'],accent:54},
+  {chapter:'THE OPEN QUESTION',kicker:'55 / 60',title:'The project is still early.',subtitle:'Some parts work. Other parts are still being rebuilt.',mode:'timeline',labels:['PROTOTYPE','INTEGRATION','SCALE'],accent:55},
+  {chapter:'THE OPEN QUESTION',kicker:'56 / 60',title:'Identity and synchronization remain hard.',subtitle:'Multi-user knowledge needs clear ownership and reliable remote state.',mode:'layers',labels:['IDENTITY','SYNC','OWNERSHIP'],accent:56},
+  {chapter:'THE OPEN QUESTION',kicker:'57 / 60',title:'Validation must survive scale.',subtitle:'Rules that work for ten nodes must still work for millions.',mode:'matrix',labels:['10','10K','1M+'],accent:57},
+  {chapter:'THE OPEN QUESTION',kicker:'58 / 60',title:'Humans and AI must not turn the graph into noise.',subtitle:'Contribution quality matters as much as contribution volume.',mode:'protocol',labels:['HUMAN','AI','VALIDATION','GRAPH'],accent:58},
+  {chapter:'THE OPEN QUESTION',kicker:'59 / 60',title:'The real test is criticism.',subtitle:'Can the structure remain consistent, correctable, and understandable?',mode:'counter',labels:['CRITICIZE','CORRECT','IMPROVE'],accent:59},
+  {chapter:'THE OPEN QUESTION',kicker:'60 / 60',title:'A map for understanding.',subtitle:'Traceable. Challengeable. Correctable. Continuously improvable.',mode:'final',labels:['KNOWLEDGE BALL'],accent:60,note:'SEE KNOWLEDGE. QUESTION IT. BUILD ON IT.'},
+];
 
-const Background: React.FC<{accent?: number}> = ({accent = 0}) => {
+const Background: React.FC<{accent:number}> = ({accent}) => {
   const frame = useCurrentFrame();
-  const drift = 50 + Math.sin(frame * 0.004 + accent) * 7;
-  return (
-    <AbsoluteFill
-      style={{
-        background: `radial-gradient(circle at ${drift}% 44%, rgba(19,35,92,.82) 0%, rgba(5,10,30,.96) 34%, ${palette.bg} 76%, #000 100%)`,
-        overflow: 'hidden',
-      }}
-    >
-      {Array.from({length: 95}, (_, i) => (
-        <div
-          key={i}
-          style={{
-            position: 'absolute',
-            left: ((i * 137) % W) + Math.sin(i * 1.9) * 18,
-            top: ((i * 83) % H) + Math.cos(i * 1.3) * 18,
-            width: i % 11 === 0 ? 2 : 1,
-            height: i % 11 === 0 ? 2 : 1,
-            borderRadius: 99,
-            background: i % 4 === 0 ? palette.cyan : palette.white,
-            opacity: 0.12 + 0.26 * (0.5 + 0.5 * Math.sin(frame * 0.018 + i)),
-          }}
-        />
-      ))}
-    </AbsoluteFill>
-  );
-};
-
-const ChapterTitle: React.FC<{kicker: string; title: string; subtitle?: string}> = ({kicker, title, subtitle}) => {
-  const frame = useCurrentFrame();
-  return (
-    <div style={{position: 'absolute', left: 72, top: 58, width: 600}}>
-      <div style={{color: palette.cyan, fontFamily: 'Arial, sans-serif', fontSize: 15, letterSpacing: 5, opacity: interpolate(frame, [0, 24], [0, 1], clamp)}}>{kicker}</div>
-      <div style={{marginTop: 14, color: palette.white, fontFamily: 'Arial, sans-serif', fontWeight: 700, fontSize: 48, lineHeight: 1.04, letterSpacing: 1.5, opacity: interpolate(frame, [10, 42], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)})}}>{title}</div>
-      {subtitle ? <div style={{marginTop: 16, color: '#b9cae9', fontFamily: 'Arial, sans-serif', fontSize: 20, lineHeight: 1.45, width: 540, opacity: interpolate(frame, [30, 64], [0, 1], clamp)}}>{subtitle}</div> : null}
-    </div>
-  );
-};
-
-const Progress: React.FC<{chapter: number}> = ({chapter}) => (
-  <div style={{position: 'absolute', left: 72, right: 72, bottom: 32, height: 2, background: 'rgba(255,255,255,.09)'}}>
-    <div style={{width: `${chapter * 10}%`, height: 2, background: `linear-gradient(90deg, ${palette.violet}, ${palette.cyan})`, boxShadow: '0 0 12px rgba(91,233,255,.5)'}} />
-  </div>
-);
-
-const Sphere: React.FC<{labels?: boolean; split?: boolean; scale?: number; highlight?: number[]}> = ({labels = false, split = false, scale = 1, highlight = []}) => {
-  const frame = useCurrentFrame();
-  const rotate = frame * 0.0045;
-  const appear = interpolate(frame, [0, 45], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
-  const projected = sphereNodes.map((n, i) => {
-    const xr = n.x * Math.cos(rotate) - n.z * Math.sin(rotate);
-    const zr = n.x * Math.sin(rotate) + n.z * Math.cos(rotate);
-    const p = 1 + zr * 0.17;
-    return {x: 830 + xr * 250 * p * scale, y: 366 + n.y * 250 * p * scale, z: zr, r: n.r * (0.8 + p * 0.3), i, label: n.label};
-  });
-  return (
-    <div style={{position: 'absolute', inset: 0, opacity: appear}}>
-      <svg width={W} height={H} style={{position: 'absolute', inset: 0}}>
-        {projected.map((p, i) => {
-          const q = projected[(i * 9 + 17) % projected.length];
-          if (Math.abs(p.i - q.i) > 42) return null;
-          return <line key={i} x1={p.x} y1={p.y} x2={q.x} y2={q.y} stroke={i % 3 ? palette.violet : palette.cyan} strokeWidth={0.7} opacity={0.11 + (p.z + 1) * 0.05} />;
-        })}
-        {split ? <>
-          <ellipse cx="830" cy="366" rx="320" ry="105" fill="none" stroke={palette.cyan} strokeWidth="1.4" opacity=".45" />
-          <ellipse cx="830" cy="366" rx="275" ry="205" fill="none" stroke={palette.violet} strokeWidth="1.4" opacity=".42" transform="rotate(-30 830 366)" />
-        </> : null}
-      </svg>
-      <div style={{position: 'absolute', left: 830, top: 366, width: 92, height: 92, borderRadius: '50%', translate: '-50% -50%', background: 'radial-gradient(circle, #fff 0%, #fff 18%, #ddfbff 38%, rgba(117,229,255,.28) 64%, rgba(255,255,255,0) 100%)', boxShadow: '0 0 26px rgba(255,255,255,.96), 0 0 82px rgba(77,218,255,.56), 0 0 145px rgba(126,91,255,.34)'}} />
-      {projected.sort((a, b) => a.z - b.z).map((p) => {
-        const hot = highlight.includes(p.i);
-        return <div key={p.i} style={{position: 'absolute', left: p.x, top: p.y, width: p.r * (hot ? 3.2 : 2), height: p.r * (hot ? 3.2 : 2), borderRadius: '50%', translate: '-50% -50%', background: hot ? '#fff' : p.i % 3 === 0 ? palette.cyan : p.i % 3 === 1 ? palette.blue : palette.violet, boxShadow: hot ? '0 0 22px #fff, 0 0 38px rgba(91,233,255,.8)' : '0 0 9px rgba(91,233,255,.55)', opacity: hot ? 1 : .45 + (p.z + 1) * .2}} />;
-      })}
-      {labels ? projected.filter((p) => p.label).map((p, i) => <div key={p.label} style={{position: 'absolute', left: p.x + 12, top: p.y - 18, color: i === 5 ? '#ff9de4' : palette.white, fontFamily: 'Arial, sans-serif', fontWeight: 700, fontSize: 13, letterSpacing: 2, opacity: interpolate(frame, [50 + i * 20, 82 + i * 20], [0, 1], clamp), textShadow: '0 0 12px rgba(91,233,255,.75)'}}>{p.label}</div>) : null}
-    </div>
-  );
-};
-
-const Chaos: React.FC = () => {
-  const frame = useCurrentFrame();
-  const terms = ['paper', 'post', 'database', 'definition', 'claim', 'model', 'proof', 'source', 'video', 'fact', 'theory', 'evidence', 'context', 'argument', 'AI output'];
-  return <AbsoluteFill><Background accent={1} />
-    {Array.from({length: 58}, (_, i) => {
-      const a = i * .77;
-      const x = 640 + Math.cos(a + frame * .003 * (1 + i % 4)) * (90 + (i % 12) * 46);
-      const y = 360 + Math.sin(a * 1.16 + frame * .0026) * (65 + (i % 8) * 39);
-      return <div key={i} style={{position: 'absolute', left: x, top: y, translate: '-50% -50%', rotate: `${i * 23 + frame * .04 * (i % 2 ? 1 : -1)}deg`, color: i % 3 === 0 ? palette.cyan : i % 3 === 1 ? palette.violet : '#d7e4ff', opacity: .15 + (i % 5) * .09, fontFamily: 'Arial, sans-serif', fontSize: 15 + (i % 4) * 5, letterSpacing: 1.2}}>{terms[i % terms.length]}</div>;
-    })}
-    <ChapterTitle kicker="01 — THE PROBLEM" title="More information. Less inspectability." subtitle="We can store almost everything — but the structure behind knowledge is still difficult to see." />
-    <Progress chapter={1} />
+  const x = 48 + Math.sin(frame*0.015 + accent)*11;
+  const y = 44 + Math.cos(frame*0.012 + accent)*7;
+  return <AbsoluteFill style={{background:`radial-gradient(circle at ${x}% ${y}%, rgba(30,48,112,.68), rgba(7,12,34,.96) 34%, ${P.bg} 76%, #000 100%)`,overflow:'hidden'}}>
+    {Array.from({length:72},(_,i)=><div key={i} style={{position:'absolute',left:(i*173+accent*31)%W,top:(i*97+accent*47)%H,width:i%13===0?2:1,height:i%13===0?2:1,borderRadius:99,background:i%4===0?P.cyan:P.white,opacity:.12+.25*(.5+.5*Math.sin(frame*.03+i))}}/>)}
   </AbsoluteFill>;
 };
 
-const Structure: React.FC = () => {
-  const frame = useCurrentFrame();
-  return <AbsoluteFill><Background accent={2} /><ChapterTitle kicker="02 — STRUCTURE" title="From documents to explicit knowledge." subtitle="Definitions, assumptions, reasoning and contradictions should not disappear inside paragraphs." />
-    <Sphere scale={.92} />
-    <div style={{position: 'absolute', left: 100, top: 380, width: 430, color: '#c8d8f4', fontFamily: 'Arial, sans-serif', fontSize: 19, lineHeight: 1.55, opacity: interpolate(frame, [90, 140], [0, 1], clamp)}}>A navigable graph can expose how ideas depend on each other instead of storing only the final text.</div>
-    <Progress chapter={2} /></AbsoluteFill>;
+const Header: React.FC<{s:SceneDef}> = ({s}) => {
+  const f = useCurrentFrame();
+  return <>
+    <div style={{position:'absolute',left:62,top:42,color:P.cyan,fontFamily:'Arial,sans-serif',fontSize:13,letterSpacing:4,opacity:interpolate(f,[0,16],[0,1],clamp)}}>{s.chapter} · {s.kicker}</div>
+    <div style={{position:'absolute',left:62,top:80,width:600,color:P.white,fontFamily:'Arial,sans-serif',fontWeight:750,fontSize:42,lineHeight:1.06,letterSpacing:.3,opacity:interpolate(f,[6,24],[0,1],{...clamp,easing:Easing.out(Easing.cubic)})}}>{s.title}</div>
+    <div style={{position:'absolute',left:64,top:190,width:540,color:'#bdd0ee',fontFamily:'Arial,sans-serif',fontSize:18,lineHeight:1.45,opacity:interpolate(f,[16,38],[0,1],clamp)}}>{s.subtitle}</div>
+  </>;
 };
 
-const NodeTypes: React.FC = () => <AbsoluteFill><Background accent={3} /><ChapterTitle kicker="03 — KNOWLEDGE NODES" title="Make the building blocks visible." subtitle="The goal is not more boxes. It is smaller units with explicit meaning and relationships." />
-  <Sphere labels scale={.92} highlight={[0,1,2,3,4,5]} /><Progress chapter={3} /></AbsoluteFill>;
+const Footer: React.FC<{index:number}> = ({index}) => <div style={{position:'absolute',left:62,right:62,bottom:28,height:2,background:'rgba(255,255,255,.08)'}}><div style={{height:2,width:`${((index+1)/60)*100}%`,background:`linear-gradient(90deg,${P.violet},${P.cyan})`,boxShadow:'0 0 12px rgba(91,233,255,.4)'}}/></div>;
 
-const Trace: React.FC = () => {
-  const frame = useCurrentFrame();
-  const items = ['DEFINITION', 'FACT', 'PREMISE', 'REASONING', 'CONCLUSION'];
-  return <AbsoluteFill><Background accent={4} /><ChapterTitle kicker="04 — TRACEABILITY" title="Do not show only the answer." subtitle="Move backward from a conclusion to the reasoning, premises, definitions and evidence that support it." />
-    <div style={{position: 'absolute', left: 85, right: 85, top: 400, display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>{items.map((t, i) => <React.Fragment key={t}><div style={{padding: '16px 18px', border: `1px solid ${i === 4 ? 'rgba(91,233,255,.75)' : 'rgba(139,109,255,.45)'}`, background: 'rgba(5,12,35,.78)', color: palette.white, fontFamily: 'Arial, sans-serif', fontWeight: 700, fontSize: 17, letterSpacing: 2.2, opacity: interpolate(frame, [i * 55 + 80, i * 55 + 120], [0, 1], clamp), boxShadow: i === 4 ? '0 0 28px rgba(91,233,255,.18)' : undefined}}>{t}</div>{i < items.length - 1 ? <div style={{color: palette.cyan, fontSize: 30, opacity: interpolate(frame, [i * 55 + 110, i * 55 + 145], [0, 1], clamp)}}>→</div> : null}</React.Fragment>)}</div>
-    <Progress chapter={4} /></AbsoluteFill>;
-};
-
-const Challenge: React.FC = () => {
-  const frame = useCurrentFrame();
-  const impact = interpolate(frame, [250, 380], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
-  return <AbsoluteFill><Background accent={5} /><ChapterTitle kicker="05 — CORRECTION" title="Disagreement should remain visible." subtitle="A valid counterexample should reveal what failed, why it failed, and what other conclusions depend on it." />
-    <Sphere scale={.9} highlight={[4,5,27]} />
-    <div style={{position: 'absolute', left: 150 + impact * 430, top: 340 - impact * 60, padding: '13px 18px', color: '#ffd8f2', border: '1px solid rgba(255,121,216,.65)', background: 'rgba(49,10,45,.7)', fontFamily: 'Arial, sans-serif', fontWeight: 800, fontSize: 17, letterSpacing: 2.3, boxShadow: '0 0 28px rgba(255,121,216,.18)'}}>COUNTEREXAMPLE</div>
-    <div style={{position: 'absolute', right: 62, bottom: 68, color: '#dce7ff', fontFamily: 'Arial, sans-serif', fontSize: 18, letterSpacing: 2, opacity: interpolate(frame, [420, 510], [0, 1], clamp)}}>Correction becomes part of the knowledge history.</div>
-    <Progress chapter={5} /></AbsoluteFill>;
-};
-
-const Decompose: React.FC = () => {
-  const frame = useCurrentFrame();
-  const spread = interpolate(frame, [130, 330], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
-  const pts = [[620,360],[720,290],[780,390],[900,305],[980,390]];
-  return <AbsoluteFill><Background accent={6} /><ChapterTitle kicker="06 — DECOMPOSITION" title="Break complexity without breaking logic." subtitle="A decomposition is complete only when the new reasoning path still connects the original premises to the original conclusion." />
-    <svg width={W} height={H} style={{position: 'absolute', inset: 0}}>{pts.slice(0,-1).map((p,i) => {const q=pts[i+1]; return <line key={i} x1={620+(p[0]-620)*spread} y1={360+(p[1]-360)*spread} x2={620+(q[0]-620)*spread} y2={360+(q[1]-360)*spread} stroke={i%2?palette.violet:palette.cyan} strokeWidth="2" opacity={spread*.75}/>;})}</svg>
-    {pts.map((p,i)=><div key={i} style={{position:'absolute',left:620+(p[0]-620)*spread,top:360+(p[1]-360)*spread,width:i===0||i===pts.length-1?34:24,height:i===0||i===pts.length-1?34:24,borderRadius:'50%',translate:'-50% -50%',background:i===0?'#d8f7ff':i===pts.length-1?'#fff':i%2?palette.cyan:palette.violet,boxShadow:'0 0 22px rgba(91,233,255,.55)'}}/>) }
-    <div style={{position:'absolute',left:555,top:425,color:'#bcd0ee',fontFamily:'Arial, sans-serif',fontSize:16,letterSpacing:1.5,opacity:interpolate(frame,[330,430],[0,1],clamp)}}>premise → intermediate result → reasoning → intermediate result → conclusion</div>
-    <Progress chapter={6} /></AbsoluteFill>;
-};
-
-const Merge: React.FC = () => {
-  const frame = useCurrentFrame();
-  const close = interpolate(frame, [130, 360], [0, 1], {...clamp, easing: Easing.inOut(Easing.cubic)});
-  return <AbsoluteFill><Background accent={7} /><ChapterTitle kicker="07 — MERGE + VALIDATION" title="Equivalent is not the same as similar." subtitle="Adding, challenging, decomposing and merging should use explicit commands and explicit validation rules." />
-    <div style={{position:'absolute',left:650-close*115,top:345,width:150,height:150,borderRadius:'50%',translate:'-50% -50%',border:`2px solid ${palette.cyan}`,background:'rgba(28,105,145,.18)',boxShadow:'0 0 45px rgba(91,233,255,.18)'}}/>
-    <div style={{position:'absolute',left:900-close*135,top:345,width:150,height:150,borderRadius:'50%',translate:'-50% -50%',border:`2px solid ${palette.violet}`,background:'rgba(94,65,169,.18)',boxShadow:'0 0 45px rgba(139,109,255,.18)'}}/>
-    <div style={{position:'absolute',left:770,top:450,color:palette.white,fontFamily:'Arial, sans-serif',fontWeight:700,fontSize:18,letterSpacing:3,opacity:interpolate(frame,[340,430],[0,1],clamp)}}>VALIDATE BEFORE MERGE</div>
-    <div style={{position:'absolute',left:92,bottom:92,display:'grid',gridTemplateColumns:'repeat(4, 1fr)',gap:10,width:550}}>{['ADD','CHALLENGE','DECOMPOSE','MERGE'].map((x,i)=><div key={x} style={{padding:'12px 10px',textAlign:'center',border:'1px solid rgba(255,255,255,.15)',background:'rgba(10,20,46,.72)',color:i===1?'#ffb1e6':palette.white,fontFamily:'Arial, sans-serif',fontSize:13,fontWeight:700,letterSpacing:1.8}}>{x}</div>)}</div>
-    <Progress chapter={7} /></AbsoluteFill>;
-};
-
-const Layers: React.FC = () => {
-  const frame = useCurrentFrame();
-  return <AbsoluteFill><Background accent={8} /><ChapterTitle kicker="08 — TWO LAYERS" title="Shared truth is not personal mastery." subtitle="The public graph describes knowledge. A private layer can describe what each person has studied, understood, forgotten or wants to revisit." />
-    <Sphere split scale={.88} />
-    <div style={{position:'absolute',right:88,top:120,color:palette.cyan,fontFamily:'Arial, sans-serif',fontSize:17,fontWeight:700,letterSpacing:3,opacity:interpolate(frame,[120,210],[0,1],clamp)}}>SHARED KNOWLEDGE</div>
-    <div style={{position:'absolute',right:88,top:158,color:'#c2a9ff',fontFamily:'Arial, sans-serif',fontSize:17,fontWeight:700,letterSpacing:3,opacity:interpolate(frame,[240,330],[0,1],clamp)}}>PRIVATE LEARNING STATE</div>
-    <Progress chapter={8} /></AbsoluteFill>;
-};
-
-const Uses: React.FC = () => {
-  const frame = useCurrentFrame();
-  const cards = [
-    ['STUDENT','Find the exact prerequisite that is missing.'],
-    ['RESEARCHER','Inspect where two theories actually diverge.'],
-    ['AI','Return an answer with an explicit dependency path.'],
-    ['COMMUNITY','Improve shared knowledge without erasing correction history.'],
-  ];
-  return <AbsoluteFill><Background accent={9} /><ChapterTitle kicker="09 — WHAT THIS ENABLES" title="A graph that can be used, not just viewed." subtitle="Once knowledge relationships are explicit, learning, research and AI reasoning can operate on the same structure." />
-    <div style={{position:'absolute',left:78,right:78,top:300,display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>{cards.map((c,i)=><div key={c[0]} style={{padding:'22px 24px',border:'1px solid rgba(104,197,255,.18)',background:'linear-gradient(135deg, rgba(10,23,55,.84), rgba(19,12,46,.72))',opacity:interpolate(frame,[80+i*75,140+i*75],[0,1],clamp)}}><div style={{color:i%2?palette.violet:palette.cyan,fontFamily:'Arial, sans-serif',fontWeight:800,fontSize:14,letterSpacing:3}}>{c[0]}</div><div style={{marginTop:10,color:'#e4edff',fontFamily:'Arial, sans-serif',fontSize:18,lineHeight:1.4}}>{c[1]}</div></div>)}</div>
-    <Progress chapter={9} /></AbsoluteFill>;
-};
-
-const Vision: React.FC = () => {
-  const frame = useCurrentFrame();
-  const questions = ['Can rules remain consistent?', 'Can errors be corrected without destroying history?', 'Can millions of nodes remain understandable?', 'Can humans and AI contribute without turning the graph into noise?'];
-  return <AbsoluteFill><Background accent={10} /><Sphere scale={1.02} />
-    <div style={{position:'absolute',left:68,top:58,color:palette.cyan,fontFamily:'Arial, sans-serif',fontSize:14,letterSpacing:5}}>10 — THE OPEN QUESTION</div>
-    <div style={{position:'absolute',left:68,top:112,width:500,color:palette.white,fontFamily:'Arial, sans-serif',fontWeight:700,fontSize:39,lineHeight:1.08}}>A better structure should survive criticism.</div>
-    <div style={{position:'absolute',left:70,top:265,width:520,display:'flex',flexDirection:'column',gap:12}}>{questions.map((q,i)=><div key={q} style={{color:'#c8d9f4',fontFamily:'Arial, sans-serif',fontSize:17,lineHeight:1.4,opacity:interpolate(frame,[60+i*80,110+i*80],[0,1],clamp)}}>{q}</div>)}</div>
-    <div style={{position:'absolute',left:0,right:0,bottom:95,textAlign:'center',opacity:interpolate(frame,[520,650],[0,1],clamp)}}><div style={{color:palette.white,fontFamily:'Arial, sans-serif',fontWeight:800,fontSize:48,letterSpacing:8,textShadow:'0 0 30px rgba(91,233,255,.22)'}}>KNOWLEDGE BALL</div><div style={{marginTop:16,color:palette.cyan,fontFamily:'Arial, sans-serif',fontSize:18,letterSpacing:6}}>SEE KNOWLEDGE. QUESTION IT. BUILD ON IT.</div></div>
-    <Progress chapter={10} /></AbsoluteFill>;
-};
-
-const scenes = [Chaos, Structure, NodeTypes, Trace, Challenge, Decompose, Merge, Layers, Uses, Vision];
+const Dots: React.FC<{count?:number;cx?:number;cy?:number;spread?:number;accent?:number}> = ({count=64,cx=880,cy=370,spread=235,accent=0}) => {const f=useCurrentFrame();return <>{Array.from({length:count},(_,i)=>{const a=i*2.399+accent*.17;const r=spread*Math.sqrt((i+1)/count);const wob=1+Math.sin(f*.025+i)*.035;const x=cx+Math.cos(a+f*.006)*r*wob;const y=cy+Math.sin(a*.92+f*.004)*r*.78*wob;return <div key={i} style={{position:'absolute',left:x,top:y,width:i%11===0?9:4,height:i%11===0?9:4,borderRadius:'50%',translate:'-50% -50%',background:i%3===0?P.cyan:i%3===1?P.blue:P.violet,boxShadow:'0 0 12px rgba(91,233,255,.48)',opacity:.34+(i%7)*.07}}/>})}</>};
+const Orb: React.FC<{s:SceneDef}> = ({s}) => {const f=useCurrentFrame();return <><Dots accent={s.accent}/><div style={{position:'absolute',left:880,top:370,width:104,height:104,borderRadius:'50%',translate:'-50% -50%',background:'radial-gradient(circle,#fff 0 18%,#ddfbff 38%,rgba(117,229,255,.25) 62%,transparent 100%)',boxShadow:'0 0 32px #fff,0 0 90px rgba(91,233,255,.58),0 0 155px rgba(139,109,255,.34)',scale:interpolate(f,[0,60],[.75,1],{...clamp,easing:Easing.out(Easing.cubic)})}}/>{(s.labels||[]).map((x,i)=><div key={x} style={{position:'absolute',left:720+(i%3)*165,top:520+Math.floor(i/3)*38,color:i%2?P.violet:P.cyan,fontFamily:'Arial,sans-serif',fontWeight:700,fontSize:13,letterSpacing:2.1,opacity:interpolate(f,[24+i*10,50+i*10],[0,1],clamp)}}>{x}</div>)}</>};
+const Chain: React.FC<{s:SceneDef}> = ({s}) => {const f=useCurrentFrame();const labels=s.labels||[];return <div style={{position:'absolute',left:600,right:55,top:318,display:'flex',alignItems:'center',gap:12}}>{labels.map((x,i)=><React.Fragment key={x+i}><div style={{minWidth:110,maxWidth:150,padding:'15px 12px',textAlign:'center',border:`1px solid ${i===labels.length-1?P.cyan:'rgba(139,109,255,.48)'}`,background:'rgba(8,16,42,.84)',color:P.white,fontFamily:'Arial,sans-serif',fontWeight:700,fontSize:13,letterSpacing:1.6,opacity:interpolate(f,[i*12,i*12+22],[0,1],clamp),translate:`0 ${interpolate(f,[i*12,i*12+22],[12,0],clamp)}px`,boxShadow:i===labels.length-1?'0 0 26px rgba(91,233,255,.18)':undefined}}>{x}</div>{i<labels.length-1?<div style={{color:P.cyan,fontSize:26,opacity:interpolate(f,[i*12+12,i*12+30],[0,1],clamp)}}>→</div>:null}</React.Fragment>)}</div>};
+const Cards: React.FC<{s:SceneDef}> = ({s}) => {const f=useCurrentFrame();return <div style={{position:'absolute',left:635,right:55,top:286,display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:14}}>{(s.labels||[]).map((x,i)=><div key={x+i} style={{height:92,padding:'18px',border:'1px solid rgba(100,190,255,.2)',background:`linear-gradient(135deg,rgba(10,24,58,.88),rgba(${i%2?43:20},14,63,.74))`,color:P.white,fontFamily:'Arial,sans-serif',fontWeight:760,fontSize:15,letterSpacing:2,opacity:interpolate(f,[i*12,i*12+24],[0,1],clamp),scale:interpolate(f,[i*12,i*12+24],[.96,1],clamp),boxShadow:'0 18px 50px rgba(0,0,0,.18)'}}>{x}<div style={{marginTop:14,height:2,width:`${36+i*12}%`,background:i%2?P.violet:P.cyan,opacity:.75}}/></div>)}</div>};
+const Counter: React.FC<{s:SceneDef}> = ({s}) => {const f=useCurrentFrame();const hit=interpolate(f,[28,85],[0,1],{...clamp,easing:Easing.out(Easing.back(1.2))});return <><div style={{position:'absolute',left:850,top:360,width:170,height:170,borderRadius:'50%',border:`2px solid ${P.cyan}`,background:'rgba(18,70,94,.17)',boxShadow:'0 0 52px rgba(91,233,255,.18)',translate:'-50% -50%'}}/><div style={{position:'absolute',left:690+hit*130,top:250+hit*85,padding:'13px 18px',border:`1px solid ${P.magenta}`,background:'rgba(62,10,53,.82)',color:'#ffd9f3',fontFamily:'Arial,sans-serif',fontWeight:800,fontSize:14,letterSpacing:2,boxShadow:'0 0 28px rgba(255,121,216,.28)'}}>{(s.labels||[])[1]||'COUNTEREXAMPLE'}</div><div style={{position:'absolute',left:805,top:530,color:P.cyan,fontFamily:'Arial,sans-serif',fontWeight:700,fontSize:13,letterSpacing:2.2,opacity:hit}}>{(s.labels||[])[0]||'CLAIM'} → REVIEW DEPENDENCIES</div></>};
+const Decompose: React.FC<{s:SceneDef}> = ({s}) => {const f=useCurrentFrame();const spread=interpolate(f,[8,92],[0,1],{...clamp,easing:Easing.out(Easing.cubic)});const pts=[[670,360],[760,290],[835,405],[930,295],[1035,385]];return <><svg width={W} height={H} style={{position:'absolute',inset:0}}>{pts.slice(0,-1).map((p,i)=>{const q=pts[i+1];return <line key={i} x1={670+(p[0]-670)*spread} y1={360+(p[1]-360)*spread} x2={670+(q[0]-670)*spread} y2={360+(q[1]-360)*spread} stroke={i%2?P.violet:P.cyan} strokeWidth="2" opacity={spread*.75}/>})}</svg>{pts.map((p,i)=><div key={i} style={{position:'absolute',left:670+(p[0]-670)*spread,top:360+(p[1]-360)*spread,width:i===0||i===4?32:22,height:i===0||i===4?32:22,borderRadius:'50%',translate:'-50% -50%',background:i%2?P.cyan:P.violet,boxShadow:'0 0 22px rgba(91,233,255,.5)'}}/>)}<div style={{position:'absolute',left:650,top:500,color:'#bed0ee',fontFamily:'Arial,sans-serif',fontSize:13,letterSpacing:1.5,opacity:interpolate(f,[68,105],[0,1],clamp)}}>{(s.labels||[]).join(' → ')}</div></>};
+const Merge: React.FC<{s:SceneDef}> = ({s}) => {const f=useCurrentFrame();const c=interpolate(f,[12,90],[0,1],{...clamp,easing:Easing.inOut(Easing.cubic)});return <><div style={{position:'absolute',left:765-c*55,top:365,width:190,height:190,borderRadius:'50%',translate:'-50% -50%',border:`2px solid ${P.cyan}`,background:'rgba(26,104,142,.15)',boxShadow:'0 0 45px rgba(91,233,255,.17)'}}/><div style={{position:'absolute',left:1005+c*-65,top:365,width:190,height:190,borderRadius:'50%',translate:'-50% -50%',border:`2px solid ${P.violet}`,background:'rgba(93,63,169,.15)',boxShadow:'0 0 45px rgba(139,109,255,.17)'}}/><div style={{position:'absolute',left:760,top:510,width:300,textAlign:'center',color:P.white,fontFamily:'Arial,sans-serif',fontWeight:700,fontSize:14,letterSpacing:2.3,opacity:interpolate(f,[80,118],[0,1],clamp)}}>{(s.labels||[]).slice(-1)[0]||'VALIDATE'}</div></>};
+const Layers: React.FC<{s:SceneDef}> = ({s}) => {const f=useCurrentFrame();return <><div style={{position:'absolute',left:825,top:342,width:430,height:190,borderRadius:220,border:`1.5px solid ${P.cyan}`,background:'rgba(22,93,125,.09)',rotate:'-10deg',boxShadow:'0 0 60px rgba(91,233,255,.12)'}}/><div style={{position:'absolute',left:855,top:365,width:390,height:165,borderRadius:220,border:`1.5px solid ${P.violet}`,background:'rgba(85,48,159,.09)',rotate:'17deg',boxShadow:'0 0 60px rgba(139,109,255,.12)'}}/><Dots count={38} cx={865} cy={365} spread={165} accent={s.accent}/>{(s.labels||[]).map((x,i)=><div key={x+i} style={{position:'absolute',right:74,top:140+i*42,color:i%2?P.violet:P.cyan,fontFamily:'Arial,sans-serif',fontWeight:700,fontSize:14,letterSpacing:2.4,opacity:interpolate(f,[18+i*20,46+i*20],[0,1],clamp)}}>{x}</div>)}</>};
+const Matrix: React.FC<{s:SceneDef}> = ({s}) => {const f=useCurrentFrame();const labels=s.labels||[];return <div style={{position:'absolute',left:650,top:290,width:520,display:'grid',gridTemplateColumns:`repeat(${Math.min(3,labels.length||3)},1fr)`,gap:10}}>{labels.map((x,i)=><div key={x+i} style={{height:82,border:'1px solid rgba(255,255,255,.13)',background:'rgba(8,18,44,.78)',display:'grid',placeItems:'center',color:i%3===0?P.cyan:i%3===1?P.violet:P.green,fontFamily:'Arial,sans-serif',fontWeight:780,fontSize:13,letterSpacing:1.7,opacity:interpolate(f,[i*10,i*10+22],[0,1],clamp)}}>{x}</div>)}</div>};
+const Timeline: React.FC<{s:SceneDef}> = ({s}) => {const f=useCurrentFrame();const labels=s.labels||[];return <><div style={{position:'absolute',left:670,right:70,top:385,height:2,background:'rgba(255,255,255,.15)'}}/>{labels.map((x,i)=>{const xPos=700+i*(470/Math.max(1,labels.length-1));return <React.Fragment key={x+i}><div style={{position:'absolute',left:xPos,top:385,width:16,height:16,borderRadius:'50%',translate:'-50% -50%',background:i%2?P.violet:P.cyan,boxShadow:'0 0 18px rgba(91,233,255,.45)',scale:interpolate(f,[i*14,i*14+22],[0,1],clamp)}}/><div style={{position:'absolute',left:xPos-58,top:420,width:116,textAlign:'center',color:'#dce8ff',fontFamily:'Arial,sans-serif',fontWeight:700,fontSize:12,letterSpacing:1.5,opacity:interpolate(f,[i*14+8,i*14+28],[0,1],clamp)}}>{x}</div></React.Fragment>})}</>};
+const Domains: React.FC<{s:SceneDef}> = ({s}) => {const f=useCurrentFrame();const labels=s.labels||[];return <>{labels.map((x,i)=>{const a=i*(Math.PI*2/Math.max(labels.length,1))+f*.003;const r=170+(i%2)*55;const cx=880+Math.cos(a)*r;const cy=370+Math.sin(a)*r*.68;return <div key={x+i} style={{position:'absolute',left:cx,top:cy,minWidth:118,padding:'12px 14px',translate:'-50% -50%',textAlign:'center',border:`1px solid ${i%2?P.violet:P.cyan}`,background:'rgba(8,16,40,.82)',color:P.white,fontFamily:'Arial,sans-serif',fontWeight:700,fontSize:12,letterSpacing:1.6,boxShadow:'0 0 25px rgba(91,233,255,.12)'}}>{x}</div>})}<div style={{position:'absolute',left:880,top:370,width:28,height:28,borderRadius:'50%',translate:'-50% -50%',background:'#fff',boxShadow:'0 0 40px #fff,0 0 90px rgba(91,233,255,.55)'}}/></>};
+const Protocol: React.FC<{s:SceneDef}> = ({s}) => {const f=useCurrentFrame();const labels=s.labels||[];return <div style={{position:'absolute',left:640,right:65,top:300}}>{labels.map((x,i)=><div key={x+i} style={{marginBottom:14,padding:'13px 16px',borderLeft:`3px solid ${i%2?P.violet:P.cyan}`,background:'rgba(8,18,43,.76)',color:P.white,fontFamily:'Arial,sans-serif',fontWeight:700,fontSize:14,letterSpacing:1.7,opacity:interpolate(f,[i*12,i*12+24],[0,1],clamp),translate:`${interpolate(f,[i*12,i*12+24],[20,0],clamp)}px 0`}}><span style={{color:P.dim,marginRight:12}}>0{i+1}</span>{x}</div>)}</div>};
+const Final: React.FC<{s:SceneDef}> = ({s}) => {const f=useCurrentFrame();return <><Dots count={48} cx={880} cy={350} spread={185} accent={s.accent}/><div style={{position:'absolute',left:880,top:350,width:120,height:120,borderRadius:'50%',translate:'-50% -50%',background:'radial-gradient(circle,#fff 0 20%,#dffbff 42%,rgba(91,233,255,.25) 65%,transparent 100%)',boxShadow:'0 0 34px #fff,0 0 100px rgba(91,233,255,.6),0 0 180px rgba(139,109,255,.35)'}}/><div style={{position:'absolute',left:650,right:55,bottom:120,textAlign:'center',color:P.white,fontFamily:'Arial,sans-serif',fontWeight:820,fontSize:32,letterSpacing:4,opacity:interpolate(f,[40,78],[0,1],clamp)}}>{(s.labels||[])[0]}</div>{s.note?<div style={{position:'absolute',left:650,right:55,bottom:82,textAlign:'center',color:P.cyan,fontFamily:'Arial,sans-serif',fontSize:13,letterSpacing:3.2,opacity:interpolate(f,[72,108],[0,1],clamp)}}>{s.note}</div>:null}</>};
+const Visual: React.FC<{s:SceneDef}> = ({s}) => {switch(s.mode){case 'orb':return <Orb s={s}/>;case 'chain':return <Chain s={s}/>;case 'cards':return <Cards s={s}/>;case 'counter':return <Counter s={s}/>;case 'decompose':return <Decompose s={s}/>;case 'merge':return <Merge s={s}/>;case 'layers':return <Layers s={s}/>;case 'matrix':return <Matrix s={s}/>;case 'timeline':return <Timeline s={s}/>;case 'domains':return <Domains s={s}/>;case 'protocol':return <Protocol s={s}/>;case 'final':return <Final s={s}/>;case 'chaos':default:return <><Dots count={82} cx={875} cy={365} spread={290} accent={s.accent}/>{(s.labels||[]).map((x,i)=><div key={x+i} style={{position:'absolute',left:670+(i*103)%470,top:270+(i%3)*105,color:i%2?P.violet:P.cyan,fontFamily:'Arial,sans-serif',fontWeight:700,fontSize:13,letterSpacing:2,rotate:`${(i%2?1:-1)*(8+i*3)}deg`,opacity:.72}}>{x}</div>)}</>}};
+const Scene: React.FC<{s:SceneDef;index:number}> = ({s,index}) => <AbsoluteFill><Background accent={s.accent||index}/><Header s={s}/><Visual s={s}/><Footer index={index}/></AbsoluteFill>;
 
 export const KnowledgeBallLong: React.FC = () => {
   const {fps} = useVideoConfig();
-  const sceneFrames = 30 * fps;
-  return <AbsoluteFill style={{background: palette.bg}}>{scenes.map((Scene, i) => <Sequence key={i} from={i * sceneFrames} durationInFrames={sceneFrames}><Scene /></Sequence>)}</AbsoluteFill>;
+  const sceneFrames = 5 * fps;
+  return <AbsoluteFill style={{background:P.bg}}>{scenes.map((s,i)=><Sequence key={`${i}-${s.title}`} from={i*sceneFrames} durationInFrames={sceneFrames}><Scene s={s} index={i}/></Sequence>)}</AbsoluteFill>;
 };
