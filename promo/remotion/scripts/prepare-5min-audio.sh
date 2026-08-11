@@ -37,7 +37,6 @@ edge-tts \
 RAW_DURATION="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 out/narration-5min-raw.mp3)"
 echo "Raw narration duration: $RAW_DURATION"
 
-# Keep the narration naturally inside a five-minute film with a short visual opening and closing.
 RATIO="$(python3 - "$RAW_DURATION" <<'PY'
 import sys
 raw=float(sys.argv[1])
@@ -51,7 +50,6 @@ ffmpeg -hide_banner -loglevel error -y \
   -filter:a "atempo=${RATIO},highpass=f=70,lowpass=f=12500" \
   -ar 48000 -ac 1 out/narration-5min.wav
 
-# Download multiple CC0/public-domain music cues. Each slot has fallbacks so CI stays reproducible.
 BASE="https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com"
 fetch_track() {
   local out="$1"; shift
@@ -69,21 +67,52 @@ fetch_track out/music1.mp3 "Asking%20Questions.mp3" "Deep%20Tones.mp3"
 fetch_track out/music2.mp3 "Deep%20Tones.mp3" "Circuit.mp3" "Asking%20Questions.mp3"
 fetch_track out/music3.mp3 "Circuit.mp3" "Asking%20Questions.mp3" "Deep%20Tones.mp3"
 
-# Build a long research-documentary bed with crossfades. Reusing the first cue as a fourth section
-# guarantees more than five minutes of source material before trimming.
+# Pick one continuous source for the entire film. This removes audible song-to-song joins.
+MAIN_TRACK="$(python3 - <<'PY'
+import subprocess
+tracks=['out/music1.mp3','out/music2.mp3','out/music3.mp3']
+best=None
+for p in tracks:
+    try:
+        d=float(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-of','default=nw=1:nk=1',p], text=True).strip())
+    except Exception:
+        continue
+    print(f'{p}: {d:.2f}s')
+    if best is None or d > best[1]:
+        best=(p,d)
+if best is None:
+    raise SystemExit('No usable background track')
+print(best[0])
+PY
+)"
+# The Python diagnostic lines are included above; keep only the final path.
+MAIN_TRACK="$(printf '%s\n' "$MAIN_TRACK" | tail -n 1)"
+MAIN_DURATION="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 "$MAIN_TRACK")"
+echo "Continuous background source: $MAIN_TRACK (${MAIN_DURATION}s)"
+
+# Build a legal atempo chain so the selected track becomes exactly 300 seconds without pitch shifting.
+TEMPO_CHAIN="$(python3 - "$MAIN_DURATION" <<'PY'
+import sys
+ratio=float(sys.argv[1])/300.0
+parts=[]
+while ratio < 0.5:
+    parts.append(0.5)
+    ratio /= 0.5
+while ratio > 2.0:
+    parts.append(2.0)
+    ratio /= 2.0
+parts.append(ratio)
+print(','.join(f'atempo={x:.8f}' for x in parts))
+PY
+)"
+
+echo "Background tempo chain: $TEMPO_CHAIN"
 ffmpeg -hide_banner -loglevel error -y \
-  -i out/music1.mp3 -i out/music2.mp3 -i out/music3.mp3 -i out/music1.mp3 \
-  -filter_complex "\
-    [0:a]aresample=48000,volume=0.9[a0];\
-    [1:a]aresample=48000,volume=0.9[a1];\
-    [2:a]aresample=48000,volume=0.9[a2];\
-    [3:a]aresample=48000,volume=0.9[a3];\
-    [a0][a1]acrossfade=d=5:c1=tri:c2=tri[x1];\
-    [x1][a2]acrossfade=d=5:c1=tri:c2=tri[x2];\
-    [x2][a3]acrossfade=d=5:c1=tri:c2=tri,atrim=0:300,apad=whole_dur=300,afade=t=in:st=0:d=2.5,afade=t=out:st=296:d=4[bg]" \
+  -i "$MAIN_TRACK" \
+  -filter_complex "[0:a]aresample=48000,${TEMPO_CHAIN},atrim=0:300,apad=whole_dur=300,highpass=f=45,lowpass=f=14500,afade=t=in:st=0:d=3,afade=t=out:st=296:d=4[bg]" \
   -map "[bg]" -ar 48000 -ac 2 out/background-5min.wav
 
 VOICE_DURATION="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 out/narration-5min.wav)"
 BG_DURATION="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 out/background-5min.wav)"
 echo "Final narration duration: $VOICE_DURATION"
-echo "Background duration: $BG_DURATION"
+echo "Continuous background duration: $BG_DURATION"
