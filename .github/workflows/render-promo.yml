@@ -1,9 +1,9 @@
-name: Render Knowledge Ball 5-Minute Film
+name: Render Knowledge Ball Script Film V2
 
 on:
   push:
     branches:
-      - promo/knowledge-ball-5min
+      - promo/knowledge-ball-script-film-v2
     paths:
       - 'promo/remotion/**'
       - '.github/workflows/render-promo.yml'
@@ -15,7 +15,7 @@ permissions:
 jobs:
   render:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - name: Checkout isolated promo branch
         uses: actions/checkout@v4
@@ -34,49 +34,53 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
 
-      - name: Prepare natural narration and long-form music
+      - name: Build script-driven vertical film source
+        working-directory: promo/remotion
+        run: node scripts/build-script-film.mjs
+
+      - name: Prepare natural narration and continuous music bed
         working-directory: promo/remotion
         run: bash scripts/prepare-5min-audio.sh
 
-      - name: Validate composition
+      - name: Validate vertical composition
         working-directory: promo/remotion
         run: npx remotion compositions src/index.ts
 
-      - name: Render five-minute silent film
+      - name: Render 5-minute 9x16 script film
         working-directory: promo/remotion
         run: |
           npx remotion render src/index.ts KnowledgeBall5Min \
-            out/knowledge-ball-5min-silent.mp4 \
-            --codec=h264 --crf=21 --concurrency=4
+            out/knowledge-ball-script-film-v2-silent.mp4 \
+            --codec=h264 --crf=22 --concurrency=4
 
-      - name: Mix narration with quiet ducked background
+      - name: Mix natural narration with quiet ducked music
         working-directory: promo/remotion
         run: |
           ffmpeg -hide_banner -loglevel error -y \
-            -i out/knowledge-ball-5min-silent.mp4 \
+            -i out/knowledge-ball-script-film-v2-silent.mp4 \
             -i out/background-5min.wav \
             -i out/narration-5min.wav \
             -filter_complex "\
-              [1:a]atrim=0:300,asetpts=PTS-STARTPTS,loudnorm=I=-30:TP=-4:LRA=8[bg];\
-              [2:a]loudnorm=I=-16:TP=-1.8:LRA=7,pan=stereo|c0=c0|c1=c0,adelay=2000|2000,apad=whole_dur=300,atrim=0:300,asplit=2[vo_sc][vo_mix];\
-              [bg][vo_sc]sidechaincompress=threshold=0.020:ratio=6:attack=35:release=520[ducked];\
+              [1:a]atrim=0:300,asetpts=PTS-STARTPTS,loudnorm=I=-31:TP=-5:LRA=7[bg];\
+              [2:a]loudnorm=I=-16:TP=-1.8:LRA=7,pan=stereo|c0=c0|c1=c0,adelay=1400|1400,apad=whole_dur=300,atrim=0:300,asplit=2[vo_sc][vo_mix];\
+              [bg][vo_sc]sidechaincompress=threshold=0.018:ratio=7:attack=25:release=620[ducked];\
               [ducked][vo_mix]amix=inputs=2:normalize=0,alimiter=limit=0.88:level=disabled[mix]" \
             -map 0:v:0 -map "[mix]" \
             -c:v copy -c:a aac -b:a 192k -ar 48000 -ac 2 -t 300 \
-            out/knowledge-ball-5min-final.mp4
+            out/knowledge-ball-script-film-v2.mp4
 
-      - name: Validate final media
+      - name: Validate final vertical media
         working-directory: promo/remotion
         run: |
-          ffprobe -v error -show_entries format=duration -of default=nw=1 out/knowledge-ball-5min-final.mp4
-          ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate -of default=nw=1 out/knowledge-ball-5min-final.mp4
-          ffprobe -v error -select_streams a:0 -show_entries stream=codec_name,sample_rate,channels -of default=nw=1 out/knowledge-ball-5min-final.mp4
-          ffmpeg -hide_banner -nostats -i out/knowledge-ball-5min-final.mp4 -filter_complex ebur128=peak=true -f null - 2>&1 | tail -n 20
+          ffprobe -v error -show_entries format=duration -of default=nw=1 out/knowledge-ball-script-film-v2.mp4
+          ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate -of default=nw=1 out/knowledge-ball-script-film-v2.mp4
+          ffprobe -v error -select_streams a:0 -show_entries stream=codec_name,sample_rate,channels -of default=nw=1 out/knowledge-ball-script-film-v2.mp4
+          ffmpeg -hide_banner -nostats -i out/knowledge-ball-script-film-v2.mp4 -filter_complex ebur128=peak=true -f null - 2>&1 | tail -n 20
 
-      - name: Upload five-minute film
+      - name: Upload script-driven Instagram film
         uses: actions/upload-artifact@v4
         with:
-          name: knowledge-ball-5min-film
-          path: promo/remotion/out/knowledge-ball-5min-final.mp4
+          name: knowledge-ball-script-film-v2
+          path: promo/remotion/out/knowledge-ball-script-film-v2.mp4
           if-no-files-found: error
           retention-days: 7
