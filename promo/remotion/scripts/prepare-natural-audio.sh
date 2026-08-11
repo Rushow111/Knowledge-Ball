@@ -36,30 +36,29 @@ edge-tts \
   --file narration-natural.txt \
   --write-media out/narration-natural.mp3
 
-# Fetch a professionally produced, Mixkit-licensed neutral/technology ambient track.
-curl -fsSL -A 'Mozilla/5.0' 'https://mixkit.co/free-stock-music/mood/neutral/' -o /tmp/mixkit-neutral.html
-MUSIC_URL="$(python3 - <<'PY'
-import html, re
-page = html.unescape(open('/tmp/mixkit-neutral.html', encoding='utf-8').read())
-urls = re.findall(r'https://assets\.mixkit\.co/music/(?:preview|download)/[^\"\'<> ]+?\.mp3', page)
-# Prefer Sonor if its slug is exposed; otherwise use the first music preview from the neutral collection.
-for u in urls:
-    if 'sonor' in u.lower():
-        print(u)
-        break
-else:
-    if urls:
-        print(urls[0])
-PY
-)"
+# Use a CC0/public-domain music corpus hosted on GitHub so CI can download it reproducibly.
+# Prefer a restrained documentary-style cue; fall back to other subdued electronic cues.
+MUSIC_URLS=(
+  "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Asking%20Questions.mp3"
+  "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Circuit.mp3"
+  "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Deep%20Tones.mp3"
+)
 
-if [ -z "$MUSIC_URL" ]; then
-  echo "Could not extract a Mixkit music URL" >&2
+MUSIC_OK=0
+for MUSIC_URL in "${MUSIC_URLS[@]}"; do
+  echo "Trying background music: $MUSIC_URL"
+  if curl -fL --retry 2 --retry-delay 1 "$MUSIC_URL" -o out/background-professional.mp3; then
+    MUSIC_OK=1
+    break
+  fi
+done
+
+if [ "$MUSIC_OK" -ne 1 ]; then
+  echo "Could not download a CC0 background track" >&2
   exit 1
 fi
 
-echo "Using background music: $MUSIC_URL"
-curl -fL -A 'Mozilla/5.0' "$MUSIC_URL" -o out/background-professional.mp3
-
-ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 out/narration-natural.mp3
-ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 out/background-professional.mp3
+VOICE_DURATION="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 out/narration-natural.mp3)"
+MUSIC_DURATION="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 out/background-professional.mp3)"
+echo "Narration duration: $VOICE_DURATION"
+echo "Background duration: $MUSIC_DURATION"
