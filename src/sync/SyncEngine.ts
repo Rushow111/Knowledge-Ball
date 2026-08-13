@@ -23,6 +23,14 @@ export class SyncEngine<TState> {
     store.subscribe(event => {
       if (!this.applyingRemote && isPublicKnowledgeEvent(event)) this.queue(event.id);
     }, false);
+
+    // The web app restores and may seed local events before the SyncEngine is
+    // constructed. Reconcile those already-present public events so enabling a
+    // hosted adapter later does not permanently strand them in localStorage.
+    for (const event of store.allEvents()) {
+      if (isPublicKnowledgeEvent(event)) this.queue(event.id);
+    }
+
     if (!adapter) this.setStatus('unavailable');
   }
 
