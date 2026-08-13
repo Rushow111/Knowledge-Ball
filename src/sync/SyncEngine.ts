@@ -63,14 +63,22 @@ export class SyncEngine<TState> {
 
   private async pullAndApply(): Promise<void> {
     const batch = await this.adapter!.pull(this.metadata.cursor);
+    const remoteEventIds: string[] = [];
     this.applyingRemote = true;
     try {
       for (const event of batch.events) {
         if (!isPublicKnowledgeEvent(event)) continue;
+        remoteEventIds.push(event.id);
         const invalid = this.validate(event);
         if (!invalid) this.store.append(event);
       }
     } finally { this.applyingRemote = false; }
+
+    if (remoteEventIds.length) {
+      const acknowledged = new Set([...this.metadata.acknowledgedEventIds, ...remoteEventIds]);
+      this.metadata.acknowledgedEventIds = [...acknowledged];
+      this.metadata.pendingEventIds = this.metadata.pendingEventIds.filter(id => !acknowledged.has(id));
+    }
     this.metadata.cursor = batch.cursor;
     this.persist();
   }
