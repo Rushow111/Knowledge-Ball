@@ -1,4 +1,4 @@
-import { isPublicKnowledgeEvent, type DomainEvent, type PublicKnowledgeEvent } from '../event/Event';
+import { isCanonicalPublicKnowledgeEvent, isPublicKnowledgeEvent, type DomainEvent, type PublicKnowledgeEvent } from '../event/Event';
 import { KnowledgeBallAuthClient } from '../auth/AuthClient';
 import { RemoteHeadConflictError, type PushResult, type SyncAdapter, type SyncBatch } from './SyncAdapter';
 import type { StorageLike } from '../persistence/KnowledgePersistence';
@@ -33,10 +33,10 @@ export class SupabaseSyncAdapter implements SyncAdapter {
   }
 
   async push(events: PublicKnowledgeEvent[], expectedCursor: string): Promise<PushResult> {
-    if (events.some(event => !isPublicKnowledgeEvent(event))) throw new Error('Personal events cannot enter the public stream');
+    if (events.some(event => !isCanonicalPublicKnowledgeEvent(event))) throw new Error('Only canonical public knowledge events can enter the public stream');
     const envelopes = events.map(({ seq: _localSequence, ...event }) => event);
     try {
-      const result = await this.api<{ head: number; acknowledged_event_ids: string[] }>('/rest/v1/rpc/append_public_knowledge_events', { method: 'POST', body: JSON.stringify({ expected_head: Number(expectedCursor), event_batch: envelopes }) }, true);
+      const result = await this.api<{ head: number; acknowledged_event_ids: string[] }>('/rest/v1/rpc/append_public_knowledge_events', { method: 'POST', body: JSON.stringify({ expected_head: Number(expectedCursor), event_batch: envelopes }) });
       return { cursor: String(result.head), acknowledgedEventIds: result.acknowledged_event_ids };
     } catch (error) {
       if (error instanceof SupabaseApiError && error.code === 'KB409') throw new RemoteHeadConflictError(String(error.details?.current_head ?? expectedCursor));
@@ -44,9 +44,8 @@ export class SupabaseSyncAdapter implements SyncAdapter {
     }
   }
 
-  private async api<T>(path: string, init?: RequestInit, requiresAccount = false): Promise<T> {
-    const session = requiresAccount ? await this.auth.session() : await this.auth.publicSession();
-    if (!session) throw new Error(requiresAccount ? '登录或注册后才能提交公共知识修改' : '匿名浏览会话不可用');
+  private async api<T>(path: string, init?: RequestInit): Promise<T> {
+    const session = await this.auth.publicSession();
     const response = await this.request(`${this.config.url.replace(/\/$/, '')}${path}`, {
       ...init,
       headers: { apikey: this.config.publishableKey, Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json', ...init?.headers },
