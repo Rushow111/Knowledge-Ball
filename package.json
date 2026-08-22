@@ -32,6 +32,7 @@
     "test:architecture": "node scripts/verify-scheme7-architecture.mjs && node scripts/verify-energy-migration.mjs && node scripts/verify-revalidation-v1-migration.mjs && node scripts/verify-viewpoint-reconciliation.mjs && node scripts/verify-lineage-cascade.mjs && node scripts/verify-lineage-spec-convergence.mjs && node scripts/verify-total-energy.mjs && node scripts/verify-account-ui.mjs && node scripts/verify-issue45-regressions.mjs && node scripts/verify-personal-account-state.mjs",
     "test:auth": "npx esbuild src/auth/AuthClientRegression.test.ts --bundle --platform=node --format=esm --outfile=.test-dist/auth-regression.mjs && node .test-dist/auth-regression.mjs",
     "test:browser-cloud": "node scripts/verify-cloud-authority-browser.mjs",
+    "test:browser-lineage-product": "node scripts/verify-lineage-product-browser.mjs",
     "test:browser-mobile": "node scripts/verify-mobile-browser.mjs",
     "test:issue51-browser": "node scripts/verify-issue51-browser.mjs",
     "test:bootstrap": "npx esbuild src/bootstrap/RemoteFirstBootstrap.test.ts --bundle --platform=node --format=esm --outfile=.test-dist/remote-first-bootstrap.mjs && node .test-dist/remote-first-bootstrap.mjs"

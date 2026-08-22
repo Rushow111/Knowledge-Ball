@@ -41,8 +41,6 @@ async function analyzeScreenshot(page,screenshot,regions=[]){
       if(h>=80&&h<=165&&s>=.25&&v>=.14)stats.greenDominant++;
     };
     const global=empty();
-    // Sample every fourth pixel for the whole-frame gate. Hue/saturation are more faithful than
-    // absolute RGB thresholds after WebGL is composited over the deep-space background.
     for(let i=0;i<data.length;i+=16)add(global,data[i],data[i+1],data[i+2],data[i+3]);
     const local=regions.map(region=>{const stats=empty(),radius=Math.max(1,Math.round(region.radius??18)),cx=Math.round(region.x),cy=Math.round(region.y);for(let y=Math.max(0,cy-radius);y<=Math.min(canvas.height-1,cy+radius);y++){for(let x=Math.max(0,cx-radius);x<=Math.min(canvas.width-1,cx+radius);x++){const dx=x-cx,dy=y-cy;if(dx*dx+dy*dy>radius*radius)continue;const i=(y*canvas.width+x)*4;add(stats,data[i],data[i+1],data[i+2],data[i+3]);}}return stats;});
     return{width:canvas.width,height:canvas.height,...global,regions:local};
@@ -78,7 +76,6 @@ try{
     assert.ok(hostBox,'mobile canvas host must expose a finite bounding box');
     const toLocalRegions=points=>points.map(point=>({x:point.x-hostBox.x,y:point.y-hostBox.y,radius:18}));
 
-    // Gate A: capture the actual graph exactly as current data renders on a phone viewport.
     await mkdir('artifacts',{recursive:true});
     const screenshot=await canvasHost.screenshot({path:'artifacts/mobile-scene-visual.png',type:'png'});
     assert.ok(screenshot.length>5_000,'mobile WebGL scene screenshot must contain real rendered visual data');
@@ -90,10 +87,6 @@ try{
     assert.ok(visual.trueBluePeak>=.55,'actual true-blue scene signal must remain visibly bright instead of collapsing into near-black blue');
     assert.ok(visual.greenDominant<=5,'old green/teal contamination must not reappear in the actual scene screenshot');
 
-    // Gate B: calibrate semantic colors around four real on-screen nodes. The local peak checks are
-    // deliberate: hue alone is insufficient because a correctly-hued node can still be visually too dark.
-    // Layer color is now controlled by effectiveLayer, not by NodeType, so the calibration must exercise
-    // the same canonical layer input consumed by the production scene.
     const calibrationIds=targets.slice(0,4).map(target=>target.id);
     const originals=await page.evaluate(ids=>{
       const original=[];
@@ -126,9 +119,6 @@ try{
     assert.equal(palette.height,visual.height,'actual and semantic-palette screenshots must share the same height');
     assert.ok(palette.regions[0].cyan>=control.regions[0].cyan+6,`inner calibration must add local ice-blue pixels (control=${control.regions[0].cyan}, palette=${palette.regions[0].cyan})`);
     assert.ok(palette.regions[0].cyanPeak>=.60,`inner ice-blue must stay bright in the real composite (peak=${palette.regions[0].cyanPeak})`);
-    // The intended middle hue sits on an intentionally blue background. Replacing a white control sphere
-    // with a purer/brighter blue can reduce the total count of already-blue background pixels, so count
-    // deltas are not a reliable signal. Require a strong local brightness gain in the true-blue hue instead.
     assert.ok(palette.regions[1].trueBluePeak>=.75,`middle true-blue must stay bright in the real composite (peak=${palette.regions[1].trueBluePeak})`);
     assert.ok(palette.regions[1].trueBluePeak>=control.regions[1].trueBluePeak+.15,`middle calibration must increase local true-blue brightness (control=${control.regions[1].trueBluePeak}, palette=${palette.regions[1].trueBluePeak})`);
     assert.ok(palette.regions[2].violet>=control.regions[2].violet+6,`outer calibration must add local violet pixels (control=${control.regions[2].violet}, palette=${palette.regions[2].violet})`);
@@ -139,8 +129,6 @@ try{
     await page.waitForTimeout(100);
     await page.evaluate(()=>window.__debug.scene.stop());
 
-    // Gate C: the real Personal control must hide both untouched nodes and every
-    // edge incident to them, then restore exactly the same edge set when disabled.
     const personalFixture=await page.evaluate(()=>{
       const sceneNodes=window.__debug.renderNodes.slice(0,48);
       const ids=new Set(sceneNodes.map(node=>node.id));
@@ -224,14 +212,16 @@ try{
     await page.locator('#nodeDetailOverlay').waitFor({state:'hidden'});
     await page.waitForFunction(title=>[...document.querySelectorAll('.node-label')].some(label=>label.textContent?.trim()===title&&label.style.display!=='none'),target.title);
 
-    // Re-open the focused node and verify all edit variants are entered through one text control.
+    // Re-open the focused node: the primary product action must be directly visible.
     await page.touchscreen.tap(centered.x,centered.y);
     await page.locator('#nodeDetailOverlay.open').waitFor({state:'visible'});
-    await page.locator('#nodeDetailOverlay .node-detail-edit').click();
-    await page.locator('#nodeDetailOverlay [data-node-detail-action="edit"]').click();
+    const directOptimize=page.locator('#nodeDetailOverlay [data-node-detail-action="edit"]');
+    await directOptimize.waitFor({state:'visible'});
+    assert.equal(await page.locator('#nodeDetailOverlay .node-detail-edit').count(),0,'optimization must not be hidden behind a generic Edit gate');
+    await directOptimize.click();
     await page.locator('#panelTitle').filter({hasText:'编辑节点'}).waitFor({state:'visible'});
     assert.equal(await page.locator('#nodeDetailOverlay.open').count(),0,'choosing an edit operation must close the near-node viewer before opening the editor');
-    assert.equal(await page.locator('#panelClose').getAttribute('aria-label'),'返回节点详情','legacy editor subview keeps its existing safe back semantics');
+    assert.equal(await page.locator('#panelClose').getAttribute('aria-label'),'返回节点详情','editor subview keeps its existing safe back semantics');
     await page.locator('#panelClose').click();
     await page.waitForFunction(title=>document.getElementById('panelTitle')?.textContent?.trim()===title,target.title);
     assert.ok(await page.locator('#panel').evaluate(element=>element.classList.contains('open')),'editor back must return to the existing operation host');
@@ -261,5 +251,5 @@ try{
     assert.deepEqual(errors.filter(error=>/NaN|computeBoundingSphere|pageerror/i.test(error)),[]);
     await context.close();
   }finally{await browser.close();}
-  console.log('Mobile viewport, bright semantic colors, Personal node/edge visibility, focus-before-details, near-node details, search focus, exit navigation, raycast and UI click checks passed');
+  console.log('Mobile viewport, bright semantic colors, Personal node/edge visibility, focus-before-details, direct lineage actions, search focus, exit navigation, raycast and UI click checks passed');
 }finally{server.kill('SIGKILL');server.unref();}

@@ -60,3 +60,10 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Read-only click-test deployed Pages and Supabase wiring
         run: node scripts/verify-production-browser.mjs "${{ steps.deployment.outputs.page_url }}"
+      - name: Upload deployed product visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-product-smoke
+          path: artifacts/production-product-smoke.png
+          if-no-files-found: warn

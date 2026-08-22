@@ -47,6 +47,10 @@ const ACTION_LABEL: Readonly<Record<NodeDetailAction, string>> = Object.freeze({
   resolve: '重新验证',
   dispute: '争议',
 });
+const PRIMARY_ACTION_HINT: Readonly<Partial<Record<NodeDetailAction, string>>> = Object.freeze({
+  edit: '生成新版本，旧版本保留',
+  negate: '提交另一种观点，不直接覆盖',
+});
 const LABEL_SWITCH_CLASS = 'node-detail-labels-off';
 const VOTE_REFRESH_MS = 3_000;
 let voteAccount: ReturnType<typeof createProductionAuthClient> | undefined;
@@ -69,6 +73,51 @@ function escapeHtml(input: string): string {
 
 function displayEnergy(value: string): string {
   return value.replace(/\.0+$/, '').replace(/(\.\d*?[1-9])0+$/, '$1');
+}
+
+function lineageStateMarkup(node: NodeDetailNode): string {
+  const role = lineageRoleFor(node);
+  let label = '当前版本';
+  let detail = '这是当前使用的知识版本。优化或提出对立观点都会生成新球，不会原地覆盖它。';
+  let tone = 'current';
+
+  if (node.status === 'pending') {
+    if (role === 'candidate-history') {
+      label = '优化候选 · 等待验证';
+      detail = '验证通过后它才会成为当前版本；判定前原来的当前版本保持不变。';
+      tone = 'candidate-history';
+    } else if (role === 'candidate-opposition') {
+      label = '对立候选 · 等待验证';
+      detail = '这是另一种观点。验证通过后才会切换当前观点；判定前原观点保持不变。';
+      tone = 'candidate-opposition';
+    } else {
+      label = '新知识 · 等待验证';
+      detail = '这条知识正在进行首次验证，通过后才会成为稳定知识。';
+      tone = 'pending';
+    }
+  } else if (role === 'history') {
+    label = node.status === 'disputed' ? '历史版本 · 重新验证中' : '历史版本';
+    detail = node.status === 'disputed'
+      ? '这个旧版本正在重新竞争当前版本，完成前当前版本不会被替换。'
+      : '这是保留下来的旧版本。你可以发起重新验证，让它重新竞争当前版本。';
+    tone = 'history';
+  } else if (role === 'opposition') {
+    label = node.status === 'disputed' ? '对立版本 · 重新验证中' : '对立版本';
+    detail = node.status === 'disputed'
+      ? '这个对立版本正在重新竞争当前版本，完成前当前版本不会被替换。'
+      : '这是保留下来的对立观点。你可以发起重新验证，让它重新竞争当前版本。';
+    tone = 'opposition';
+  } else if (role === 'current' && node.status === 'disputed') {
+    label = '当前版本 · 重新验证中';
+    detail = '它依赖的前提版本已经变化，系统正在重新确认这条知识是否仍然成立。';
+    tone = 'cascade';
+  } else if (node.status === 'suspended') {
+    label = '当前版本 · 已悬置';
+    detail = '重新验证未通过，当前暂时悬置；历史记录仍然保留。';
+    tone = 'suspended';
+  }
+
+  return `<div class="node-detail-state ${tone}" role="status"><strong>${label}</strong><span>${detail}</span></div>`;
 }
 
 function relationMarkup(relations: NodeDetailRelations): string {
@@ -198,7 +247,7 @@ export class NodeDetailController {
       // First-round node/candidate validation remains V2 and one energy.
       interaction = `
         <div class="node-detail-vote node-detail-interaction">
-          <div class="node-detail-vote-title">投票</div>
+          <div class="node-detail-vote-title">验证这个候选</div>
           <div class="node-detail-vote-actions">
             <button type="button" class="node-detail-vote-button agree" data-vote-side="AGREE" disabled><span>同意</span><small>能量 −1</small></button>
             <button type="button" class="node-detail-vote-button disagree" data-vote-side="DISAGREE" disabled><span>反对</span><small>能量 −1</small></button>
@@ -209,19 +258,19 @@ export class NodeDetailController {
     } else if (oldLineage && node.status === 'verified') {
       interaction = `
         <div class="node-detail-reactivation node-detail-interaction">
-          <div class="node-detail-vote-title">设为当前最优</div>
+          <div class="node-detail-vote-title">让这个版本重新竞争当前版本</div>
           <div class="node-detail-vote-actions">
-            <button type="button" class="node-detail-vote-button agree" data-reactivate-intent="1" ${account ? '' : 'disabled'}><span>同意</span><small>重新验证</small></button>
-            <button type="button" class="node-detail-vote-button disagree" disabled><span>反对</span><small>此处不可用</small></button>
+            <button type="button" class="node-detail-vote-button agree" data-reactivate-intent="1" ${account ? '' : 'disabled'}><span>发起重新验证</span><small>需要确认</small></button>
+            <button type="button" class="node-detail-vote-button disagree" disabled><span>当前版本不变</span><small>无需操作</small></button>
           </div>
           <div class="node-detail-confirm" hidden>
-            <div>请确认该知识点为当前最优</div>
+            <div>确认让这个旧版本重新竞争当前版本？</div>
             <div class="node-detail-confirm-actions">
               <button type="button" data-reactivate-cancel>取消</button>
-              <button type="button" data-reactivate-confirm>确认</button>
+              <button type="button" data-reactivate-confirm>确认发起</button>
             </div>
           </div>
-          <div class="node-detail-vote-status" role="status" aria-live="polite">${account ? '确认后按当前 ORIGINAL_DESIGN_V1 阶段启动重新验证' : '共享服务未配置，暂不能重新验证'}</div>
+          <div class="node-detail-vote-status" role="status" aria-live="polite">${account ? '确认后进入重新验证；完成前当前版本不会被替换' : '共享服务未配置，暂不能重新验证'}</div>
         </div>
       `;
     } else if (oldLineage && node.status === 'disputed') {
@@ -229,13 +278,17 @@ export class NodeDetailController {
     } else if (role === 'current' && node.status === 'disputed') {
       interaction = `
         <div class="node-detail-cascade-status node-detail-interaction" role="status">
-          前提的当前版本已经变化，此知识正在等待重新验证。
+          前提的当前版本已经变化，正在等待大家重新确认这条知识是否仍然成立。
         </div>
       `;
     } else {
       interaction = `
-        <button type="button" class="node-detail-edit" aria-expanded="false">编辑</button>
-        <div class="node-detail-edit-menu" hidden></div>
+        <div class="node-detail-product-actions node-detail-interaction" aria-label="可执行操作">
+          <div class="node-detail-action-title">继续完善这个知识</div>
+          <div class="node-detail-primary-actions"></div>
+          <button type="button" class="node-detail-more" aria-expanded="false">更多操作</button>
+          <div class="node-detail-edit-menu" hidden></div>
+        </div>
       `;
     }
 
@@ -245,6 +298,7 @@ export class NodeDetailController {
     this.root.innerHTML = `
       ${relationMarkup(relations)}
       <button type="button" class="node-detail-close" aria-label="关闭知识节点详情">×</button>
+      ${lineageStateMarkup(node)}
       <h2 class="node-detail-title">${escapeHtml(node.title)}</h2>
       <div class="node-detail-content">${escapeHtml(node.reasoning || '（未填写）')}</div>
       ${interaction}
@@ -273,17 +327,12 @@ export class NodeDetailController {
 
     if (role === 'current' && node.status === 'disputed') return;
 
-    const editButton = this.root.querySelector<HTMLButtonElement>('.node-detail-edit');
+    const primary = this.root.querySelector<HTMLElement>('.node-detail-primary-actions');
     const menu = this.root.querySelector<HTMLElement>('.node-detail-edit-menu');
-    editButton?.addEventListener('click', () => {
-      if (!menu) return;
-      menu.hidden = !menu.hidden;
-      editButton.setAttribute('aria-expanded', String(!menu.hidden));
-    });
-    for (const action of actions) {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.textContent = ACTION_LABEL[action];
+    const moreButton = this.root.querySelector<HTMLButtonElement>('.node-detail-more');
+    let secondaryCount = 0;
+
+    const bindAction = (button: HTMLButtonElement, action: NodeDetailAction) => {
       button.dataset.nodeDetailAction = action;
       button.addEventListener('click', () => {
         const id = this.currentId;
@@ -291,8 +340,36 @@ export class NodeDetailController {
         this.close();
         this.onAction(id, action);
       });
-      menu?.appendChild(button);
+    };
+
+    for (const action of actions) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      if (action === 'edit' || action === 'negate') {
+        button.className = `node-detail-primary-action ${action === 'edit' ? 'optimization' : 'opposition'}`;
+        button.innerHTML = `<strong>${ACTION_LABEL[action]}</strong><small>${PRIMARY_ACTION_HINT[action] ?? ''}</small>`;
+        bindAction(button, action);
+        primary?.appendChild(button);
+      } else {
+        button.textContent = ACTION_LABEL[action];
+        bindAction(button, action);
+        menu?.appendChild(button);
+        secondaryCount += 1;
+      }
     }
+
+    if (primary && primary.childElementCount === 0) primary.hidden = true;
+    if (!moreButton || !menu) return;
+    if (secondaryCount === 0) {
+      moreButton.hidden = true;
+      menu.hidden = true;
+      return;
+    }
+    moreButton.addEventListener('click', () => {
+      menu.hidden = !menu.hidden;
+      moreButton.setAttribute('aria-expanded', String(!menu.hidden));
+      moreButton.textContent = menu.hidden ? '更多操作' : '收起其他操作';
+    });
   }
 
   private bindReactivation(
@@ -338,7 +415,7 @@ export class NodeDetailController {
     const stake = snapshot ? displayEnergy(snapshot.stake) : '…';
     return `
       <div class="node-detail-revalidation node-detail-interaction">
-        <div class="node-detail-vote-title">重新验证 · ORIGINAL_DESIGN_V1</div>
+        <div class="node-detail-vote-title">重新验证这个旧版本</div>
         <div class="node-detail-vote-actions">
           <button type="button" class="node-detail-vote-button agree" data-revalidation-side="AGREE" disabled><span>同意</span><small>能量 −${stake}</small></button>
           <button type="button" class="node-detail-vote-button disagree" data-revalidation-side="DISAGREE" disabled><span>反对</span><small>能量 −${stake}</small></button>
@@ -451,11 +528,11 @@ export class NodeDetailController {
     const status = this.root.querySelector<HTMLElement>('.node-detail-vote-status');
     if (!status) return;
     const gate = snapshot.accuracyGate === undefined ? '' : ` · 准确率≥${snapshot.accuracyGate}%`;
-    const scope = snapshot.scope === 'LOCAL_10' ? 'LOCAL_10' : 'GLOBAL';
+    const scope = snapshot.scope === 'LOCAL_10' ? '附近知识' : '全部用户';
     const tally = `同意 ${snapshot.agreeCount}/${snapshot.requiredVotes} · 反对 ${snapshot.disagreeCount}/${snapshot.requiredVotes}`;
     if (!open) {
       const reason = snapshot.closeReason === 'TIMEOUT' ? '时间到期' : '达到票数';
-      status.textContent = `${snapshot.verdict === 'CORRECT' ? '旧知识重新成为当前' : '当前知识保持不变'} · ${reason} · ${tally}`;
+      status.textContent = `${snapshot.verdict === 'CORRECT' ? '旧版本重新成为当前版本' : '当前版本保持不变'} · ${reason} · ${tally}`;
       return;
     }
     if (this.root.dataset.revalidationInitiator === '1') {
@@ -577,7 +654,7 @@ export class NodeDetailController {
     const tally = `同意 ${snapshot.agreeCount}/${snapshot.requiredVotes} · 反对 ${snapshot.disagreeCount}/${snapshot.requiredVotes}`;
     if (!open) {
       const reason = snapshot.closeReason === 'TIMEOUT' ? '时间到期' : '达到票数';
-      status.textContent = `${snapshot.verdict === 'CORRECT' ? '已判定正确' : '已判定错误'} · ${reason} · ${tally}`;
+      status.textContent = `${snapshot.verdict === 'CORRECT' ? '验证通过' : '验证未通过'} · ${reason} · ${tally}`;
       return;
     }
     if (this.root.dataset.voteCreator === '1') {
