@@ -27,6 +27,15 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Verify cloud-only public state with two already-open real pages
         run: npm run test:browser-cloud
+      - name: Verify Knowledge Lineage product completion at 375px
+        run: npm run test:browser-lineage-product
+      - name: Upload Knowledge Lineage product visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lineage-product-visual
+          path: artifacts/lineage-product-*.png
+          if-no-files-found: error
       - run: npm run test:browser-mobile
       - name: Upload mobile scene visual evidence
         if: always()
