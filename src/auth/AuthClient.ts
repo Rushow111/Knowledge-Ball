@@ -158,6 +158,16 @@ export class KnowledgeBallAuthClient {
     return parsePendingKnowledgeVote(response, nodeId);
   }
 
+  async startSecondKnowledgeVerification(nodeId:string):Promise<PendingKnowledgeVoteSnapshot>{
+    const current=await this.publicSession();
+    return parsePendingKnowledgeVote(await this.restRequest('/rest/v1/rpc/start_second_knowledge_verification',current,{method:'POST',body:JSON.stringify({target_node_id:nodeId,operation_key:`second-verification:${nodeId}`})}),nodeId);
+  }
+
+  async ensureCascadeKnowledgeVerification(nodeId:string,sourceNodeId:string):Promise<PendingKnowledgeVoteSnapshot>{
+    const current=await this.publicSession();
+    return parsePendingKnowledgeVote(await this.restRequest('/rest/v1/rpc/start_cascade_knowledge_verification',current,{method:'POST',body:JSON.stringify({target_node_id:nodeId,source_node_id:sourceNodeId})}),nodeId);
+  }
+
   async settleExpiredPendingKnowledgeVotes(maxRounds = 50): Promise<number> {
     if (!Number.isSafeInteger(maxRounds) || maxRounds < 1 || maxRounds > 200) throw new Error('无效结算批量大小');
     const current = await this.publicSession();

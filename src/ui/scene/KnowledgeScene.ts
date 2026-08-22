@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { KnowledgeLayer } from '../../domain/KnowledgeLayerPolicy';
 import { isSystemCoreNodeId } from '../../domain/KnowledgeLayerPolicy';
+import { lineageColorRole, visibleInKnowledgeView, type KnowledgeLineageMeta, type KnowledgeViewMode } from '../../domain/KnowledgeLineage';
 import {
   CORE_AMBIENT_LIGHT_INTENSITY,
   CORE_LABEL_REVEAL_ZOOM,
@@ -60,6 +61,7 @@ export interface KnowledgeSceneNode {
   vel?: THREE.Vector3;
   homePos?: THREE.Vector3;
   layer?: KnowledgeLayer;
+  lineage?: KnowledgeLineageMeta;
 }
 
 export interface KnowledgeSceneCallbacks {
@@ -86,6 +88,7 @@ export interface KnowledgeSceneRuntime {
   setLabelBrightness: (n: number) => void;
   setNodeRadius: (n: number) => void;
   setHideUntouched: (enabled: boolean) => void;
+  setKnowledgeViewMode: (mode: KnowledgeViewMode) => void;
   setCascadeDepthLimit: (n: number | null) => void;
   getCameraZ: () => number;
   getVisibleEdgeCount: () => number;
@@ -129,7 +132,10 @@ export function layerForNode(node: Pick<KnowledgeSceneNode, 'id' | 'status' | 't
   return 'middle';
 }
 
-export function colorForNode(node: Pick<KnowledgeSceneNode, 'id' | 'status' | 'type' | 'effectiveLayer'>): number {
+export function colorForNode(node: Pick<KnowledgeSceneNode, 'id' | 'status' | 'type' | 'effectiveLayer' | 'lineage'>): number {
+  const role=lineageColorRole(node as KnowledgeSceneNode);
+  if(role==='history') return NODE_SPECIAL_COLOR.history;
+  if(role==='opposition') return NODE_SPECIAL_COLOR.opposition;
   if (node.status === 'falsified') return NODE_SPECIAL_COLOR.falsified;
   if (node.type === 'reasoning' || node.type === 'logic-symbol') return NODE_SPECIAL_COLOR.structural;
   return NODE_LAYER_COLOR[layerForNode(node)];
@@ -271,6 +277,7 @@ export function createKnowledgeScene({ host, labelsLayer, getNodes, callbacks }:
   let labelBrightness = 1;
   let nodeRadiusMM = 7.2;
   let hideUntouched = false;
+  let knowledgeViewMode:KnowledgeViewMode='current';
   let selectedId: string | null = null;
   let detailNodeId: string | null = null;
   let draggedNodeId: string | null = null;
@@ -573,7 +580,7 @@ export function createKnowledgeScene({ host, labelsLayer, getNodes, callbacks }:
     const byId = new Map(getNodes().map(node => [node.id, node] as const));
     for (const [id, record] of Object.entries(nodeMap)) {
       const node = byId.get(id);
-      const visible = Boolean(node && (!isCoreNodeId(id) || coreLabelsVisible(graphZoom)) && nodeVisibleInPersonalMode(node, hideUntouched));
+      const visible = Boolean(node && (!isCoreNodeId(id) || coreLabelsVisible(graphZoom)) && visibleInKnowledgeView(node as any,knowledgeViewMode));
       record.group.visible = visible;
       if (labelMap[id]) labelMap[id].style.display = visible && detailNodeId !== id ? '' : 'none';
     }
@@ -1001,10 +1008,9 @@ export function createKnowledgeScene({ host, labelsLayer, getNodes, callbacks }:
       largeGraphDirty = true;
     },
     setHideUntouched: enabled => {
-      hideUntouched = enabled;
-      applyVisibility();
-      largeGraphDirty = true;
+      hideUntouched=enabled; knowledgeViewMode=enabled?'personal':'current'; applyVisibility(); largeGraphDirty=true;
     },
+    setKnowledgeViewMode: mode=>{ knowledgeViewMode=mode; hideUntouched=mode==='personal'; applyVisibility(); largeGraphDirty=true; },
     setCascadeDepthLimit: () => {},
     getCameraZ: () => camera.position.z,
     getVisibleEdgeCount: () => Object.values(edgeMap).filter(edge => edge.visible).length,

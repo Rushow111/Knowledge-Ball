@@ -23,6 +23,8 @@ export const NODE_LAYER_COLOR = {
 export const NODE_SPECIAL_COLOR = {
   structural:KNOWLEDGE_SCENE_THEME.node.structural,
   falsified:KNOWLEDGE_SCENE_THEME.node.falsified,
+  history:0x7B8497,
+  opposition:0xE35D68,
 } as const;
 const toHex=(value:number)=>`#${value.toString(16).padStart(6,'0').toUpperCase()}`;
 export const NODE_LAYER_COLOR_HEX = {

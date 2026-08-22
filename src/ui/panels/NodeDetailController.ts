@@ -5,6 +5,7 @@ import {
   type PendingVoteSide,
 } from '../../auth/AuthClient';
 import type { KnowledgeNodeStatus, KnowledgeNodeType } from '../config/KnowledgeUiConfig';
+import { stableLineageRole, type KnowledgeLineageMeta } from '../../domain/KnowledgeLineage';
 
 export type NodeDetailAction = 'edit' | 'derive' | 'negate' | 'decompose' | 'merge' | 'resolve' | 'dispute';
 
@@ -13,7 +14,8 @@ export interface NodeDetailNode {
   title: string;
   type: KnowledgeNodeType;
   status: KnowledgeNodeStatus;
-  reasoning: string;
+  reasoning:string;
+  lineage?:KnowledgeLineageMeta;
 }
 
 export interface NodeDetailMetadata {
@@ -22,10 +24,16 @@ export interface NodeDetailMetadata {
   actorId: string;
 }
 
+export interface NodeDetailRelationItem{id:string;title:string}
+export interface NodeDetailRelations{premises:NodeDetailRelationItem[];conclusions:NodeDetailRelationItem[];history:NodeDetailRelationItem[];opposition:NodeDetailRelationItem[]}
+
 export interface NodeDetailControllerOptions {
   getNodeById: (id: string) => NodeDetailNode | null;
   getMetadata: (id: string) => NodeDetailMetadata | null;
-  getScreenPosition: (id: string) => { x: number; y: number } | null;
+  getScreenPosition:(id:string)=>{x:number;y:number}|null;
+  getRelations:(id:string)=>NodeDetailRelations;
+  onNavigate:(id:string)=>void;
+  onRevalidate:(id:string)=>Promise<void>;
   getActions: (id: string) => NodeDetailAction[];
   onAction: (id: string, action: NodeDetailAction) => void;
   onDetailNodeChange: (id: string | null) => void;
@@ -79,7 +87,10 @@ export class NodeDetailController {
   private readonly getNodeById: NodeDetailControllerOptions['getNodeById'];
   private readonly getMetadata: NodeDetailControllerOptions['getMetadata'];
   private readonly getScreenPosition: NodeDetailControllerOptions['getScreenPosition'];
-  private readonly getActions: NodeDetailControllerOptions['getActions'];
+  private readonly getActions:NodeDetailControllerOptions['getActions'];
+  private readonly getRelations:NodeDetailControllerOptions['getRelations'];
+  private readonly onNavigate:NodeDetailControllerOptions['onNavigate'];
+  private readonly onRevalidate:NodeDetailControllerOptions['onRevalidate'];
   private readonly onAction: NodeDetailControllerOptions['onAction'];
   private readonly onDetailNodeChange: NodeDetailControllerOptions['onDetailNodeChange'];
   private readonly onClose?: NodeDetailControllerOptions['onClose'];
@@ -93,7 +104,7 @@ export class NodeDetailController {
     this.getNodeById = options.getNodeById;
     this.getMetadata = options.getMetadata;
     this.getScreenPosition = options.getScreenPosition;
-    this.getActions = options.getActions;
+    this.getActions=options.getActions; this.getRelations=options.getRelations; this.onNavigate=options.onNavigate; this.onRevalidate=options.onRevalidate;
     this.onAction = options.onAction;
     this.onDetailNodeChange = options.onDetailNodeChange;
     this.onClose = options.onClose;
@@ -163,8 +174,13 @@ export class NodeDetailController {
     const contributor = metadata?.contributor || '—';
     const time = formatNodeContributionTime(metadata?.createdAt);
     const actions = this.getActions(node.id);
-    const account = node.status === 'pending' ? currentVoteAccount() : null;
-    const interaction = node.status === 'pending'
+    const historical=stableLineageRole(node as any);
+    const account=node.status==='pending'?currentVoteAccount():null;
+    const interaction=historical?`
+      <div class="node-detail-vote node-detail-revalidate"><div class="node-detail-vote-title">投票</div><div class="node-detail-vote-actions">
+      <button type="button" class="node-detail-vote-button agree" data-revalidate><span>同意</span><small>能量 −10</small></button>
+      <button type="button" class="node-detail-vote-button disagree" disabled><span>反对</span><small>能量 −10</small></button></div>
+      <div class="node-detail-vote-status">同意会让该知识点激活到待验证状态</div></div>`:node.status === 'pending'
       ? `
         <div class="node-detail-vote">
           <div class="node-detail-vote-title">投票</div>
@@ -180,21 +196,24 @@ export class NodeDetailController {
         <div class="node-detail-edit-menu" hidden></div>
       `;
 
-    this.root.dataset.nodeId = node.id;
+    const relations=this.getRelations(node.id);
+    const relationHtml=(items:NodeDetailRelationItem[],where:string)=>items.length?`<div class="node-detail-relations ${where}">${items.map(item=>`<button type="button" data-related-node="${escapeHtml(item.id)}">${escapeHtml(item.title)}</button>`).join('')}</div>`:'';
+    this.root.dataset.nodeId=node.id;
     delete this.root.dataset.voteCreator;
     this.root.innerHTML = `
       <button type="button" class="node-detail-close" aria-label="关闭知识节点详情">×</button>
       <h2 class="node-detail-title">${escapeHtml(node.title)}</h2>
       <div class="node-detail-content">${escapeHtml(node.reasoning || '（未填写）')}</div>
       ${interaction}
-      <div class="node-detail-meta">
-        <span>贡献者 · <b>${escapeHtml(contributor)}</b></span>
-        <span>时间 · <b>${escapeHtml(time)}</b></span>
-      </div>
+      <div class="node-detail-meta"><span>贡献者 · <b>${escapeHtml(contributor)}</b></span><span>时间 · <b>${escapeHtml(time)}</b></span></div>
+      ${relationHtml(relations.premises,'left')}${relationHtml(relations.history,'top')}${relationHtml(relations.conclusions,'right')}${relationHtml(relations.opposition,'bottom')}
     `;
 
-    this.root.querySelector<HTMLButtonElement>('.node-detail-close')?.addEventListener('click', () => this.close());
+    this.root.querySelector<HTMLButtonElement>('.node-detail-close')?.addEventListener('click',()=>this.close());
+    this.root.querySelectorAll<HTMLButtonElement>('[data-related-node]').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.relatedNode;if(id)this.onNavigate(id);}));
+    this.root.querySelector<HTMLButtonElement>('[data-revalidate]')?.addEventListener('click',()=>this.openRevalidationConfirm(node.id));
 
+    if(historical)return;
     if (node.status === 'pending') {
       void this.bindPendingVote(node.id, token, account, metadata?.actorId);
       return;
@@ -221,6 +240,15 @@ export class NodeDetailController {
       menu?.appendChild(button);
     }
   }
+
+
+private openRevalidationConfirm(nodeId:string):void{
+  const modal=document.createElement('div');modal.className='node-detail-confirm';
+  modal.innerHTML='<div class="node-detail-confirm-card"><p>请确认该知识点为当前最优</p><div><button type="button" data-cancel>取消</button><button type="button" data-confirm>确认</button></div></div>';
+  this.root.appendChild(modal);
+  modal.querySelector<HTMLButtonElement>('[data-cancel]')?.addEventListener('click',()=>modal.remove());
+  modal.querySelector<HTMLButtonElement>('[data-confirm]')?.addEventListener('click',async()=>{const button=modal.querySelector<HTMLButtonElement>('[data-confirm]');if(button)button.disabled=true;try{await this.onRevalidate(nodeId);modal.remove();this.refresh(nodeId);}catch(error){const status=this.root.querySelector<HTMLElement>('.node-detail-vote-status');if(status)status.textContent=error instanceof Error?`重新验证失败：${error.message}`:'重新验证失败';modal.remove();}});
+}
 
   private async bindPendingVote(
     nodeId: string,

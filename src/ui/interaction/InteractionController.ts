@@ -1,5 +1,6 @@
 import { STATUS_LABEL, TYPE_LABEL, type KnowledgeMastery, type KnowledgeNodeStatus, type KnowledgeNodeType } from '../config/KnowledgeUiConfig';
 import type { KnowledgeSceneRuntime } from '../scene/KnowledgeScene';
+import type { KnowledgeViewMode } from '../../domain/KnowledgeLineage';
 
 export interface InteractionNodeSummary {
   id: string;
@@ -54,6 +55,7 @@ export class InteractionController {
   private readonly onOpenSettings?: () => void;
 
   private hideUntouched = false;
+  private knowledgeViewMode:KnowledgeViewMode='current';
   private unbinders: Unbind[] = [];
 
   constructor(options: InteractionControllerOptions) {
@@ -80,7 +82,8 @@ export class InteractionController {
 
   setHideUntouched(enabled: boolean): void {
     this.hideUntouched = enabled;
-    this.scene.setHideUntouched(enabled);
+    this.knowledgeViewMode=enabled?'personal':'current';
+    this.scene.setKnowledgeViewMode(this.knowledgeViewMode);
     if (this.personalButton) {
       this.personalButton.classList.toggle('active', enabled);
     }
@@ -140,7 +143,14 @@ export class InteractionController {
     this.unbinders.push(() => document.removeEventListener('click', onDocClick));
 
     if (this.personalButton) {
-      const onPersonalClick = () => this.setHideUntouched(!this.hideUntouched);
+      const onPersonalClick=()=>{
+        this.knowledgeViewMode=this.knowledgeViewMode==='current'?'personal':this.knowledgeViewMode==='personal'?'lineage':'current';
+        this.hideUntouched=this.knowledgeViewMode==='personal';
+        this.scene.setKnowledgeViewMode(this.knowledgeViewMode);
+        this.personalButton!.dataset.viewMode=this.knowledgeViewMode;
+        this.personalButton!.classList.toggle('active',this.knowledgeViewMode!=='current');
+        this.personalButton!.title=this.knowledgeViewMode==='current'?'当前知识':this.knowledgeViewMode==='personal'?'个人知识':'包含历史与否定';
+      };
       this.personalButton.addEventListener('click', onPersonalClick);
       this.unbinders.push(() => this.personalButton?.removeEventListener('click', onPersonalClick));
     }

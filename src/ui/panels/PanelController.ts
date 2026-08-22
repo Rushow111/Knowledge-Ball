@@ -46,14 +46,7 @@ export interface CreateNodePayload {
   author?: string;
 }
 
-export interface NegateNodePayload {
-  counterexampleIds: string[];
-  correctedReasoning?: {
-    title: string;
-    reasoning: string;
-    logicRuleId: string;
-  };
-}
+export interface NegateNodePayload { title:string; layer:UserKnowledgeLayer; reasoning:string; }
 
 export interface DecomposeNodePayload {
   conclusionId: string;
@@ -75,12 +68,7 @@ export interface MergeTheoryPayload {
   mergedConclusion: { title: string; type: KnowledgeNodeType; description: string };
 }
 
-export interface EditNodePayload {
-  title: string;
-  type: KnowledgeNodeType;
-  reasoning: string;
-  premises?: string[];
-}
+export interface EditNodePayload { title:string; layer:UserKnowledgeLayer; reasoning:string; }
 
 export interface PanelControllerCallbacks {
   getNodes: () => PanelNodeSummary[];
@@ -228,7 +216,9 @@ export class PanelController {
 
   private selectedId: string | null = null;
   private editMode = false;
-  private prefillPremise: string | null = null;
+  private prefillPremise:string|null=null;
+  private proposalMode:'optimization'|'opposition'|null=null;
+  private proposalTarget:string|null=null;
   private toastTimer: number | null = null;
 
   constructor(options: PanelControllerCallbacks & PanelControllerElements) {
@@ -474,6 +464,7 @@ export class PanelController {
   }
 
   openCreateModal(prefillPremiseId: string | null = null): void {
+    this.proposalMode=null; this.proposalTarget=null;
     this.prefillPremise = prefillPremiseId;
     this.editMode = false;
     this.modalTitle.textContent = prefillPremiseId ? '基于现有知识提交新节点' : '提交新知识节点';
@@ -608,6 +599,15 @@ export class PanelController {
         return;
       }
       const layer = layerValue;
+      if(this.proposalMode&&this.proposalTarget){
+        const title=this.fTitle.value.trim(), reasoning=this.fDescription.value.trim();
+        if(!title||!reasoning){this.showToast('名称和内容不能为空');return;}
+        try{this.modalSubmit.disabled=true;
+if(this.proposalMode==='optimization') await this.onEditNode(this.proposalTarget,{title,layer,reasoning});
+else await this.onNegateNode(this.proposalTarget,{title,layer,reasoning});
+this.closeCreateModal(); this.showToast(this.proposalMode==='optimization'?'优化候选已提交，等待验证':'否定候选已提交，等待验证');
+        }catch(error){this.showOperationError(error);}finally{this.modalSubmit.disabled=false;} return;
+      }
       const premises = Array.from(this.fPremises.querySelectorAll<HTMLInputElement>('input[type="checkbox"]:checked'))
         .map(el => el.value);
       const logicRuleId = this.fLogicRule.value;
@@ -661,6 +661,8 @@ export class PanelController {
     const resolveBtn = this.panelActions.querySelector<HTMLButtonElement>('#btnResolve');
     const disputeBtn = this.panelActions.querySelector<HTMLButtonElement>('#btnDispute');
 
+    editBtn?.addEventListener('click',()=>this.openProposalModal(id,'optimization'));
+    /* legacy in-place editor retained for historical reference only
     editBtn?.addEventListener('click', () => {
       const node = this.getNodeById(id);
       if (!node) return;
@@ -718,14 +720,11 @@ export class PanelController {
         }
       });
 
-      this.panelActions.querySelector<HTMLButtonElement>('#cancelEdit')?.addEventListener('click', () => {
-        this.editMode = false;
-        this.openNodePanel(id);
-      });
-    });
+      this.panelActions.querySelector<HTMLButtonElement>('#cancelEdit')?.addEventListener('click', () => { this.editMode=false; this.openNodePanel(id); });
+    }); */
 
     deriveBtn?.addEventListener('click', () => this.openCreateModal(id));
-    negateBtn?.addEventListener('click', () => this.openNegateForm(id));
+    negateBtn?.addEventListener('click',()=>this.openProposalModal(id,'opposition'));
     decomposeBtn?.addEventListener('click', () => this.openDecomposeForm(id));
     mergeBtn?.addEventListener('click', () => this.openMergeForm(id));
     resolveBtn?.addEventListener('click', async () => {
@@ -823,6 +822,20 @@ export class PanelController {
     console.error('[Knowledge-Ball] knowledge edit failed:', error);
     this.showToast(error instanceof Error ? `操作失败：${error.message}` : '操作失败');
   }
+
+
+private openProposalModal(id:string,mode:'optimization'|'opposition'):void {
+  const node=this.getNodeById(id); if(!node)return;
+  this.closeNodePanel(); this.prefillPremise=null; this.proposalMode=mode; this.proposalTarget=id;
+  this.modalTitle.textContent=mode==='optimization'?`优化：${node.title}`:`否定：${node.title}`;
+  this.modalHint.style.display='block';
+  this.modalHint.textContent=mode==='optimization'?'每次优化都会生成新的知识球；成功后旧版本进入灰色历史链。':'每次否定都会生成新的红色知识球；成功后按当前/历史/否定链重新定位。';
+  this.fTitle.value=mode==='optimization'?node.title:'';
+  this.fType.value=(node.declaredLayer==='inner'||node.declaredLayer==='middle'||node.declaredLayer==='outer')?node.declaredLayer:'inner';
+  this.fDescription.value=mode==='optimization'?node.reasoning:'';
+  this.fReasoningField.hidden=true; this.fPremisesField.hidden=true; this.fLogicRuleField.hidden=true;
+  this.modalSubmit.disabled=false; this.onOverlayVisibilityChange?.(true); this.modalOverlay.classList.add('show');
+}
 
   private openNegateForm(id: string): void {
     const node = this.getNodeById(id);

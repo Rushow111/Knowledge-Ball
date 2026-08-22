@@ -4,6 +4,7 @@ import type { GraphState } from '../state/GraphState';
 import { emptyGraphState, nodeList } from '../state/GraphState';
 import type { Projection } from './Projection';
 import { cascadeReachable } from '../graph/Graph';
+import { activateOptimization, activateOpposition, downstreamClosure, reactivateLineageNode, rewirePremise } from '../domain/KnowledgeLineage';
 import {
   applyKnowledgeEdit,
   type KnowledgeEdit,
@@ -70,9 +71,10 @@ export class GraphProjection implements Projection<GraphState> {
           declaredLayer: declaredLayers?.[draft.id],
           hidden: false,
           logicRuleId: draft.logicRuleId,
+          lineage: draft.lineage ? structuredClone(draft.lineage) : undefined,
         };
       };
-      if (edit.mode === 'atomic') append(edit.node, []);
+      if (edit.mode === 'atomic') append(edit.node, edit.node.premises ?? []);
       else {
         append(edit.reasoning, edit.requiredPremiseIds);
         append(edit.conclusion, [edit.reasoning.id]);
@@ -94,6 +96,7 @@ export class GraphProjection implements Projection<GraphState> {
       logicRuleId: node.logicRuleId,
       negatedBy: node.negatedBy ? [...node.negatedBy] : undefined,
       semanticKey: node.semanticKey,
+      lineage: node.lineage ? structuredClone(node.lineage) : undefined,
     }));
     const result = applyKnowledgeEdit(protocolNodes, edit);
     if (result.errors.length) {
@@ -156,15 +159,41 @@ export class GraphProjection implements Projection<GraphState> {
       case 'NodeResolved': { const n = this.state.nodesById[event.payload.nodeId]; if (n && n.status !== 'falsified') n.status = 'verified'; break; }
       case 'NodeDisputed': { const n = this.state.nodesById[event.payload.nodeId]; if (n) n.status = 'disputed'; break; }
       case 'KnowledgeStatusChanged': { const n = this.state.nodesById[event.payload.edit.nodeId]; if (n && n.status !== 'falsified') n.status = event.payload.edit.status; break; }
+      case 'KnowledgeRevalidationStarted': {
+        const n=this.state.nodesById[event.payload.nodeId];
+        if(!n) break;
+        n.status='pending'; n.hidden=false;
+        n.lineage={...(n.lineage??{topicId:n.id,proposal:'new',role:'current',rank:0}),revalidation:event.payload.kind};
+        break;
+      }
       case 'KnowledgeVerdictFinalized': {
-        const n = this.state.nodesById[event.payload.nodeId];
-        if (!n) break;
-        if (event.payload.verdict === 'CORRECT') {
-          n.status = 'verified';
-          n.hidden = false;
+        const n=this.state.nodesById[event.payload.nodeId];
+        if(!n) break;
+        const nodes=nodeList(this.state);
+        const revalidation=n.lineage?.revalidation;
+        if(event.payload.verdict==='CORRECT'){
+n.status='verified'; n.hidden=false;
+let previous:string|null=null;
+if(revalidation==='challenge') previous=reactivateLineageNode(nodes,n.id);
+else if(n.lineage?.role==='candidate-history') previous=activateOptimization(nodes,n.id);
+else if(n.lineage?.role==='candidate-opposition') previous=activateOpposition(nodes,n.id);
+if(previous){
+  rewirePremise(nodes,previous,n.id);
+  for(const id of downstreamClosure(nodes,[n.id])){
+    const dependent=this.state.nodesById[id];
+    if(!dependent||dependent.id===n.id||dependent.status==='falsified') continue;
+    dependent.status='pending'; dependent.hidden=false;
+    dependent.lineage={...(dependent.lineage??{topicId:dependent.id,proposal:'new',role:'current',rank:0}),revalidation:'cascade'};
+  }
+}
+if(n.lineage) n.lineage.revalidation=undefined;
+        } else if(revalidation==='challenge'||revalidation==='cascade'){
+// A failed revalidation leaves the previously-active lineage role intact.
+n.status='verified'; n.hidden=false;
+if(n.lineage) n.lineage.revalidation=undefined;
         } else {
-          n.status = 'falsified';
-          n.hidden = true;
+n.status='falsified'; n.hidden=true;
+if(n.lineage) n.lineage.role='rejected';
         }
         break;
       }

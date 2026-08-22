@@ -2,6 +2,7 @@ import { Capacitor } from '@capacitor/core';
 import { EventStore } from '../event/EventStore';
 import { validateDomainEventAgainstState } from '../event/EventValidation';
 import { GraphProjection, setCascadeDepthLimit } from '../projection/GraphProjection';
+import { directConclusions, lineageMembers, stableLineageRole, topicIdFor } from '../domain/KnowledgeLineage';
 import { nodeList } from '../state/GraphState';
 import type { GraphNode } from '../graph/Node';
 import {
@@ -10,7 +11,6 @@ import {
   type UserKnowledgeLayer,
 } from '../domain/KnowledgeLayerPolicy';
 
-import { editNode as cmdEditNode } from '../command/EditNode';
 import { resolveNode as cmdResolveNode } from '../command/ResolveNode';
 import { setMastery as cmdSetMastery } from '../command/SetMastery';
 import { disputeNode as cmdDisputeNode } from '../command/DisputeNode';
@@ -142,6 +142,7 @@ function renderNodeFromDomain(dn: GraphNode): KnowledgeSceneNode {
       logicRuleId: dn.logicRuleId,
       aliases: dn.aliases,
       semanticKey: dn.semanticKey,
+      lineage: dn.lineage ? structuredClone(dn.lineage) : undefined,
       ...meta,
   };
 }
@@ -210,7 +211,16 @@ function getNodeDetailById(id: string): NodeDetailNode | null {
     type: node.type,
     status: node.status,
     reasoning: node.reasoning,
+    lineage: node.lineage,
   } : null;
+}
+
+
+function getNodeDetailRelations(id:string){
+  const node=projection.state.nodesById[id]; if(!node)return {premises:[],conclusions:[],history:[],opposition:[]};
+  const all=nodeList(projection.state), item=(n:GraphNode)=>({id:n.id,title:n.title});
+  const lineage=lineageMembers(all,id);
+  return {premises:node.premises.map(pid=>projection.state.nodesById[pid]).filter((n):n is GraphNode=>Boolean(n&&!n.hidden)).map(item),conclusions:directConclusions(all,id).map(item),history:lineage.history.map(item),opposition:lineage.opposition.map(item)};
 }
 
 function reasoningParentForDetail(node: KnowledgeSceneNode): KnowledgeSceneNode | null {
@@ -374,50 +384,25 @@ async function applyKnowledgeEdit(
   await executeKnowledgeEdit(store, projection, edit, commitPublicEvent, declaredLayers);
 }
 
-async function editKnowledgeNode(id: string, payload: EditNodePayload): Promise<void> {
-  const current = projection.state.nodesById[id];
-  if (!current) throw new Error('编辑目标不存在');
-  if (payload.type !== current.type) throw new Error('结构类型不能直接更改；请通过增加、分解或合并建立新结构');
-  const title = canonicalKnowledgeText(payload.title);
-  const description = canonicalKnowledgeText(payload.reasoning);
-  const duplicateTitle = nodeList(projection.state).find(node => node.id !== id && canonicalKnowledgeText(node.title) === title);
-  const duplicateDescription = nodeList(projection.state).find(node => node.id !== id && canonicalKnowledgeText(node.reasoning) === description);
-  if (duplicateTitle) throw new Error(`节点标题已被“${duplicateTitle.title}”占用，包括隐藏历史节点`);
-  if (duplicateDescription) throw new Error(`节点描述已被“${duplicateDescription.title}”占用，包括隐藏历史节点`);
-  const premises = payload.premises ? [...new Set(payload.premises)] : [...current.premises];
-  if (premises.includes(id)) throw new Error('知识节点不能把自己作为前提');
-  for (const premiseId of premises) {
-    if (!projection.state.nodesById[premiseId]) throw new Error(`前提不存在: ${premiseId}`);
-  }
-  await cmdEditNode(store, {
-    nodeId: id,
-    title: payload.title,
-    nodeType: payload.type,
-    reasoning: payload.reasoning,
-    premises,
-  }, commitPublicEvent);
+
+async function editKnowledgeNode(id:string,payload:EditNodePayload):Promise<void>{
+  const current=projection.state.nodesById[id]; if(!current)throw new Error('优化目标不存在');
+  const candidateId=generateNodeId();
+  const edit:AddEdit={kind:'add',mode:'atomic',node:{
+    id:candidateId,title:payload.title,type:internalAtomicTypeForLayer(payload.layer),reasoning:payload.reasoning,
+    premises:[...current.premises],lineage:{topicId:topicIdFor(current),proposal:'optimization',targetId:id,role:'candidate-history',rank:1},
+  }};
+  await applyKnowledgeEdit(edit,{[candidateId]:payload.layer}); currentPanelId=null;
 }
 
-async function negateKnowledgeNode(id: string, payload: NegateNodePayload): Promise<void> {
-  const target = projection.state.nodesById[id];
-  if (!target) throw new Error('否定目标不存在');
-  const edit: NegateEdit = {
-    kind: 'negate',
-    target: target.type === 'reasoning' ? 'reasoning' : 'conclusion',
-    targetId: id,
-    counterexampleIds: payload.counterexampleIds,
-    correctedReasoning: payload.correctedReasoning
-      ? {
-          id: generateNodeId(),
-          title: payload.correctedReasoning.title,
-          type: 'reasoning',
-          reasoning: payload.correctedReasoning.reasoning,
-          logicRuleId: payload.correctedReasoning.logicRuleId,
-        }
-      : undefined,
-  };
-  await applyKnowledgeEdit(edit);
-  currentPanelId = null;
+async function negateKnowledgeNode(id:string,payload:NegateNodePayload):Promise<void>{
+  const current=projection.state.nodesById[id]; if(!current)throw new Error('否定目标不存在');
+  const candidateId=generateNodeId();
+  const edit:AddEdit={kind:'add',mode:'atomic',node:{
+    id:candidateId,title:payload.title,type:internalAtomicTypeForLayer(payload.layer),reasoning:payload.reasoning,
+    lineage:{topicId:topicIdFor(current),proposal:'opposition',targetId:id,role:'candidate-opposition',rank:1},
+  }};
+  await applyKnowledgeEdit(edit,{[candidateId]:payload.layer}); currentPanelId=null;
 }
 
 async function decomposeKnowledgeNode(id: string, payload: DecomposeNodePayload): Promise<void> {
@@ -611,7 +596,10 @@ if (!Capacitor.isNativePlatform()) {
       const metadata = productionSyncAdapter?.nodeMetadata(id);
       return metadata ? { contributor: metadata.contributor, createdAt: metadata.createdAt, actorId: metadata.actorId } : null;
     },
-    getScreenPosition: id => scene.screenPositionForNode(id),
+    getScreenPosition:id=>scene.screenPositionForNode(id),
+    getRelations:getNodeDetailRelations,
+    onNavigate:id=>{nodeDetail?.close();scene.focusNode(id);openNode(id);},
+    onRevalidate:async id=>{if(!nodeViewAuthClient)throw new Error('共享服务未配置');await nodeViewAuthClient.startSecondKnowledgeVerification(id);await syncEngine?.sync();},
     getActions: getNodeDetailActions,
     onAction: launchLegacyPanelAction,
     onDetailNodeChange: id => scene.setDetailNode(id),
@@ -640,6 +628,10 @@ interaction = new InteractionController({
 store.subscribe((event) => {
   performance.mark?.('knowledge-subscriber-start');
   projection.apply(event);
+  if(event.type==='KnowledgeVerdictFinalized'&&nodeViewAuthClient){
+    const cascade=nodeList(projection.state).filter(n=>n.status==='pending'&&n.lineage?.revalidation==='cascade');
+    for(const node of cascade) void nodeViewAuthClient.ensureCascadeKnowledgeVerification(node.id,event.payload.nodeId).catch(error=>console.warn('[Knowledge-Ball] cascade verification deferred:',error));
+  }
   // Layer occupancy is global: every event can alter layer membership or visibility,
   // so rebuild the complete slot assignment from the authoritative projection.
   syncNodesFromProjection();

@@ -1,4 +1,5 @@
 import type { NodeStatus, NodeType } from '../event/Event';
+import type { KnowledgeLineageMeta } from '../domain/KnowledgeLineage';
 
 /**
  * Canonical protocol representation used by command validation and deterministic
@@ -18,6 +19,7 @@ export interface ProtocolNode {
   logicRuleId?: string;
   negatedBy?: string[];
   semanticKey?: string;
+  lineage?: KnowledgeLineageMeta;
 }
 
 export interface ReasoningChain {
@@ -34,6 +36,8 @@ export interface NewProtocolNode {
   reasoning: string;
   /** Every new reasoning process must classify itself with an existing logic-symbol node. */
   logicRuleId?: string;
+  premises?: string[];
+  lineage?: KnowledgeLineageMeta;
 }
 
 export interface NegateEdit {
@@ -137,10 +141,11 @@ function nodeFromDraft(draft: NewProtocolNode, premises: string[]): ProtocolNode
     status: 'pending',
     hidden: false,
     logicRuleId: draft.logicRuleId,
+    lineage: draft.lineage ? structuredClone(draft.lineage) : undefined,
   };
 }
 
-function validateDraftBatch(nodes: ProtocolNode[], drafts: NewProtocolNode[]): string[] {
+function validateDraftBatch(nodes: ProtocolNode[], drafts: NewProtocolNode[], sameTitleTargetId?: string): string[] {
   const errors: string[] = [];
   const byId = indexNodes(nodes);
   const usedIds = new Set(byId.keys());
@@ -162,7 +167,9 @@ function validateDraftBatch(nodes: ProtocolNode[], drafts: NewProtocolNode[]): s
 
     if (!title) errors.push(`节点 ${id || '(unknown)'} 必须有标题`);
     else if (usedTitles.has(title)) {
-      errors.push(`节点标题与现有或本次操作中的节点重复: ${draft.title.trim()}`);
+      const target=sameTitleTargetId?byId.get(sameTitleTargetId):undefined;
+      const allowed=Boolean(target&&canonicalKnowledgeText(target.title)===title&&draft.lineage?.proposal==='optimization'&&draft.lineage.targetId===target.id);
+      if(!allowed) errors.push(`节点标题与现有或本次操作中的节点重复: ${draft.title.trim()}`);
     } else {
       usedTitles.set(title, id);
     }
@@ -244,7 +251,12 @@ export function validateKnowledgeEdit(nodes: ProtocolNode[], edit: KnowledgeEdit
       if (!ATOMIC_TYPES.has(edit.node.type)) {
         errors.push('公理、定义、事实和逻辑符号可以独立增加；其他结论必须提交完整推理链');
       }
-      errors.push(...validateDraftBatch(nodes, [edit.node]));
+      errors.push(...validateDraftBatch(nodes,[edit.node],edit.node.lineage?.proposal==='optimization'?edit.node.lineage.targetId:undefined));
+      for(const premiseId of edit.node.premises??[]){
+        const premise=byId.get(premiseId);
+        if(!premise) errors.push(`前提不存在: ${premiseId}`);
+        else if(!active(premise)) errors.push(`前提当前不可用: ${premiseId}`);
+      }
     } else {
       if (edit.requiredPremiseIds.length === 0) errors.push('增加理论必须标记至少一个已有知识前提');
       if (unique(edit.requiredPremiseIds).length !== edit.requiredPremiseIds.length) errors.push('所需前提不能重复');
@@ -411,7 +423,7 @@ export function applyKnowledgeEdit(nodes: ProtocolNode[], edit: KnowledgeEdit): 
 
   if (edit.kind === 'add') {
     if (edit.mode === 'atomic') {
-      append(nodeFromDraft(edit.node, []));
+      append(nodeFromDraft(edit.node, edit.node.premises ?? []));
     } else {
       append(nodeFromDraft(edit.reasoning, edit.requiredPremiseIds));
       append(nodeFromDraft(edit.conclusion, [edit.reasoning.id]));

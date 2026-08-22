@@ -51,6 +51,9 @@ export type KnowledgeStatusChangedEvent = EventEnvelope<'KnowledgeStatusChanged'
 export type KnowledgeNodeEditedEvent = EventEnvelope<'KnowledgeNodeEdited', {
   edit: { kind: 'update'; nodeId: string; title?: string; nodeType?: NodeType; reasoning?: string; premises?: string[] };
 }>;
+export type KnowledgeRevalidationStartedEvent = EventEnvelope<'KnowledgeRevalidationStarted', {
+  roundId:string; nodeId:string; kind:'challenge'|'cascade'; stage:number; stake:string; policyVersion:KnowledgeVerdictPolicyVersion;
+}>;
 export type KnowledgeVerdictFinalizedEvent = EventEnvelope<'KnowledgeVerdictFinalized', {
   roundId: string;
   nodeId: string;
@@ -62,14 +65,14 @@ export type KnowledgeVerdictFinalizedEvent = EventEnvelope<'KnowledgeVerdictFina
   policyVersion: KnowledgeVerdictPolicyVersion;
 }>;
 
-export type PublicKnowledgeEvent = NodeCreatedEvent | NodeEditedEvent | NodeFalsifiedEvent | NodeSuspendedEvent | NodeResolvedEvent | NodeDisputedEvent | KnowledgeAddedEvent | KnowledgeNegatedEvent | KnowledgeDecomposedEvent | KnowledgeMergedEvent | KnowledgeStatusChangedEvent | KnowledgeNodeEditedEvent | KnowledgeVerdictFinalizedEvent;
+export type PublicKnowledgeEvent = NodeCreatedEvent | NodeEditedEvent | NodeFalsifiedEvent | NodeSuspendedEvent | NodeResolvedEvent | NodeDisputedEvent | KnowledgeAddedEvent | KnowledgeNegatedEvent | KnowledgeDecomposedEvent | KnowledgeMergedEvent | KnowledgeStatusChangedEvent | KnowledgeNodeEditedEvent | KnowledgeRevalidationStartedEvent | KnowledgeVerdictFinalizedEvent;
 export type PersonalKnowledgeEvent = NodeMasterySetEvent;
 
 export type DomainEvent =
   | NodeCreatedEvent | NodeEditedEvent | NodeFalsifiedEvent | NodeSuspendedEvent
   | NodeResolvedEvent | NodeMasterySetEvent | NodeDisputedEvent
   | KnowledgeAddedEvent | KnowledgeNegatedEvent | KnowledgeDecomposedEvent | KnowledgeMergedEvent
-  | KnowledgeStatusChangedEvent | KnowledgeNodeEditedEvent | KnowledgeVerdictFinalizedEvent;
+  | KnowledgeStatusChangedEvent | KnowledgeNodeEditedEvent | KnowledgeRevalidationStartedEvent | KnowledgeVerdictFinalizedEvent;
 
 export const CURRENT_SCHEMA_VERSION = 1;
 

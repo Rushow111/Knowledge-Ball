@@ -1,5 +1,6 @@
 import type { NodeType, NodeStatus, Mastery } from '../event/Event';
 import type { UserKnowledgeLayer } from '../domain/KnowledgeLayerPolicy';
+import type { KnowledgeLineageMeta } from '../domain/KnowledgeLineage';
 
 export interface GraphNode {
   id: string;
@@ -17,4 +18,5 @@ export interface GraphNode {
   logicRuleId?: string;
   negatedBy?: string[];
   semanticKey?: string;
+  lineage?: KnowledgeLineageMeta;
 }
