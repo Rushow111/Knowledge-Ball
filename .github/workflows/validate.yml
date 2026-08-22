@@ -30,6 +30,7 @@ jobs:
           end = text.index('      - name: Commit complete draft', start)
           lines = text[start:end].splitlines()
           source = '\n'.join(line[10:] if line.startswith('          ') else line for line in lines)
+          source = source.replace("rep('src/projection/GraphProjection.ts',old,new)", "p=Path('src/projection/GraphProjection.ts'); s=p.read_text(); a=s.index(\"      case 'KnowledgeVerdictFinalized': {\"); b=s.index(\"      case 'KnowledgeNodeEdited':\",a); p.write_text(s[:a]+new+'\\n'+s[b:])")
           exec(compile(source, 'lineage-v3-stage.py', 'exec'), {})
       - name: Commit complete draft
         run: |
