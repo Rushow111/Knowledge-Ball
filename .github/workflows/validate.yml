@@ -31,6 +31,18 @@ jobs:
           lines = text[start:end].splitlines()
           source = '\n'.join(line[10:] if line.startswith('          ') else line for line in lines)
           source = source.replace("rep('src/projection/GraphProjection.ts',old,new)", "p=Path('src/projection/GraphProjection.ts'); s=p.read_text(); a=s.index(\"      case 'KnowledgeVerdictFinalized': {\"); b=s.index(\"      case 'KnowledgeNodeEdited':\",a); p.write_text(s[:a]+new+'\\n'+s[b:])")
+          old_form = """      const layer = isUserKnowledgeLayer(this.fType.value) ? this.fType.value : null;
+      if (!layer) {
+        this.showToast('请选择知识层级');
+        return;
+      }"""
+          current_form = """      const layerValue = this.fType.value;
+      if (!isUserKnowledgeLayer(layerValue)) {
+        this.showToast('请选择三个知识层级之一。');
+        return;
+      }
+      const layer = layerValue;"""
+          source = source.replace(old_form, current_form)
           exec(compile(source, 'lineage-v3-stage.py', 'exec'), {})
       - name: Commit complete draft
         run: |
