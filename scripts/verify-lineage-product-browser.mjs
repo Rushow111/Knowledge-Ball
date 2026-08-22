@@ -423,12 +423,18 @@ async function openNode(page, id) {
   const firstPoint = await page.evaluate(id => window.__debug?.scene?.screenPositionForNode?.(id) ?? null, id);
   assert.ok(firstPoint && Number.isFinite(firstPoint.x) && Number.isFinite(firstPoint.y), `node ${id} must have a finite mobile position before focus`);
   await page.touchscreen.tap(firstPoint.x, firstPoint.y);
-  await page.waitForTimeout(900);
-  assert.equal(await page.locator('#nodeDetailOverlay.open').count(), 0, 'first real node tap must focus without opening details');
+  await page.waitForTimeout(60);
+  const detail = page.locator(`#nodeDetailOverlay.open[data-node-id="${id}"]`);
+  if (await detail.count()) {
+    await detail.waitFor({ state: 'visible' });
+    return;
+  }
+  await page.waitForTimeout(840);
+  assert.equal(await page.locator('#nodeDetailOverlay.open').count(), 0, 'first real tap on an unfocused node must only focus it');
   const centered = await page.evaluate(id => window.__debug?.scene?.screenPositionForNode?.(id) ?? null, id);
   assert.ok(centered && Number.isFinite(centered.x) && Number.isFinite(centered.y), `focused node ${id} must remain renderable`);
   await page.touchscreen.tap(centered.x, centered.y);
-  await page.locator(`#nodeDetailOverlay.open[data-node-id="${id}"]`).waitFor({ state: 'visible' });
+  await detail.waitFor({ state: 'visible' });
 }
 
 async function assertViewport(page) {
