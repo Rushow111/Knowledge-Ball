@@ -416,18 +416,18 @@ async function preparePage(context) {
 }
 
 async function openNode(page, id) {
-  await page.evaluate(id => {
+  await page.evaluate(() => {
     window.__debug?.interaction?.setVisibilityMode?.('all');
-    window.__debug?.scene?.focusNode?.(id);
     window.__debug?.scene?.start?.();
-  }, id);
-  await page.waitForTimeout(220);
-  const point = await page.evaluate(id => {
-    window.__debug?.scene?.stop?.();
-    return window.__debug?.scene?.screenPositionForNode?.(id) ?? null;
-  }, id);
-  assert.ok(point && Number.isFinite(point.x) && Number.isFinite(point.y), `node ${id} must have a finite mobile position`);
-  await page.touchscreen.tap(point.x, point.y);
+  });
+  const firstPoint = await page.evaluate(id => window.__debug?.scene?.screenPositionForNode?.(id) ?? null, id);
+  assert.ok(firstPoint && Number.isFinite(firstPoint.x) && Number.isFinite(firstPoint.y), `node ${id} must have a finite mobile position before focus`);
+  await page.touchscreen.tap(firstPoint.x, firstPoint.y);
+  await page.waitForTimeout(900);
+  assert.equal(await page.locator('#nodeDetailOverlay.open').count(), 0, 'first real node tap must focus without opening details');
+  const centered = await page.evaluate(id => window.__debug?.scene?.screenPositionForNode?.(id) ?? null, id);
+  assert.ok(centered && Number.isFinite(centered.x) && Number.isFinite(centered.y), `focused node ${id} must remain renderable`);
+  await page.touchscreen.tap(centered.x, centered.y);
   await page.locator(`#nodeDetailOverlay.open[data-node-id="${id}"]`).waitFor({ state: 'visible' });
 }
 
@@ -501,7 +501,6 @@ try {
     const { page: pageA, pageErrors: errorsA } = await preparePage(contextA);
     const { page: pageB, pageErrors: errorsB } = await preparePage(contextB);
 
-    // The Current / Personal / All entry itself must be understandable and operable on mobile.
     const visibility = pageA.locator('#btnPersonal');
     await visibility.waitFor({ state: 'visible' });
     assert.equal(await visibility.textContent(), '当前');
@@ -512,7 +511,6 @@ try {
     await visibility.click();
     assert.equal(await visibility.textContent(), '当前');
 
-    // 1–3: discoverable direct entry and a complete real user path.
     await openNode(pageA, 'opt-base');
     await pageA.locator('.node-detail-state.current').waitFor({ state: 'visible' });
     assert.match(await pageA.locator('.node-detail-state.current').innerText(), /当前版本/);
@@ -523,7 +521,6 @@ try {
     await pageA.screenshot({ path: 'artifacts/lineage-product-current.png', fullPage: true });
     await pageA.locator('.node-detail-close').click();
 
-    // Optimization success -> pending candidate -> server verdict -> both already-open clients converge.
     const optCandidate = await submitCandidate(pageA, 'optimization', 'opt-base', 'Optimization Improved', 'A visibly improved immutable version');
     assert.ok(optCandidate, 'optimization candidate must be created through the real UI');
     await openNode(pageA, optCandidate);
@@ -536,26 +533,22 @@ try {
     await pageB.waitForFunction(id => window.__debug?.projection?.state?.nodesById?.[id]?.lineage?.role === 'current', optCandidate);
     assert.equal(await pageA.evaluate(() => window.__debug?.projection?.state?.nodesById?.['opt-base']?.lineage?.role), 'history', 'successful optimization must preserve the old ball as history');
 
-    // 6: hard reload must reconstruct the same authoritative result.
     await pageA.reload({ waitUntil: 'domcontentloaded' });
     await pageA.waitForFunction(id => window.__debug?.projection?.state?.nodesById?.[id]?.lineage?.role === 'current', optCandidate);
     assert.equal(await pageA.evaluate(() => window.__debug?.projection?.state?.nodesById?.['opt-base']?.lineage?.role), 'history');
 
-    // Failed optimization keeps the old head, while the losing candidate becomes rejected audit state.
     const failedCandidate = await submitCandidate(pageA, 'optimization', 'fail-base', 'Failure Candidate', 'This candidate should lose its validation');
     await pageB.waitForFunction(id => Boolean(window.__debug?.projection?.state?.nodesById?.[id]), failedCandidate);
     await votePending(pageB, failedCandidate, 'DISAGREE');
     await pageA.waitForFunction(id => window.__debug?.projection?.state?.nodesById?.[id]?.lineage?.role === 'rejected', failedCandidate);
     assert.equal(await pageA.evaluate(() => window.__debug?.projection?.state?.nodesById?.['fail-base']?.lineage?.role ?? 'current'), 'current');
 
-    // Opposition success uses the same visible path but keeps viewpoint semantics distinct.
     const oppositionCandidate = await submitCandidate(pageA, 'opposition', 'opp-base', 'Opposing Viewpoint', 'A distinct opposing claim');
     await pageB.waitForFunction(id => Boolean(window.__debug?.projection?.state?.nodesById?.[id]), oppositionCandidate);
     await votePending(pageB, oppositionCandidate, 'AGREE');
     await pageA.waitForFunction(id => window.__debug?.projection?.state?.nodesById?.[id]?.lineage?.role === 'current', oppositionCandidate);
     assert.equal(await pageA.evaluate(() => window.__debug?.projection?.state?.nodesById?.['opp-base']?.lineage?.role), 'opposition');
 
-    // Old gray ball is visible in All and can complete the human revalidation path.
     await openNode(pageA, 'opt-base');
     assert.match(await pageA.locator('.node-detail-state').innerText(), /历史版本/);
     await pageA.screenshot({ path: 'artifacts/lineage-product-history.png', fullPage: true });
@@ -569,7 +562,6 @@ try {
     await pageA.waitForFunction(() => window.__debug?.projection?.state?.nodesById?.['opt-base']?.lineage?.role === 'current');
     await pageB.waitForFunction(() => window.__debug?.projection?.state?.nodesById?.['opt-base']?.lineage?.role === 'current');
 
-    // Cascade is a real visible pending state and settles through the ordinary one-energy vote RPC.
     await pageB.waitForFunction(() => window.__debug?.projection?.state?.nodesById?.downstream?.status === 'disputed');
     await openNode(pageB, 'downstream');
     await pageB.locator('.node-detail-cascade-vote').waitFor({ state: 'visible' });
@@ -578,7 +570,6 @@ try {
     await pageB.locator('[data-cascade-vote-side="AGREE"]').click();
     await pageA.waitForFunction(() => window.__debug?.projection?.state?.nodesById?.downstream?.status === 'verified');
 
-    // Explicit server failure stays visible and never creates local public truth.
     rejectNextAppend = true;
     await openNode(pageA, 'fail-base');
     await pageA.locator('[data-node-detail-action="edit"]').click();
