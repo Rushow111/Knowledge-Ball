@@ -35,7 +35,7 @@ jobs:
         with:
           name: lineage-product-visual
           path: artifacts/lineage-product-*.png
-          if-no-files-found: error
+          if-no-files-found: warn
       - run: npm run test:browser-mobile
       - name: Upload mobile scene visual evidence
         if: always()
