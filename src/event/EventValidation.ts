@@ -29,6 +29,14 @@ export function validateDomainEventEnvelope(event: DomainEvent): string[] {
       errors.push(`${event.type} 必须携带 ${expected} 编辑载荷`);
     }
   }
+  if (event.type === 'KnowledgeRevalidationStarted') {
+    const p = event.payload;
+    if (!p.roundId?.trim() || !p.nodeId?.trim()) errors.push('重新验证事件缺少轮次或节点 ID');
+    if (p.kind !== 'challenge' && p.kind !== 'cascade') errors.push('重新验证 kind 无效');
+    if (!Number.isSafeInteger(p.stage) || p.stage < 0) errors.push('重新验证 stage 无效');
+    if (!/^-?\d+(?:\.\d{1,6})?$/.test(p.stake)) errors.push('重新验证 stake 无效');
+    if (p.policyVersion !== 'ORIGINAL_DESIGN_V1' && p.policyVersion !== 'ORIGINAL_DESIGN_V2') errors.push('重新验证 policyVersion 无效');
+  }
   if (event.type === 'KnowledgeVerdictFinalized') {
     const p = event.payload;
     if (!p.roundId?.trim() || !p.nodeId?.trim()) errors.push('投票结算事件缺少轮次或节点 ID');
@@ -60,6 +68,7 @@ function protocolNodes(state: GraphState): ProtocolNode[] {
     logicRuleId: node.logicRuleId,
     negatedBy: node.negatedBy ? [...node.negatedBy] : undefined,
     semanticKey: node.semanticKey,
+    lineage: node.lineage ? structuredClone(node.lineage) : undefined,
   }));
 }
 
@@ -80,10 +89,16 @@ export function validateDomainEventAgainstState(event: DomainEvent, state: Graph
       if (event.payload.edit.causeNodeId && !state.nodesById[event.payload.edit.causeNodeId]) return [`原因节点不存在: ${event.payload.edit.causeNodeId}`];
       return [];
     }
+    case 'KnowledgeRevalidationStarted': {
+      const target = state.nodesById[event.payload.nodeId];
+      if (!target) return [`重新验证目标不存在: ${event.payload.nodeId}`];
+      if (target.status === 'falsified') return [`已被拒绝的知识节点不能直接重新验证: ${event.payload.nodeId}`];
+      return [];
+    }
     case 'KnowledgeVerdictFinalized': {
       const target = state.nodesById[event.payload.nodeId];
       if (!target) return [`投票结算目标不存在: ${event.payload.nodeId}`];
-      if (target.status !== 'pending') return [`只有待验证节点可以接收首轮投票结算: ${event.payload.nodeId}`];
+      if (target.status !== 'pending') return [`只有待验证节点可以接收投票结算: ${event.payload.nodeId}`];
       return [];
     }
     case 'KnowledgeNodeEdited':
@@ -98,12 +113,12 @@ export function validateDomainEventAgainstState(event: DomainEvent, state: Graph
     case 'NodeMasterySet':
       return state.nodesById[event.payload.nodeId] ? [] : [`事件目标不存在: ${event.payload.nodeId}`];
     case 'NodeFalsified':
-      return ['NodeFalsified 仅用于读取旧事件；新的否定必须提交带反例的 KnowledgeNegated'];
+      return ['NodeFalsified 仅用于读取旧事件；新的否定必须提交 KnowledgeAdded opposition 候选'];
     case 'NodeResolved': {
       const target = state.nodesById[event.payload.nodeId];
       if (!target) return [`事件目标不存在: ${event.payload.nodeId}`];
       if (target.status === 'falsified') {
-        return ['已证伪节点不能直接恢复；必须先否定记录在 negatedBy 中的相反知识节点'];
+        return ['已证伪节点不能直接恢复；必须通过当前版本协议重新提交或重新验证'];
       }
       return [];
     }
