@@ -1,0 +1,514 @@
+name: temp-lineage-v3-dump
+on:
+  push:
+    branches: [feature/knowledge-lineage-v3]
+permissions:
+  contents: write
+jobs:
+  dump:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/knowledge-lineage-v3
+      - name: Stage complete feature draft
+        shell: python
+        run: |
+          from pathlib import Path
+          import textwrap
+
+          def rep(path, old, new, count=1):
+              p=Path(path); s=p.read_text()
+              if s.count(old) < count:
+                  raise SystemExit(f'{path}: missing marker {old[:120]!r}')
+              p.write_text(s.replace(old,new,count))
+
+          Path('src/domain/KnowledgeLineage.ts').write_text(textwrap.dedent(r'''
+            import type { GraphNode } from '../graph/Node';
+
+            export type KnowledgeProposalKind = 'new' | 'optimization' | 'opposition';
+            export type KnowledgeLineageRole = 'current' | 'history' | 'opposition' | 'candidate-history' | 'candidate-opposition' | 'rejected';
+            export type KnowledgeViewMode = 'current' | 'personal' | 'lineage';
+            export type RevalidationKind = 'challenge' | 'cascade';
+
+            export interface KnowledgeLineageMeta {
+              topicId: string;
+              proposal: KnowledgeProposalKind;
+              targetId?: string;
+              role: KnowledgeLineageRole;
+              rank: number;
+              revalidation?: RevalidationKind;
+            }
+
+            export function topicIdFor(node: Pick<GraphNode,'id'|'lineage'>): string {
+              return node.lineage?.topicId ?? node.id;
+            }
+
+            export function lineageRoleFor(node: Pick<GraphNode,'lineage'>): KnowledgeLineageRole {
+              return node.lineage?.role ?? 'current';
+            }
+
+            export function lineageColorRole(node: Pick<GraphNode,'lineage'>): 'normal'|'history'|'opposition' {
+              const role=lineageRoleFor(node);
+              if(role==='history'||role==='candidate-history') return 'history';
+              if(role==='opposition'||role==='candidate-opposition') return 'opposition';
+              return 'normal';
+            }
+
+            export function stableLineageRole(node: Pick<GraphNode,'status'|'lineage'>): 'history'|'opposition'|null {
+              if(node.status==='pending') return null;
+              const role=lineageRoleFor(node);
+              return role==='history'||role==='opposition'?role:null;
+            }
+
+            export function visibleInKnowledgeView(
+              node: Pick<GraphNode,'status'|'mastery'|'lineage'>,
+              mode: KnowledgeViewMode,
+            ): boolean {
+              const role=lineageRoleFor(node);
+              if(role==='rejected') return false;
+              // Pending proposals/revalidations must remain visible in every view.
+              if(node.status==='pending') return true;
+              if(role==='history'||role==='opposition') return mode==='lineage';
+              return mode!=='personal'||node.mastery!=='none';
+            }
+
+            export function ensureCurrentLineage(node: GraphNode): KnowledgeLineageMeta {
+              if(!node.lineage) node.lineage={topicId:node.id,proposal:'new',role:'current',rank:0};
+              return node.lineage;
+            }
+
+            export function lineageMembers(nodes:readonly GraphNode[], nodeId:string) {
+              const selected=nodes.find(n=>n.id===nodeId);
+              if(!selected) return {history:[] as GraphNode[],opposition:[] as GraphNode[]};
+              const topic=topicIdFor(selected);
+              const ordered=(role:'history'|'opposition')=>nodes
+                .filter(n=>n.id!==nodeId&&topicIdFor(n)===topic&&lineageRoleFor(n)===role&&!n.hidden)
+                .sort((a,b)=>(a.lineage?.rank??1e9)-(b.lineage?.rank??1e9));
+              return {history:ordered('history'),opposition:ordered('opposition')};
+            }
+
+            function setRole(node:GraphNode, topicId:string, role:KnowledgeLineageRole, rank:number):void {
+              const base=ensureCurrentLineage(node);
+              node.lineage={...base,topicId,role,rank,revalidation:undefined};
+            }
+
+            export function activateOptimization(nodes:GraphNode[], candidateId:string):string|null {
+              const candidate=nodes.find(n=>n.id===candidateId);
+              const target=candidate?.lineage?.targetId?nodes.find(n=>n.id===candidate.lineage!.targetId):undefined;
+              if(!candidate||!target) return null;
+              const topic=ensureCurrentLineage(target).topicId;
+              for(const node of nodes){
+                if(topicIdFor(node)===topic&&lineageRoleFor(node)==='history') setRole(node,topic,'history',(node.lineage?.rank??0)+1);
+              }
+              setRole(target,topic,'history',1);
+              setRole(candidate,topic,'current',0);
+              return target.id;
+            }
+
+            export function activateOpposition(nodes:GraphNode[], candidateId:string):string|null {
+              const candidate=nodes.find(n=>n.id===candidateId);
+              const target=candidate?.lineage?.targetId?nodes.find(n=>n.id===candidate.lineage!.targetId):undefined;
+              if(!candidate||!target) return null;
+              const topic=ensureCurrentLineage(target).topicId;
+              const oldCurrentAndHistory=nodes.filter(n=>topicIdFor(n)===topic&&['current','history'].includes(lineageRoleFor(n))&&n.id!==candidate.id)
+                .sort((a,b)=>lineageRoleFor(a)==='current'?-1:lineageRoleFor(b)==='current'?1:(a.lineage?.rank??0)-(b.lineage?.rank??0));
+              const oldOpposition=nodes.filter(n=>topicIdFor(n)===topic&&lineageRoleFor(n)==='opposition'&&n.id!==candidate.id)
+                .sort((a,b)=>(a.lineage?.rank??0)-(b.lineage?.rank??0));
+              oldOpposition.forEach((n,i)=>setRole(n,topic,'history',i+1));
+              oldCurrentAndHistory.forEach((n,i)=>setRole(n,topic,'opposition',i+1));
+              setRole(candidate,topic,'current',0);
+              return target.id;
+            }
+
+            export function reactivateLineageNode(nodes:GraphNode[], nodeId:string):string|null {
+              const selected=nodes.find(n=>n.id===nodeId);
+              if(!selected?.lineage) return null;
+              const topic=selected.lineage.topicId;
+              const role=lineageRoleFor(selected);
+              const current=nodes.find(n=>topicIdFor(n)===topic&&lineageRoleFor(n)==='current');
+              if(!current) return null;
+              if(role==='history'){
+                for(const node of nodes){
+                  if(topicIdFor(node)===topic&&lineageRoleFor(node)==='history'&&node.id!==selected.id) setRole(node,topic,'history',(node.lineage?.rank??0)+1);
+                }
+                setRole(current,topic,'history',1);
+                setRole(selected,topic,'current',0);
+                return current.id;
+              }
+              if(role==='opposition'){
+                // Existing red node wins the same side-swap that a new opposition candidate would.
+                selected.lineage={...selected.lineage,targetId:current.id,role:'candidate-opposition'};
+                return activateOpposition(nodes,selected.id);
+              }
+              return null;
+            }
+
+            export function directConclusions(nodes:readonly GraphNode[], nodeId:string):GraphNode[]{
+              return nodes.filter(n=>!n.hidden&&n.premises.includes(nodeId));
+            }
+
+            export function downstreamClosure(nodes:readonly GraphNode[], roots:readonly string[]):string[]{
+              const seen=new Set(roots); const queue=[...roots]; const result:string[]=[];
+              while(queue.length){
+                const current=queue.shift()!;
+                for(const node of nodes){
+                  if(seen.has(node.id)||!node.premises.includes(current)) continue;
+                  seen.add(node.id); queue.push(node.id); result.push(node.id);
+                }
+              }
+              return result;
+            }
+
+            export function rewirePremise(nodes:GraphNode[], oldId:string, newId:string):void{
+              for(const node of nodes) node.premises=node.premises.map(id=>id===oldId?newId:id);
+            }
+          '''))
+
+          # Domain node/event/protocol metadata.
+          rep('src/graph/Node.ts',"import type { UserKnowledgeLayer } from '../domain/KnowledgeLayerPolicy';", "import type { UserKnowledgeLayer } from '../domain/KnowledgeLayerPolicy';\nimport type { KnowledgeLineageMeta } from '../domain/KnowledgeLineage';")
+          rep('src/graph/Node.ts','  semanticKey?: string;\n}', '  semanticKey?: string;\n  lineage?: KnowledgeLineageMeta;\n}')
+
+          rep('src/protocol/KnowledgeEditingProtocol.ts',"import type { NodeStatus, NodeType } from '../event/Event';", "import type { NodeStatus, NodeType } from '../event/Event';\nimport type { KnowledgeLineageMeta } from '../domain/KnowledgeLineage';")
+          rep('src/protocol/KnowledgeEditingProtocol.ts','  semanticKey?: string;\n}', '  semanticKey?: string;\n  lineage?: KnowledgeLineageMeta;\n}',1)
+          rep('src/protocol/KnowledgeEditingProtocol.ts','  logicRuleId?: string;\n}', '  logicRuleId?: string;\n  premises?: string[];\n  lineage?: KnowledgeLineageMeta;\n}',1)
+          rep('src/protocol/KnowledgeEditingProtocol.ts','function validateDraftBatch(nodes: ProtocolNode[], drafts: NewProtocolNode[]): string[] {', 'function validateDraftBatch(nodes: ProtocolNode[], drafts: NewProtocolNode[], sameTitleTargetId?: string): string[] {')
+          rep('src/protocol/KnowledgeEditingProtocol.ts',"    else if (usedTitles.has(title)) {\n      errors.push(`节点标题与现有或本次操作中的节点重复: ${draft.title.trim()}`);\n    } else {", "    else if (usedTitles.has(title)) {\n      const target=sameTitleTargetId?byId.get(sameTitleTargetId):undefined;\n      const allowed=Boolean(target&&canonicalKnowledgeText(target.title)===title&&draft.lineage?.proposal==='optimization'&&draft.lineage.targetId===target.id);\n      if(!allowed) errors.push(`节点标题与现有或本次操作中的节点重复: ${draft.title.trim()}`);\n    } else {")
+          rep('src/protocol/KnowledgeEditingProtocol.ts','    logicRuleId: draft.logicRuleId,\n  };', '    logicRuleId: draft.logicRuleId,\n    lineage: draft.lineage ? structuredClone(draft.lineage) : undefined,\n  };')
+          rep('src/protocol/KnowledgeEditingProtocol.ts','      errors.push(...validateDraftBatch(nodes, [edit.node]));', "      errors.push(...validateDraftBatch(nodes,[edit.node],edit.node.lineage?.proposal==='optimization'?edit.node.lineage.targetId:undefined));\n      for(const premiseId of edit.node.premises??[]){\n        const premise=byId.get(premiseId);\n        if(!premise) errors.push(`前提不存在: ${premiseId}`);\n        else if(!active(premise)) errors.push(`前提当前不可用: ${premiseId}`);\n      }")
+          rep('src/protocol/KnowledgeEditingProtocol.ts','      append(nodeFromDraft(edit.node, []));', '      append(nodeFromDraft(edit.node, edit.node.premises ?? []));')
+
+          rep('src/command/KnowledgeEdit.ts','    semanticKey: node.semanticKey,\n  }));', '    semanticKey: node.semanticKey,\n    lineage: node.lineage ? structuredClone(node.lineage) : undefined,\n  }));')
+
+          # Server-authored revalidation-start event.
+          rep('src/event/Event.ts',"export type KnowledgeVerdictFinalizedEvent = EventEnvelope<'KnowledgeVerdictFinalized', {", "export type KnowledgeRevalidationStartedEvent = EventEnvelope<'KnowledgeRevalidationStarted', {\n  roundId:string; nodeId:string; kind:'challenge'|'cascade'; stage:number; stake:string; policyVersion:KnowledgeVerdictPolicyVersion;\n}>;\nexport type KnowledgeVerdictFinalizedEvent = EventEnvelope<'KnowledgeVerdictFinalized', {")
+          rep('src/event/Event.ts','KnowledgeStatusChangedEvent | KnowledgeNodeEditedEvent | KnowledgeVerdictFinalizedEvent;', 'KnowledgeStatusChangedEvent | KnowledgeNodeEditedEvent | KnowledgeRevalidationStartedEvent | KnowledgeVerdictFinalizedEvent;',1)
+          rep('src/event/Event.ts','| KnowledgeStatusChangedEvent | KnowledgeNodeEditedEvent | KnowledgeVerdictFinalizedEvent;', '| KnowledgeStatusChangedEvent | KnowledgeNodeEditedEvent | KnowledgeRevalidationStartedEvent | KnowledgeVerdictFinalizedEvent;',1)
+
+          # Projection: lineage transitions and directional cascade.
+          rep('src/projection/GraphProjection.ts',"import { cascadeReachable } from '../graph/Graph';", "import { cascadeReachable } from '../graph/Graph';\nimport { activateOptimization, activateOpposition, downstreamClosure, reactivateLineageNode, rewirePremise } from '../domain/KnowledgeLineage';")
+          rep('src/projection/GraphProjection.ts','          logicRuleId: draft.logicRuleId,\n        };', '          logicRuleId: draft.logicRuleId,\n          lineage: draft.lineage ? structuredClone(draft.lineage) : undefined,\n        };')
+          rep('src/projection/GraphProjection.ts',"      if (edit.mode === 'atomic') append(edit.node, []);", "      if (edit.mode === 'atomic') append(edit.node, edit.node.premises ?? []);")
+          rep('src/projection/GraphProjection.ts','      semanticKey: node.semanticKey,\n    }));', '      semanticKey: node.semanticKey,\n      lineage: node.lineage ? structuredClone(node.lineage) : undefined,\n    }));')
+          old="""      case 'KnowledgeVerdictFinalized': {
+        const n = this.state.nodesById[event.payload.nodeId];
+        if (!n) break;
+        if (event.payload.verdict === 'CORRECT') {
+          n.status = 'verified';
+          n.hidden = false;
+        } else {
+          n.status = 'falsified';
+          n.hidden = true;
+        }
+        break;
+      }"""
+          new="""      case 'KnowledgeRevalidationStarted': {
+        const n=this.state.nodesById[event.payload.nodeId];
+        if(!n) break;
+        n.status='pending'; n.hidden=false;
+        n.lineage={...(n.lineage??{topicId:n.id,proposal:'new',role:'current',rank:0}),revalidation:event.payload.kind};
+        break;
+      }
+      case 'KnowledgeVerdictFinalized': {
+        const n=this.state.nodesById[event.payload.nodeId];
+        if(!n) break;
+        const nodes=nodeList(this.state);
+        const revalidation=n.lineage?.revalidation;
+        if(event.payload.verdict==='CORRECT'){
+          n.status='verified'; n.hidden=false;
+          let previous:string|null=null;
+          if(revalidation==='challenge') previous=reactivateLineageNode(nodes,n.id);
+          else if(n.lineage?.role==='candidate-history') previous=activateOptimization(nodes,n.id);
+          else if(n.lineage?.role==='candidate-opposition') previous=activateOpposition(nodes,n.id);
+          if(previous){
+            rewirePremise(nodes,previous,n.id);
+            for(const id of downstreamClosure(nodes,[n.id])){
+              const dependent=this.state.nodesById[id];
+              if(!dependent||dependent.id===n.id||dependent.status==='falsified') continue;
+              dependent.status='pending'; dependent.hidden=false;
+              dependent.lineage={...(dependent.lineage??{topicId:dependent.id,proposal:'new',role:'current',rank:0}),revalidation:'cascade'};
+            }
+          }
+          if(n.lineage) n.lineage.revalidation=undefined;
+        } else if(revalidation==='challenge'||revalidation==='cascade'){
+          // A failed revalidation leaves the previously-active lineage role intact.
+          n.status='verified'; n.hidden=false;
+          if(n.lineage) n.lineage.revalidation=undefined;
+        } else {
+          n.status='falsified'; n.hidden=true;
+          if(n.lineage) n.lineage.role='rejected';
+        }
+        break;
+      }"""
+          rep('src/projection/GraphProjection.ts',old,new)
+
+          # Auth client can start exact V1 second verification and cascade rounds.
+          rep('src/auth/AuthClient.ts','  async settleExpiredPendingKnowledgeVotes(maxRounds = 50): Promise<number> {', "  async startSecondKnowledgeVerification(nodeId:string):Promise<PendingKnowledgeVoteSnapshot>{\n    const current=await this.publicSession();\n    return parsePendingKnowledgeVote(await this.restRequest('/rest/v1/rpc/start_second_knowledge_verification',current,{method:'POST',body:JSON.stringify({target_node_id:nodeId,operation_key:`second-verification:${nodeId}`})}),nodeId);\n  }\n\n  async ensureCascadeKnowledgeVerification(nodeId:string,sourceNodeId:string):Promise<PendingKnowledgeVoteSnapshot>{\n    const current=await this.publicSession();\n    return parsePendingKnowledgeVote(await this.restRequest('/rest/v1/rpc/start_cascade_knowledge_verification',current,{method:'POST',body:JSON.stringify({target_node_id:nodeId,source_node_id:sourceNodeId})}),nodeId);\n  }\n\n  async settleExpiredPendingKnowledgeVotes(maxRounds = 50): Promise<number> {")
+
+          # Scene colors/visibility.
+          rep('src/ui/config/KnowledgeUiConfig.ts',"  falsified:KNOWLEDGE_SCENE_THEME.node.falsified,\n} as const;", "  falsified:KNOWLEDGE_SCENE_THEME.node.falsified,\n  history:0x7B8497,\n  opposition:0xE35D68,\n} as const;")
+          rep('src/ui/scene/KnowledgeScene.ts',"import { isSystemCoreNodeId } from '../../domain/KnowledgeLayerPolicy';", "import { isSystemCoreNodeId } from '../../domain/KnowledgeLayerPolicy';\nimport { lineageColorRole, visibleInKnowledgeView, type KnowledgeLineageMeta, type KnowledgeViewMode } from '../../domain/KnowledgeLineage';")
+          rep('src/ui/scene/KnowledgeScene.ts','  layer?: KnowledgeLayer;\n}', '  layer?: KnowledgeLayer;\n  lineage?: KnowledgeLineageMeta;\n}')
+          rep('src/ui/scene/KnowledgeScene.ts','  setHideUntouched: (enabled: boolean) => void;', '  setHideUntouched: (enabled: boolean) => void;\n  setKnowledgeViewMode: (mode: KnowledgeViewMode) => void;')
+          rep('src/ui/scene/KnowledgeScene.ts',"export function colorForNode(node: Pick<KnowledgeSceneNode, 'id' | 'status' | 'type' | 'effectiveLayer'>): number {\n  if (node.status === 'falsified')", "export function colorForNode(node: Pick<KnowledgeSceneNode, 'id' | 'status' | 'type' | 'effectiveLayer' | 'lineage'>): number {\n  const role=lineageColorRole(node as KnowledgeSceneNode);\n  if(role==='history') return NODE_SPECIAL_COLOR.history;\n  if(role==='opposition') return NODE_SPECIAL_COLOR.opposition;\n  if (node.status === 'falsified')")
+          rep('src/ui/scene/KnowledgeScene.ts','  let hideUntouched = false;', "  let hideUntouched = false;\n  let knowledgeViewMode:KnowledgeViewMode='current';")
+          # Replace live visibility expression only; retain legacy exported helper.
+          rep('src/ui/scene/KnowledgeScene.ts','&& nodeVisibleInPersonalMode(node, hideUntouched)', "&& visibleInKnowledgeView(node as any,knowledgeViewMode)")
+          rep('src/ui/scene/KnowledgeScene.ts',"    setHideUntouched: enabled => {\n      hideUntouched = enabled;\n      applyVisibility();\n      largeGraphDirty = true;\n    },", "    setHideUntouched: enabled => {\n      hideUntouched=enabled; knowledgeViewMode=enabled?'personal':'current'; applyVisibility(); largeGraphDirty=true;\n    },\n    setKnowledgeViewMode: mode=>{ knowledgeViewMode=mode; hideUntouched=mode==='personal'; applyVisibility(); largeGraphDirty=true; },")
+
+          rep('src/ui/interaction/InteractionController.ts',"import type { KnowledgeSceneRuntime } from '../scene/KnowledgeScene';", "import type { KnowledgeSceneRuntime } from '../scene/KnowledgeScene';\nimport type { KnowledgeViewMode } from '../../domain/KnowledgeLineage';")
+          rep('src/ui/interaction/InteractionController.ts','  private hideUntouched = false;', "  private hideUntouched = false;\n  private knowledgeViewMode:KnowledgeViewMode='current';")
+          rep('src/ui/interaction/InteractionController.ts',"    this.scene.setHideUntouched(enabled);", "    this.knowledgeViewMode=enabled?'personal':'current';\n    this.scene.setKnowledgeViewMode(this.knowledgeViewMode);")
+          rep('src/ui/interaction/InteractionController.ts',"      const onPersonalClick = () => this.setHideUntouched(!this.hideUntouched);", "      const onPersonalClick=()=>{\n        this.knowledgeViewMode=this.knowledgeViewMode==='current'?'personal':this.knowledgeViewMode==='personal'?'lineage':'current';\n        this.hideUntouched=this.knowledgeViewMode==='personal';\n        this.scene.setKnowledgeViewMode(this.knowledgeViewMode);\n        this.personalButton!.dataset.viewMode=this.knowledgeViewMode;\n        this.personalButton!.classList.toggle('active',this.knowledgeViewMode!=='current');\n        this.personalButton!.title=this.knowledgeViewMode==='current'?'当前知识':this.knowledgeViewMode==='personal'?'个人知识':'包含历史与否定';\n      };")
+
+          # Panel payloads/forms: name + layer + content for optimize/opposition.
+          rep('src/ui/panels/PanelController.ts',"export interface NegateNodePayload {\n  counterexampleIds: string[];\n  correctedReasoning?: {\n    title: string;\n    reasoning: string;\n    logicRuleId: string;\n  };\n}", "export interface NegateNodePayload { title:string; layer:UserKnowledgeLayer; reasoning:string; }")
+          rep('src/ui/panels/PanelController.ts',"export interface EditNodePayload {\n  title: string;\n  type: KnowledgeNodeType;\n  reasoning: string;\n  premises?: string[];\n}", "export interface EditNodePayload { title:string; layer:UserKnowledgeLayer; reasoning:string; }")
+          rep('src/ui/panels/PanelController.ts','  private prefillPremise: string | null = null;', "  private prefillPremise:string|null=null;\n  private proposalMode:'optimization'|'opposition'|null=null;\n  private proposalTarget:string|null=null;")
+          rep('src/ui/panels/PanelController.ts',"  openCreateModal(prefillPremiseId: string | null = null): void {\n    this.prefillPremise = prefillPremiseId;", "  openCreateModal(prefillPremiseId: string | null = null): void {\n    this.proposalMode=null; this.proposalTarget=null;\n    this.prefillPremise = prefillPremiseId;")
+          # Edit and negate buttons route to compact modal; leave legacy advanced methods unreachable.
+          rep('src/ui/panels/PanelController.ts',"    editBtn?.addEventListener('click', () => {", "    editBtn?.addEventListener('click',()=>this.openProposalModal(id,'optimization'));\n    /* legacy in-place editor retained for historical reference only\n    editBtn?.addEventListener('click', () => {")
+          rep('src/ui/panels/PanelController.ts',"      this.panelActions.querySelector<HTMLButtonElement>('#cancelEdit')?.addEventListener('click', () => {\n        this.editMode = false;\n        this.openNodePanel(id);\n      });\n    });", "      this.panelActions.querySelector<HTMLButtonElement>('#cancelEdit')?.addEventListener('click', () => { this.editMode=false; this.openNodePanel(id); });\n    }); */")
+          rep('src/ui/panels/PanelController.ts',"    negateBtn?.addEventListener('click', () => this.openNegateForm(id));", "    negateBtn?.addEventListener('click',()=>this.openProposalModal(id,'opposition'));")
+          proposal=textwrap.dedent(r'''
+              private openProposalModal(id:string,mode:'optimization'|'opposition'):void {
+                const node=this.getNodeById(id); if(!node)return;
+                this.closeNodePanel(); this.prefillPremise=null; this.proposalMode=mode; this.proposalTarget=id;
+                this.modalTitle.textContent=mode==='optimization'?`优化：${node.title}`:`否定：${node.title}`;
+                this.modalHint.style.display='block';
+                this.modalHint.textContent=mode==='optimization'?'每次优化都会生成新的知识球；成功后旧版本进入灰色历史链。':'每次否定都会生成新的红色知识球；成功后按当前/历史/否定链重新定位。';
+                this.fTitle.value=mode==='optimization'?node.title:'';
+                this.fType.value=(node.declaredLayer==='inner'||node.declaredLayer==='middle'||node.declaredLayer==='outer')?node.declaredLayer:'inner';
+                this.fDescription.value=mode==='optimization'?node.reasoning:'';
+                this.fReasoningField.hidden=true; this.fPremisesField.hidden=true; this.fLogicRuleField.hidden=true;
+                this.modalSubmit.disabled=false; this.onOverlayVisibilityChange?.(true); this.modalOverlay.classList.add('show');
+              }
+          ''')
+          rep('src/ui/panels/PanelController.ts','  private openNegateForm(id: string): void {', proposal+'\n  private openNegateForm(id: string): void {')
+          marker="""      const layer = isUserKnowledgeLayer(this.fType.value) ? this.fType.value : null;
+      if (!layer) {
+        this.showToast('请选择知识层级');
+        return;
+      }"""
+          rep('src/ui/panels/PanelController.ts',marker,marker+"""
+      if(this.proposalMode&&this.proposalTarget){
+        const title=this.fTitle.value.trim(), reasoning=this.fDescription.value.trim();
+        if(!title||!reasoning){this.showToast('名称和内容不能为空');return;}
+        try{this.modalSubmit.disabled=true;
+          if(this.proposalMode==='optimization') await this.onEditNode(this.proposalTarget,{title,layer,reasoning});
+          else await this.onNegateNode(this.proposalTarget,{title,layer,reasoning});
+          this.closeCreateModal(); this.showToast(this.proposalMode==='optimization'?'优化候选已提交，等待验证':'否定候选已提交，等待验证');
+        }catch(error){this.showOperationError(error);}finally{this.modalSubmit.disabled=false;} return;
+      }""")
+
+          # App creates candidates as KnowledgeAdded (therefore first-round validation remains server-owned).
+          rep('src/ui/app.ts',"import { GraphProjection, setCascadeDepthLimit } from '../projection/GraphProjection';", "import { GraphProjection, setCascadeDepthLimit } from '../projection/GraphProjection';\nimport { directConclusions, lineageMembers, stableLineageRole, topicIdFor } from '../domain/KnowledgeLineage';")
+          rep('src/ui/app.ts',"import { editNode as cmdEditNode } from '../command/EditNode';\n",'')
+          rep('src/ui/app.ts','      semanticKey: dn.semanticKey,\n      ...meta,', '      semanticKey: dn.semanticKey,\n      lineage: dn.lineage ? structuredClone(dn.lineage) : undefined,\n      ...meta,')
+          rep('src/ui/app.ts','    reasoning: node.reasoning,\n  } : null;', '    reasoning: node.reasoning,\n    lineage: node.lineage,\n  } : null;')
+          oldedit=Path('src/ui/app.ts').read_text()
+          start=oldedit.index('async function editKnowledgeNode('); end=oldedit.index('\nasync function decomposeKnowledgeNode(',start)
+          replacement=textwrap.dedent(r'''
+            async function editKnowledgeNode(id:string,payload:EditNodePayload):Promise<void>{
+              const current=projection.state.nodesById[id]; if(!current)throw new Error('优化目标不存在');
+              const candidateId=generateNodeId();
+              const edit:AddEdit={kind:'add',mode:'atomic',node:{
+                id:candidateId,title:payload.title,type:internalAtomicTypeForLayer(payload.layer),reasoning:payload.reasoning,
+                premises:[...current.premises],lineage:{topicId:topicIdFor(current),proposal:'optimization',targetId:id,role:'candidate-history',rank:1},
+              }};
+              await applyKnowledgeEdit(edit,{[candidateId]:payload.layer}); currentPanelId=null;
+            }
+
+            async function negateKnowledgeNode(id:string,payload:NegateNodePayload):Promise<void>{
+              const current=projection.state.nodesById[id]; if(!current)throw new Error('否定目标不存在');
+              const candidateId=generateNodeId();
+              const edit:AddEdit={kind:'add',mode:'atomic',node:{
+                id:candidateId,title:payload.title,type:internalAtomicTypeForLayer(payload.layer),reasoning:payload.reasoning,
+                lineage:{topicId:topicIdFor(current),proposal:'opposition',targetId:id,role:'candidate-opposition',rank:1},
+              }};
+              await applyKnowledgeEdit(edit,{[candidateId]:payload.layer}); currentPanelId=null;
+            }
+          ''')
+          Path('src/ui/app.ts').write_text(oldedit[:start]+replacement+oldedit[end:])
+          relationfn=textwrap.dedent(r'''
+            function getNodeDetailRelations(id:string){
+              const node=projection.state.nodesById[id]; if(!node)return {premises:[],conclusions:[],history:[],opposition:[]};
+              const all=nodeList(projection.state), item=(n:GraphNode)=>({id:n.id,title:n.title});
+              const lineage=lineageMembers(all,id);
+              return {premises:node.premises.map(pid=>projection.state.nodesById[pid]).filter((n):n is GraphNode=>Boolean(n&&!n.hidden)).map(item),conclusions:directConclusions(all,id).map(item),history:lineage.history.map(item),opposition:lineage.opposition.map(item)};
+            }
+          ''')
+          rep('src/ui/app.ts','function reasoningParentForDetail(node: KnowledgeSceneNode): KnowledgeSceneNode | null {', relationfn+'\nfunction reasoningParentForDetail(node: KnowledgeSceneNode): KnowledgeSceneNode | null {')
+          rep('src/ui/app.ts','    getScreenPosition: id => scene.screenPositionForNode(id),', "    getScreenPosition:id=>scene.screenPositionForNode(id),\n    getRelations:getNodeDetailRelations,\n    onNavigate:id=>{nodeDetail?.close();scene.focusNode(id);openNode(id);},\n    onRevalidate:async id=>{if(!nodeViewAuthClient)throw new Error('共享服务未配置');await nodeViewAuthClient.startSecondKnowledgeVerification(id);await syncEngine?.sync();},")
+          # Start server cascade rounds for deterministic projection descendants after verdict replay.
+          rep('src/ui/app.ts','  projection.apply(event);', "  projection.apply(event);\n  if(event.type==='KnowledgeVerdictFinalized'&&nodeViewAuthClient){\n    const cascade=nodeList(projection.state).filter(n=>n.status==='pending'&&n.lineage?.revalidation==='cascade');\n    for(const node of cascade) void nodeViewAuthClient.ensureCascadeKnowledgeVerification(node.id,event.payload.nodeId).catch(error=>console.warn('[Knowledge-Ball] cascade verification deferred:',error));\n  }")
+
+          # Detail four directions and stable lineage second-verification confirmation.
+          rep('src/ui/panels/NodeDetailController.ts',"import type { KnowledgeNodeStatus, KnowledgeNodeType } from '../config/KnowledgeUiConfig';", "import type { KnowledgeNodeStatus, KnowledgeNodeType } from '../config/KnowledgeUiConfig';\nimport { stableLineageRole, type KnowledgeLineageMeta } from '../../domain/KnowledgeLineage';")
+          rep('src/ui/panels/NodeDetailController.ts','  reasoning: string;\n}', '  reasoning:string;\n  lineage?:KnowledgeLineageMeta;\n}',1)
+          rep('src/ui/panels/NodeDetailController.ts','export interface NodeDetailControllerOptions {', "export interface NodeDetailRelationItem{id:string;title:string}\nexport interface NodeDetailRelations{premises:NodeDetailRelationItem[];conclusions:NodeDetailRelationItem[];history:NodeDetailRelationItem[];opposition:NodeDetailRelationItem[]}\n\nexport interface NodeDetailControllerOptions {")
+          rep('src/ui/panels/NodeDetailController.ts','  getScreenPosition: (id: string) => { x: number; y: number } | null;', "  getScreenPosition:(id:string)=>{x:number;y:number}|null;\n  getRelations:(id:string)=>NodeDetailRelations;\n  onNavigate:(id:string)=>void;\n  onRevalidate:(id:string)=>Promise<void>;")
+          rep('src/ui/panels/NodeDetailController.ts',"  private readonly getActions: NodeDetailControllerOptions['getActions'];", "  private readonly getActions:NodeDetailControllerOptions['getActions'];\n  private readonly getRelations:NodeDetailControllerOptions['getRelations'];\n  private readonly onNavigate:NodeDetailControllerOptions['onNavigate'];\n  private readonly onRevalidate:NodeDetailControllerOptions['onRevalidate'];")
+          rep('src/ui/panels/NodeDetailController.ts','    this.getActions = options.getActions;', "    this.getActions=options.getActions; this.getRelations=options.getRelations; this.onNavigate=options.onNavigate; this.onRevalidate=options.onRevalidate;")
+          rep('src/ui/panels/NodeDetailController.ts',"    const account = node.status === 'pending' ? currentVoteAccount() : null;\n    const interaction = node.status === 'pending'", "    const historical=stableLineageRole(node as any);\n    const account=node.status==='pending'?currentVoteAccount():null;\n    const interaction=historical?`\n      <div class=\"node-detail-vote node-detail-revalidate\"><div class=\"node-detail-vote-title\">投票</div><div class=\"node-detail-vote-actions\">\n      <button type=\"button\" class=\"node-detail-vote-button agree\" data-revalidate><span>同意</span><small>能量 −10</small></button>\n      <button type=\"button\" class=\"node-detail-vote-button disagree\" disabled><span>反对</span><small>能量 −10</small></button></div>\n      <div class=\"node-detail-vote-status\">同意会让该知识点激活到待验证状态</div></div>`:node.status === 'pending'")
+          rep('src/ui/panels/NodeDetailController.ts','    this.root.dataset.nodeId = node.id;', "    const relations=this.getRelations(node.id);\n    const relationHtml=(items:NodeDetailRelationItem[],where:string)=>items.length?`<div class=\"node-detail-relations ${where}\">${items.map(item=>`<button type=\"button\" data-related-node=\"${escapeHtml(item.id)}\">${escapeHtml(item.title)}</button>`).join('')}</div>`:'';\n    this.root.dataset.nodeId=node.id;")
+          rep('src/ui/panels/NodeDetailController.ts','      <div class="node-detail-meta">\n        <span>贡献者 · <b>${escapeHtml(contributor)}</b></span>\n        <span>时间 · <b>${escapeHtml(time)}</b></span>\n      </div>\n    `;', "      <div class=\"node-detail-meta\"><span>贡献者 · <b>${escapeHtml(contributor)}</b></span><span>时间 · <b>${escapeHtml(time)}</b></span></div>\n      ${relationHtml(relations.premises,'left')}${relationHtml(relations.history,'top')}${relationHtml(relations.conclusions,'right')}${relationHtml(relations.opposition,'bottom')}\n    `;")
+          rep('src/ui/panels/NodeDetailController.ts',"    this.root.querySelector<HTMLButtonElement>('.node-detail-close')?.addEventListener('click', () => this.close());", "    this.root.querySelector<HTMLButtonElement>('.node-detail-close')?.addEventListener('click',()=>this.close());\n    this.root.querySelectorAll<HTMLButtonElement>('[data-related-node]').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.relatedNode;if(id)this.onNavigate(id);}));\n    this.root.querySelector<HTMLButtonElement>('[data-revalidate]')?.addEventListener('click',()=>this.openRevalidationConfirm(node.id));")
+          rep('src/ui/panels/NodeDetailController.ts',"    if (node.status === 'pending') {", "    if(historical)return;\n    if (node.status === 'pending') {")
+          confirm=textwrap.dedent(r'''
+              private openRevalidationConfirm(nodeId:string):void{
+                const modal=document.createElement('div');modal.className='node-detail-confirm';
+                modal.innerHTML='<div class="node-detail-confirm-card"><p>请确认该知识点为当前最优</p><div><button type="button" data-cancel>取消</button><button type="button" data-confirm>确认</button></div></div>';
+                this.root.appendChild(modal);
+                modal.querySelector<HTMLButtonElement>('[data-cancel]')?.addEventListener('click',()=>modal.remove());
+                modal.querySelector<HTMLButtonElement>('[data-confirm]')?.addEventListener('click',async()=>{const button=modal.querySelector<HTMLButtonElement>('[data-confirm]');if(button)button.disabled=true;try{await this.onRevalidate(nodeId);modal.remove();this.refresh(nodeId);}catch(error){const status=this.root.querySelector<HTMLElement>('.node-detail-vote-status');if(status)status.textContent=error instanceof Error?`重新验证失败：${error.message}`:'重新验证失败';modal.remove();}});
+              }
+          ''')
+          rep('src/ui/panels/NodeDetailController.ts','  private async bindPendingVote(', confirm+'\n  private async bindPendingVote(')
+          p=Path('src/ui/panels/NodeDetailPanel.css');p.write_text(p.read_text()+textwrap.dedent(r'''
+            .node-detail-relations{position:absolute;display:flex;gap:6px;z-index:2;pointer-events:auto;max-width:min(42vw,180px);max-height:132px;overflow:auto;scrollbar-width:none}.node-detail-relations::-webkit-scrollbar{display:none}
+            .node-detail-relations button{border:0;background:rgba(7,11,34,.88);color:#d9ecff;font-size:11px;padding:5px 7px;border-radius:9px;white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis}
+            .node-detail-relations.left{right:calc(100% + 8px);top:50%;transform:translateY(-50%);flex-direction:column;align-items:flex-end}.node-detail-relations.right{left:calc(100% + 8px);top:50%;transform:translateY(-50%);flex-direction:column;align-items:flex-start}
+            .node-detail-relations.top{bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);flex-direction:column-reverse;align-items:center}.node-detail-relations.bottom{top:calc(100% + 5px);left:50%;transform:translateX(-50%);flex-direction:column;align-items:center}
+            .node-detail-confirm{position:absolute;inset:0;display:grid;place-items:center;z-index:5;background:rgba(0,0,0,.38);border-radius:50% / 44%}.node-detail-confirm-card{width:78%;padding:14px;background:rgba(4,7,24,.98);border-radius:18px;text-align:center}.node-detail-confirm-card p{margin:0 0 12px;font-size:13px}.node-detail-confirm-card div{display:grid;grid-template-columns:1fr 1fr;gap:8px}.node-detail-confirm-card button{border:0;border-radius:11px;padding:8px;background:rgba(151,205,255,.12);color:#d9ecff}
+          '''))
+
+          # Database forward migration: reuse frozen V1 stage-0 challenge (10 GLOBAL), ordinary -1 ballots, nullable cascade initiator.
+          Path('supabase/migrations/202608220001_knowledge_lineage_revalidation.sql').write_text(textwrap.dedent(r'''
+            -- Knowledge Lineage V3: wire the already-frozen ORIGINAL_DESIGN_V1 second verification.
+            -- No challenge policy constants are redefined here: stage 0 is the existing 10-energy GLOBAL challenge.
+            alter table public.public_knowledge_events drop constraint if exists public_knowledge_events_event_type_check;
+            alter table public.public_knowledge_events add constraint public_knowledge_events_event_type_check check (event_type in (
+              'NodeCreated','NodeEdited','NodeFalsified','NodeSuspended','NodeDisputed','NodeResolved','KnowledgeAdded','KnowledgeNegated','KnowledgeDecomposed','KnowledgeMerged','KnowledgeStatusChanged','KnowledgeNodeEdited','KnowledgeRevalidationStarted','KnowledgeVerdictFinalized'));
+
+            alter table public.knowledge_pending_vote_rounds add column if not exists round_kind text not null default 'INITIAL';
+            alter table public.knowledge_pending_vote_rounds add column if not exists challenge_stage integer;
+            alter table public.knowledge_pending_vote_rounds add column if not exists initiator_stake numeric(30,6) not null default 1.000000;
+            alter table public.knowledge_pending_vote_rounds add column if not exists source_node_id text;
+            alter table public.knowledge_pending_vote_rounds drop constraint if exists knowledge_pending_vote_rounds_round_kind_check;
+            alter table public.knowledge_pending_vote_rounds add constraint knowledge_pending_vote_rounds_round_kind_check check(round_kind in('INITIAL','CHALLENGE','CASCADE'));
+            alter table public.knowledge_pending_vote_rounds alter column initiator_id drop not null;
+            alter table public.knowledge_pending_vote_rounds alter column initiator_side drop not null;
+            alter table public.knowledge_pending_vote_rounds drop constraint if exists knowledge_pending_vote_rounds_initiator_side_check;
+            alter table public.knowledge_pending_vote_rounds add constraint knowledge_pending_vote_rounds_initiator_side_check check(initiator_side is null or initiator_side in('AGREE','DISAGREE'));
+            alter table public.knowledge_pending_votes drop constraint if exists knowledge_pending_votes_node_id_voter_id_key;
+            alter table public.knowledge_pending_votes add constraint knowledge_pending_votes_round_id_voter_id_key unique(round_id,voter_id);
+
+            alter table public.energy_transactions drop constraint if exists energy_transactions_transaction_type_check;
+            alter table public.energy_transactions add constraint energy_transactions_transaction_type_check check(transaction_type in('REFERRAL','SPEND','TRANSFER','VOTE_STAKE','CLAIM_STAKE','CHALLENGE_STAKE','VOTE_SETTLEMENT'));
+
+            create or replace function public.latest_pending_vote_round(target_node_id text) returns uuid language sql stable security definer set search_path=public,pg_temp as $$
+              select id from public.knowledge_pending_vote_rounds where node_id=target_node_id and verdict='PENDING' order by round_no desc limit 1
+            $$;
+
+            create or replace function public.pending_vote_snapshot(target_node_id text) returns jsonb language plpgsql security definer stable set search_path=public,pg_temp as $$
+            declare actor uuid:=auth.uid(); r public.knowledge_pending_vote_rounds%rowtype; agree_count integer; disagree_count integer; my_side text; my_balance numeric(30,6);
+            begin
+              if actor is null then raise exception 'authentication required' using errcode='42501'; end if;
+              select * into r from public.knowledge_pending_vote_rounds where node_id=target_node_id order by round_no desc limit 1;
+              if not found then raise exception 'pending vote round not found' using errcode='22023'; end if;
+              select count(*) filter(where side='AGREE' and settlement_status='ACTIVE'),count(*) filter(where side='DISAGREE' and settlement_status='ACTIVE') into agree_count,disagree_count from public.knowledge_pending_votes where round_id=r.id;
+              select side into my_side from public.knowledge_pending_votes where round_id=r.id and voter_id=actor and settlement_status='ACTIVE';
+              select balance into my_balance from public.energy_accounts where user_id=actor;
+              return jsonb_build_object('node_id',target_node_id,'round_id',r.id::text,'round_no',r.round_no,'round_kind',r.round_kind,'challenge_stage',r.challenge_stage,'stake',r.initiator_stake::text,'agree_count',agree_count,'disagree_count',disagree_count,'required_votes',r.required_votes,'my_side',my_side,'my_balance',case when my_balance is null then null else my_balance::text end,'verdict',r.verdict,'close_reason',r.close_reason,'deadline',r.deadline,'closed_at',r.closed_at,'policy_version',r.policy_version);
+            end $$;
+
+            create or replace function public.emit_revalidation_started(r public.knowledge_pending_vote_rounds) returns void language plpgsql security definer set search_path=public,pg_temp as $$
+            declare e jsonb; actor uuid:=coalesce(r.initiator_id,auth.uid());
+            begin
+              e:=jsonb_build_object('id','revalidation-start:'||r.id::text,'type','KnowledgeRevalidationStarted','scope','public','schemaVersion',1,'timestamp',floor(extract(epoch from clock_timestamp())*1000)::bigint,'payload',jsonb_build_object('roundId',r.id::text,'nodeId',r.node_id,'kind',case when r.round_kind='CHALLENGE' then 'challenge' else 'cascade' end,'stage',coalesce(r.challenge_stage,0),'stake',r.initiator_stake::text,'policyVersion',r.policy_version));
+              insert into public.public_knowledge_events(event_id,schema_version,event_type,envelope,actor_id) values(e->>'id',1,'KnowledgeRevalidationStarted',e,actor) on conflict(event_id) do nothing;
+            end $$;
+
+            create or replace function public.start_second_knowledge_verification(target_node_id text,operation_key text) returns jsonb language plpgsql security definer set search_path=public,pg_temp as $$
+            declare actor uuid:=auth.uid(); account uuid; r public.knowledge_pending_vote_rounds%rowtype; next_round integer; snapshot bigint; tx uuid; stake numeric(30,6):=10.000000; request_hash text;
+            begin
+              if actor is null then raise exception 'authentication required' using errcode='42501'; end if;
+              if nullif(target_node_id,'') is null or nullif(operation_key,'') is null then raise exception 'node id and idempotency key required' using errcode='22023'; end if;
+              perform public.ensure_anonymous_profile(); perform pg_advisory_xact_lock(hashtextextended('second-verification:'||target_node_id,0));
+              select * into r from public.knowledge_pending_vote_rounds where node_id=target_node_id and verdict='PENDING' order by round_no desc limit 1;
+              if found then return public.pending_vote_snapshot(target_node_id); end if;
+              if not exists(select 1 from public.knowledge_pending_vote_rounds where node_id=target_node_id and verdict in('CORRECT','INCORRECT')) then raise exception 'first verification has not finalized' using errcode='22023'; end if;
+              select coalesce(max(round_no),0)+1 into next_round from public.knowledge_pending_vote_rounds where node_id=target_node_id;
+              select greatest(count(*),1)::bigint into snapshot from public.knowledge_ball_profiles where active;
+              select id into account from public.energy_accounts where user_id=actor for update; if account is null then raise exception 'energy account not found'; end if;
+              update public.energy_accounts set balance=balance-stake where id=account and balance-stake>=-10.000000; if not found then raise exception 'insufficient energy' using errcode='23514'; end if;
+              request_hash:=encode(sha256(convert_to(jsonb_build_object('node_id',target_node_id,'round_no',next_round,'stage',0,'stake',stake::text,'scope','GLOBAL')::text,'UTF8')),'hex');
+              insert into public.energy_transactions(transaction_type,idempotency_key,metadata,actor_id,request_hash) values('CHALLENGE_STAKE',operation_key,jsonb_build_object('operation','SECOND_VERIFICATION','node_id',target_node_id,'stage',0,'scope','GLOBAL','stake',stake::text),actor,request_hash) on conflict(actor_id,transaction_type,idempotency_key) do nothing returning id into tx;
+              if tx is null then select id into tx from public.energy_transactions where actor_id=actor and transaction_type='CHALLENGE_STAKE' and idempotency_key=operation_key; end if;
+              insert into public.energy_ledger_entries(transaction_id,account_id,amount) values(tx,account,-stake),(tx,'00000000-0000-0000-0000-000000000001',stake) on conflict do nothing;
+              update public.energy_accounts set balance=balance+stake where account_type='SYSTEM';
+              insert into public.knowledge_pending_vote_rounds(node_id,round_no,policy_version,initiator_id,initiator_side,eligible_user_snapshot,required_votes,opened_at,deadline,creator_stake_transaction_id,legacy_unfunded,round_kind,challenge_stage,initiator_stake)
+                values(target_node_id,next_round,'ORIGINAL_DESIGN_V1',actor,'AGREE',snapshot,public.pending_vote_required_for_snapshot(snapshot),clock_timestamp(),clock_timestamp()+interval '720 hours',tx,false,'CHALLENGE',0,stake) returning * into r;
+              perform public.emit_revalidation_started(r); perform public.assert_energy_conservation(); return public.pending_vote_snapshot(target_node_id);
+            end $$;
+
+            create or replace function public.start_cascade_knowledge_verification(target_node_id text,source_node_id text) returns jsonb language plpgsql security definer set search_path=public,pg_temp as $$
+            declare r public.knowledge_pending_vote_rounds%rowtype; next_round integer; snapshot bigint;
+            begin
+              if auth.uid() is null then raise exception 'authentication required' using errcode='42501'; end if;
+              perform pg_advisory_xact_lock(hashtextextended('cascade-verification:'||target_node_id,0));
+              select * into r from public.knowledge_pending_vote_rounds where node_id=target_node_id and verdict='PENDING' order by round_no desc limit 1; if found then return public.pending_vote_snapshot(target_node_id); end if;
+              select coalesce(max(round_no),0)+1 into next_round from public.knowledge_pending_vote_rounds where node_id=target_node_id;
+              select greatest(count(*),1)::bigint into snapshot from public.knowledge_ball_profiles where active;
+              insert into public.knowledge_pending_vote_rounds(node_id,round_no,policy_version,initiator_id,initiator_side,eligible_user_snapshot,required_votes,opened_at,deadline,legacy_unfunded,round_kind,challenge_stage,initiator_stake,source_node_id)
+                values(target_node_id,next_round,'ORIGINAL_DESIGN_V1',null,null,snapshot,public.pending_vote_required_for_snapshot(snapshot),clock_timestamp(),clock_timestamp()+interval '720 hours',true,'CASCADE',null,0.000000,source_node_id) returning * into r;
+              perform public.emit_revalidation_started(r); return public.pending_vote_snapshot(target_node_id);
+            end $$;
+
+            -- Use the latest PENDING round for both first and later verification. Ordinary votes remain exactly 1 energy.
+            create or replace function public.get_pending_knowledge_vote(target_node_id text) returns jsonb language plpgsql security definer set search_path=public,pg_temp as $$
+            declare rid uuid;
+            begin
+              if auth.uid() is null then raise exception 'authentication required' using errcode='42501'; end if;
+              rid:=public.latest_pending_vote_round(target_node_id); if rid is null then rid:=public.pending_vote_round_for_node(target_node_id); end if;
+              perform public.finalize_pending_vote_round(rid); return public.pending_vote_snapshot(target_node_id);
+            end $$;
+
+            -- Patch vote casting to target the latest open round and allow the same person in later rounds.
+            create or replace function public.cast_pending_knowledge_vote(target_node_id text,vote_side text,operation_key text) returns jsonb language plpgsql security definer set search_path=public,pg_temp as $$
+            declare actor uuid:=auth.uid(); account uuid; tx uuid; existing_side text; stake numeric(30,6):=1.000000; request_hash text; rid uuid; r public.knowledge_pending_vote_rounds%rowtype;
+            begin
+              if actor is null then raise exception 'authentication required' using errcode='42501'; end if;
+              if vote_side not in('AGREE','DISAGREE') then raise exception 'invalid vote side' using errcode='22023'; end if;
+              perform public.ensure_anonymous_profile(); perform pg_advisory_xact_lock(hashtextextended('pending-vote:'||target_node_id,0));
+              rid:=public.latest_pending_vote_round(target_node_id); if rid is null then rid:=public.pending_vote_round_for_node(target_node_id); end if;
+              perform public.finalize_pending_vote_round(rid); select * into r from public.knowledge_pending_vote_rounds where id=rid;
+              if r.verdict<>'PENDING' then return public.pending_vote_snapshot(target_node_id); end if;
+              if r.initiator_id=actor then raise exception 'claim creator cannot cast an ordinary vote on the same round' using errcode='42501'; end if;
+              select side into existing_side from public.knowledge_pending_votes where round_id=rid and voter_id=actor and settlement_status='ACTIVE'; if found then return public.pending_vote_snapshot(target_node_id); end if;
+              select id into account from public.energy_accounts where user_id=actor for update; update public.energy_accounts set balance=balance-stake where id=account and balance-stake>=-10.000000; if not found then raise exception 'insufficient energy' using errcode='23514'; end if;
+              request_hash:=encode(sha256(convert_to(jsonb_build_object('node_id',target_node_id,'round_id',rid::text,'side',vote_side,'stake',stake::text)::text,'UTF8')),'hex');
+              insert into public.energy_transactions(transaction_type,idempotency_key,metadata,actor_id,request_hash) values('VOTE_STAKE',operation_key||':'||rid::text,jsonb_build_object('operation','PENDING_VOTE','node_id',target_node_id,'round_id',rid::text,'side',vote_side,'stake',stake::text),actor,request_hash) returning id into tx;
+              insert into public.energy_ledger_entries(transaction_id,account_id,amount) values(tx,account,-stake),(tx,'00000000-0000-0000-0000-000000000001',stake); update public.energy_accounts set balance=balance+stake where account_type='SYSTEM';
+              insert into public.knowledge_pending_votes(node_id,round_id,voter_id,side,stake,transaction_id) values(target_node_id,rid,actor,vote_side,stake,tx);
+              perform public.finalize_pending_vote_round(rid); perform public.assert_energy_conservation(); return public.pending_vote_snapshot(target_node_id);
+            end $$;
+
+            grant execute on function public.start_second_knowledge_verification(text,text) to authenticated;
+            grant execute on function public.start_cascade_knowledge_verification(text,text) to authenticated;
+          '''))
+
+          Path('docs/KNOWLEDGE_LINEAGE_V3.md').write_text(textwrap.dedent(r'''
+            # Knowledge Lineage V3 — current product contract
+            This current-product contract supersedes only conflicting behavior. `ORIGINAL_DESIGN_V1` remains the rule source for second-verification/challenge policy.
+
+            1. Every semantic edit creates a new immutable ball. Optimize and oppose never overwrite the old ball.
+            2. Each topic has one current ball, one linear grey history chain (rank 1 = previous version), and one linear red opposition chain.
+            3. Optimization candidates are grey + PENDING; opposition candidates are red + PENDING. Failed candidates remain audit history but do not enter visible chains.
+            4. Optimization may reuse the current target title; unrelated title uniqueness remains unchanged.
+            5. Successful optimize: old current -> grey history; candidate -> current. Successful opposition: old current+history -> red; prior red -> grey history; winning candidate -> current.
+            6. Stable grey/red reactivation is the already-designed second verification: V1 stage 0, 10 energy, GLOBAL. UI does not redefine its policy. Confirmed start changes only PENDING/flashing, not grey/red colour.
+            7. A current-head change recursively marks every directed premise descendant PENDING. Cascade has no initiator stake or initiator vote; a 30-day tie remains PENDING.
+            8. View modes cycle Current -> Personal -> Lineage. Stable grey/red only show in Lineage; any PENDING ball remains visible.
+            9. Detail neighbours: left direct premises, right direct conclusions, top linear history, bottom linear opposition. Only names; no empty placeholders.
+          '''))
+
+      - name: Commit complete draft
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src supabase/migrations docs
+          git commit -m "Draft knowledge lineage V3 end-to-end"
+          git push origin HEAD:feature/knowledge-lineage-v3
