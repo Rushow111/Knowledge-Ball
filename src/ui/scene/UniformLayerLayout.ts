@@ -19,7 +19,7 @@ export interface UniformLayoutNode {
   homePos?: THREE.Vector3;
   hidden?: boolean;
   type?: string;
-  premises?: readonly string[];
+  premises?: string[];
   lineage?: import('../../domain/KnowledgeLineage').KnowledgeLineageMeta;
 }
 
