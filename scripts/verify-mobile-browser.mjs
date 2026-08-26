@@ -99,11 +99,27 @@ try{
     assert.ok(visual.trueBluePeak>=.55,'actual true-blue scene signal must remain visibly bright instead of collapsing into near-black blue');
     assert.ok(visual.greenDominant<=5,'old green/teal contamination must not reappear in the actual scene screenshot');
 
-    // Gate B: calibrate semantic colors around four real on-screen nodes. The local peak checks are
-    // deliberate: hue alone is insufficient because a correctly-hued node can still be visually too dark.
-    // Layer color is now controlled by effectiveLayer, not by NodeType, so the calibration must exercise
-    // the same canonical layer input consumed by the production scene.
-    const calibrationIds=targets.slice(0,4).map(target=>target.id);
+    // Gate B: calibrate semantic colors around four real on-screen nodes. Global spherical layout can
+    // legitimately change which nodes appear first in render order, so do not calibrate against four
+    // arbitrary possibly-overlapping balls. Select front-most, screen-separated balls using geometry only;
+    // the same brightness/count thresholds below remain unchanged.
+    const calibrationTargets=await page.evaluate(()=>{
+      const candidates=window.__debug.renderNodes
+        .filter(node=>!['n1','n2','n16'].includes(node.id))
+        .map(node=>{const point=window.__debug.scene.screenPositionForNode(node.id);return point?{...point,id:node.id,z:node.pos?.z??-Infinity}:null;})
+        .filter(target=>target&&target.x>30&&target.x<360&&target.y>96&&target.y<700)
+        .sort((a,b)=>b.z-a.z||a.id.localeCompare(b.id));
+      for(const minDistance of [72,60,48,36,0]){
+        const chosen=[];
+        for(const candidate of candidates){
+          if(chosen.every(other=>Math.hypot(candidate.x-other.x,candidate.y-other.y)>=minDistance))chosen.push(candidate);
+          if(chosen.length===4)return chosen;
+        }
+      }
+      return candidates.slice(0,4);
+    });
+    assert.equal(calibrationTargets.length,4,'semantic palette calibration needs four isolated on-screen nodes');
+    const calibrationIds=calibrationTargets.map(target=>target.id);
     const originals=await page.evaluate(ids=>{
       const original=[];
       ids.forEach(id=>{const node=window.__debug.renderNodes.find(candidate=>candidate.id===id);if(!node)return;original.push({id,type:node.type,status:node.status,mastery:node.mastery,effectiveLayer:node.effectiveLayer});node.type='reasoning';node.status='verified';node.mastery='none';});
