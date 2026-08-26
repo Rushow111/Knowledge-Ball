@@ -41,8 +41,6 @@ async function assertDetailAtViewportCore(page, tolerance = 1.5) {
   );
 }
 
-// Legacy helper name remains for lineage lifecycle checks. The physical node
-// stays where the graph placed it while the detail navigator stays at screen core.
 async function waitForNodeAtCanvasCenter(page, id) {
   const point = await waitForNodePoint(page, id);
   await assertDetailAtViewportCore(page);
@@ -53,6 +51,77 @@ async function assertNodeStayedNear(page, id, before, tolerance = 3) {
   const after = await waitForNodePoint(page, id);
   assert.ok(after, `node ${id} must remain renderable`);
   assert.ok(Math.hypot(after.x - before.x, after.y - before.y) <= tolerance, `node ${id} must not be auto-centered or rotated by detail navigation`);
+}
+
+async function readVisibleReasoningBridge(page) {
+  return page.evaluate(() => {
+    const debug = window.__debug;
+    const nodes = debug.renderNodes;
+    const byId = new Map(nodes.map(node => [node.id, node]));
+    const core = new Set(['n1', 'n2', 'n16']);
+    const choices = nodes.flatMap(node => {
+      if (core.has(node.id) || node.hidden || node.type === 'reasoning' || node.type === 'logic-symbol') return [];
+      const previousReasoning = node.premises
+        ?.map(id => byId.get(id))
+        .find(previous => previous?.type === 'reasoning');
+      const nextReasoning = nodes.find(next => next.type === 'reasoning' && next.premises?.includes(node.id));
+      if (!previousReasoning || !nextReasoning) return [];
+      const point = debug.scene.screenPositionForNode(node.id);
+      if (!point || point.x <= 24 || point.x >= 366 || point.y <= 88 || point.y >= 808) return [];
+      return [{
+        id: node.id,
+        title: node.title,
+        previousReasoningId: previousReasoning.id,
+        previousReasoningTitle: previousReasoning.title,
+        nextReasoningId: nextReasoning.id,
+        nextReasoningTitle: nextReasoning.title,
+        ...point,
+      }];
+    });
+    return choices[0] ?? null;
+  });
+}
+
+async function rotateSphere(page, dx, dy = 0) {
+  await page.evaluate(({ dx, dy }) => {
+    const canvas = document.querySelector('canvas');
+    if (!canvas) throw new Error('knowledge scene canvas is missing');
+    const pointerId = 991;
+    const startX = -1000;
+    const startY = -1000;
+    const event = (type, x, y) => new PointerEvent(type, {
+      pointerId,
+      pointerType: 'touch',
+      clientX: x,
+      clientY: y,
+      bubbles: true,
+      cancelable: true,
+    });
+    canvas.dispatchEvent(event('pointerdown', startX, startY));
+    canvas.dispatchEvent(event('pointermove', startX + dx, startY + dy));
+    canvas.dispatchEvent(event('pointerup', startX + dx, startY + dy));
+  }, { dx, dy });
+  await page.waitForTimeout(130);
+}
+
+async function findReasoningBridgeByUserRotation(page) {
+  let candidate = await readVisibleReasoningBridge(page);
+  if (candidate) return candidate;
+
+  // Global chain placement no longer promises that a particular relation chain
+  // starts in the initial camera hemisphere. Exercise the existing user-owned
+  // whole-sphere rotation until a real bridge conclusion enters the mobile view.
+  for (let pitchBand = 0; pitchBand < 4; pitchBand += 1) {
+    for (let yawStep = 0; yawStep < 14; yawStep += 1) {
+      await rotateSphere(page, 120, 0);
+      candidate = await readVisibleReasoningBridge(page);
+      if (candidate) return candidate;
+    }
+    await rotateSphere(page, 0, 120);
+    candidate = await readVisibleReasoningBridge(page);
+    if (candidate) return candidate;
+  }
+  return null;
 }
 
 try {
@@ -67,37 +136,12 @@ try {
     await page.goto(`${origin}?canonical-reasoning-chain-regression=1`, { waitUntil: 'domcontentloaded', timeout: 20_000 });
     await page.waitForFunction(() => Boolean(window.__debug?.scene && window.__debug?.renderNodes?.length), null, { timeout: 10_000 });
 
-    const candidate = await page.evaluate(() => {
-      const debug = window.__debug;
-      const nodes = debug.renderNodes;
-      const byId = new Map(nodes.map(node => [node.id, node]));
-      const core = new Set(['n1', 'n2', 'n16']);
-      const choices = nodes.flatMap(node => {
-        if (core.has(node.id) || node.hidden || node.type === 'reasoning' || node.type === 'logic-symbol') return [];
-        const previousReasoning = node.premises
-          ?.map(id => byId.get(id))
-          .find(previous => previous?.type === 'reasoning');
-        const nextReasoning = nodes.find(next => next.type === 'reasoning' && next.premises?.includes(node.id));
-        if (!previousReasoning || !nextReasoning) return [];
-        const point = debug.scene.screenPositionForNode(node.id);
-        if (!point || point.x <= 24 || point.x >= 366 || point.y <= 88 || point.y >= 808) return [];
-        return [{
-          id: node.id,
-          title: node.title,
-          previousReasoningId: previousReasoning.id,
-          previousReasoningTitle: previousReasoning.title,
-          nextReasoningId: nextReasoning.id,
-          nextReasoningTitle: nextReasoning.title,
-          ...point,
-        }];
-      });
-      return choices[0] ?? null;
-    });
-    assert.ok(candidate, 'fixture must expose a conclusion that is between two real reasoning-process nodes');
+    const candidate = await findReasoningBridgeByUserRotation(page);
+    assert.ok(candidate, 'fixture must expose a conclusion that is between two real reasoning-process nodes after user sphere rotation');
 
-    // One real-ball tap opens its local navigator immediately. The physical
-    // graph orientation is user-owned and must remain unchanged; only the detail
-    // surface itself belongs at the screen/solar core.
+    // After the ordinary user rotation makes the real ball visible, the rest of
+    // the acceptance remains real touch/button interaction; detail navigation
+    // itself must never move or auto-center the physical graph.
     await page.touchscreen.tap(candidate.x, candidate.y);
 
     const detail = page.locator('#nodeDetailOverlay.open');
@@ -127,9 +171,6 @@ try {
     assert.equal((await previousReasoning.textContent())?.trim(), candidate.previousReasoningTitle, 'button text must be the real white knowledge node title');
     assert.equal((await nextReasoning.textContent())?.trim(), candidate.nextReasoningTitle, 'button text must be the real white knowledge node title');
 
-    // Presentation acceptance for the screenshot-level requirement: neighbour
-    // labels use the same body typography as the middle content and a structural
-    // white relation node uses the exact structural ball colour token.
     const relationPresentation = await page.evaluate(reasoningId => {
       const root = document.querySelector('#nodeDetailOverlay.open');
       const content = root?.querySelector('.node-detail-content');
@@ -149,7 +190,6 @@ try {
           fontSize: relationStyle.fontSize,
           fontWeight: relationStyle.fontWeight,
           lineHeight: relationStyle.lineHeight,
-          color: relationStyle.color,
           colorToken: relationStyle.getPropertyValue('--relation-node-color').trim().toUpperCase(),
         },
         structuralToken: getComputedStyle(document.documentElement).getPropertyValue('--node-structural').trim().toUpperCase(),
@@ -162,17 +202,12 @@ try {
     assert.equal(relationPresentation.relation.lineHeight, relationPresentation.content.lineHeight, 'neighbour label line height must equal middle content');
     assert.equal(relationPresentation.relation.colorToken, relationPresentation.structuralToken, 'white reasoning label must use the same structural colour token as its real ball');
 
-    // Layout acceptance is count-independent. Two, three and seven synthetic
-    // labels exercise the actual production CSS without adding fake graph data.
-    // Side rails stay vertically centred on the ellipse and inside the viewport;
-    // top/bottom rails wrap every row around the ellipse centre.
     const symmetry = await page.evaluate(() => {
       const root = document.querySelector('#nodeDetailOverlay.open');
       if (!root) return null;
       const rootRect = root.getBoundingClientRect();
       const rootCenterX = rootRect.left + rootRect.width / 2;
       const rootCenterY = rootRect.top + rootRect.height / 2;
-
       const measure = (axis, count) => {
         const group = document.createElement('div');
         group.className = `node-detail-relations ${axis}`;
@@ -213,7 +248,6 @@ try {
         group.remove();
         return result;
       };
-
       return {
         side: [2, 3, 7].map(count => measure('left', count)),
         horizontal: [2, 3, 7].map(count => measure('top', count)),
@@ -229,9 +263,6 @@ try {
       assert.ok(sample.maxRowCenterError <= 1.5, `${sample.count} wrapped top labels must centre every row on the ellipse (error ${sample.maxRowCenterError})`);
     }
 
-    // A relation button is another entrance to the same real ball. One tap keeps
-    // the navigator at screen core, switches its content, and preserves the
-    // physical white reasoning ball at its graph position.
     const previousReasoningPoint = await waitForNodePoint(page, candidate.previousReasoningId);
     await previousReasoning.tap();
     await page.waitForFunction(
@@ -260,8 +291,6 @@ try {
     assert.ok(reasoningShape.premiseIds.every(id => reasoningShape.previousIds.includes(id)), 'white reasoning ball must naturally expand its real premise neighbours');
     assert.ok(reasoningShape.nextIds.includes(candidate.id), 'white reasoning ball must naturally expand its real conclusion neighbour');
 
-    // Navigate back through the canonical next direction. Again, the graph does
-    // not move; the fixed central detail simply switches back to the conclusion.
     const conclusionPoint = await waitForNodePoint(page, candidate.id);
     await detail.locator(`.node-detail-relation[data-relation-kind="next"][data-related-node-id="${candidate.id}"]`).tap();
     await page.waitForFunction(
@@ -272,23 +301,10 @@ try {
     await assertNodeStayedNear(page, candidate.id, conclusionPoint);
     await assertDetailAtViewportCore(page);
 
-    // A fixed central navigator can legitimately cover nearby graph balls. Once
-    // detail is open, the four relation rails are therefore the deterministic
-    // navigation surface; direct canvas tapping remains available wherever a ball
-    // is actually visible outside the central detail.
-
-    // Close before validating the stable lineage lifecycle.
     await page.locator('#nodeDetailOverlay .node-detail-close').tap();
     await page.waitForFunction(() => !document.querySelector('#nodeDetailOverlay.open'), null, { timeout: 5_000 });
     await page.waitForTimeout(250);
 
-    // The preview fixture is intentionally independent of hosted production data.
-    // Add two-step gray + red chains to the same domain projection and scene.
-    // Mark the injected nodes touched from the start: they are test-only records
-    // appended after the real layout pass, and allowing markNodeViewed() to fire
-    // would rebuild their positions while a focus animation is already targeting
-    // the pre-layout fixture coordinate. Production lineage nodes are laid out
-    // before interaction and do not have this fixture-only discontinuity.
     const lineageFixture = await page.evaluate(currentId => {
       const debug = window.__debug;
       const domainCurrent = debug.projection.state.nodesById[currentId];
@@ -306,23 +322,6 @@ try {
         premises: [...domainCurrent.premises],
         lineage: { topicId, proposal, targetId, role, rank },
       });
-      const makeRenderNode = (id, role, proposal, title, rank, targetId) => ({
-        id,
-        title,
-        type: renderCurrent.type,
-        status: 'verified',
-        mastery: 'touched',
-        reasoning: renderCurrent.reasoning,
-        premises: [...renderCurrent.premises],
-        logicRuleId: renderCurrent.logicRuleId,
-        aliases: renderCurrent.aliases ? [...renderCurrent.aliases] : undefined,
-        semanticKey: renderCurrent.semanticKey,
-        hidden: true,
-        lineage: { topicId, proposal, targetId, role, rank },
-        declaredLayer: renderCurrent.declaredLayer,
-        effectiveLayer: renderCurrent.effectiveLayer,
-      });
-
       const historyId = '__lineage-history-browser-fixture__';
       const historyOlderId = '__lineage-history-older-browser-fixture__';
       const oppositionId = '__lineage-opposition-browser-fixture__';
@@ -336,10 +335,6 @@ try {
       for (const [id, role, proposal, title, rank, targetId] of fixtures) {
         debug.projection.state.nodesById[id] = makeDomainNode(id, role, proposal, title, rank, targetId);
       }
-      // The fixture mutates Projection truth directly, so cross the same
-      // Projection -> render-generation boundary used by production events.
-      // Do not push into renderNodes: that bypasses layout/relation-index ownership
-      // and only worked when Scene rebuilt canonical topology every frame.
       debug.projectionRenderScheduler.request();
       debug.projectionRenderScheduler.flushNow();
       return { currentId, historyId, historyOlderId, oppositionId, oppositionOlderId };
@@ -359,9 +354,6 @@ try {
     assert.equal(beforeLineageDetail.oppositionPoint, null, 'Current mode must hide red rank 1 before detail opens');
     assert.equal(beforeLineageDetail.oppositionOlderPoint, null, 'Current mode must hide red rank 2 before detail opens');
 
-    // The conclusion is already focused, so a real touch normally reopens detail
-    // immediately. Keep a fallback to the ordinary two-touch entry contract if a
-    // renderer/browser implementation cleared focus while the fixture was added.
     let lineageCurrentPoint = await page.evaluate(id => window.__debug.scene.screenPositionForNode(id), lineageFixture.currentId);
     assert.ok(lineageCurrentPoint, 'lineage current ball must be renderable before opening detail');
     await page.touchscreen.tap(lineageCurrentPoint.x, lineageCurrentPoint.y);
@@ -414,9 +406,6 @@ try {
     assert.equal(afterLineageDetail.oppositionOlderPoint, null, 'opening current detail must keep non-neighbour red rank 2 hidden');
     assert.ok(afterLineageDetail.visibleEdges >= beforeLineageDetail.visibleEdges + 2, 'opening detail must show the two direct gray/red lineage edges with their balls');
 
-    // One gray-neighbour button tap switches the fixed central detail to the real
-    // gray rank-1 ball and naturally unfolds its next direct gray neighbour
-    // (rank 2), without moving the graph or exposing unrelated red history.
     await historyControl.tap();
     await page.waitForFunction(
       id => document.querySelector('#nodeDetailOverlay.open')?.getAttribute('data-node-id') === id,
@@ -447,7 +436,7 @@ try {
     );
 
     assert.deepEqual(pageErrors, [], `canonical one-hop detail navigation produced page errors:\n${pageErrors.join('\n')}`);
-    console.log(`One-hop local knowledge navigation browser regression passed: fixed screen-core detail + readable colour-matched symmetric labels + progressive gray/red lineage around ${candidate.id}`);
+    console.log(`One-hop local knowledge navigation browser regression passed after user-owned sphere rotation around ${candidate.id}`);
   } finally {
     await browser.close();
   }
