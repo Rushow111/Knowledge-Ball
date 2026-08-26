@@ -22,7 +22,7 @@ assert(layoutCallIndex > allNodesIndex, 'radial layout must run after the full p
 assert(renderFilterIndex > layoutCallIndex, 'hidden rendering filter must run only after full-graph layout');
 assert(!appSource.includes('mobileSceneNodeLimit'), 'mobile knowledge truth must not restore a fixed scene-node cap');
 
-assert(layoutEntrySource.includes("import { applyRadialKnowledgeLayout"), 'the compatibility layout entry must preserve RadialKnowledgeLayout as the first geometry stage');
+assert(layoutEntrySource.includes('applyRadialKnowledgeLayout,') && layoutEntrySource.includes("from './RadialKnowledgeLayout';"), 'the compatibility layout entry must preserve RadialKnowledgeLayout as the first geometry stage');
 assert(layoutEntrySource.includes("import { applyTriangularRelationGroupPacking } from './TriangularRelationGroupPacking';"), 'the single layout entry must use relation-group triangular packing');
 const radialCallIndex = layoutEntrySource.indexOf('applyRadialKnowledgeLayout(nodes);');
 const packingCallIndex = layoutEntrySource.indexOf('applyTriangularRelationGroupPacking(nodes);');
