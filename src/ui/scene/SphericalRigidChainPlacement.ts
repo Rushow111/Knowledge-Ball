@@ -74,6 +74,54 @@ function placementLayer(node: RadialKnowledgeLayoutNode): KnowledgeLayer | undef
   return (node as RadialKnowledgeLayoutNode & { effectiveLayer?: KnowledgeLayer }).effectiveLayer;
 }
 
+/**
+ * Phase 1 already made every chain radial. The global stage must preserve that
+ * axis instead of guessing it from the centroid of the whole (possibly very
+ * asymmetric) chain. Root knowledge balls share the first radial plane: three
+ * or more roots give its exact normal; one/two roots use their plane centre.
+ */
+function sourceAxisFromRootPlane<T extends RadialKnowledgeLayoutNode>(
+  primary: readonly (T & { pos: THREE.Vector3 })[],
+): THREE.Vector3 {
+  const memberIds = new Set(primary.map(node => node.id));
+  const knowledge = primary.filter(node => node.type !== 'reasoning');
+  const derivedIds = new Set<string>();
+  for (const node of knowledge) {
+    if ((node.premises ?? []).some(id => memberIds.has(id))) derivedIds.add(node.id);
+  }
+  const roots = knowledge.filter(node => !derivedIds.has(node.id));
+  const anchors = roots.length ? roots : knowledge.length ? knowledge : primary;
+
+  const centroid = anchors
+    .reduce((sum, node) => sum.add(node.pos), new THREE.Vector3())
+    .multiplyScalar(1 / anchors.length);
+
+  if (anchors.length >= 3) {
+    const base = anchors[0]!.pos;
+    let bestNormal = new THREE.Vector3();
+    let bestLengthSq = 0;
+    for (let i = 1; i < anchors.length - 1; i += 1) {
+      const a = anchors[i]!.pos.clone().sub(base);
+      for (let j = i + 1; j < anchors.length; j += 1) {
+        const normal = a.clone().cross(anchors[j]!.pos.clone().sub(base));
+        const lengthSq = normal.lengthSq();
+        if (lengthSq <= bestLengthSq) continue;
+        bestNormal = normal;
+        bestLengthSq = lengthSq;
+      }
+    }
+    if (bestLengthSq > 1e-12) {
+      bestNormal.normalize();
+      if (bestNormal.dot(centroid) < 0) bestNormal.negate();
+      return bestNormal;
+    }
+  }
+
+  if (centroid.lengthSq() > 1e-12) return centroid.normalize();
+  const fallback = primary[0]?.pos.clone() ?? new THREE.Vector3(1, 0, 0);
+  return fallback.lengthSq() > 1e-12 ? fallback.normalize() : new THREE.Vector3(1, 0, 0);
+}
+
 function hcpParity(k: number): 0 | 1 {
   return (((k % 2) + 2) % 2) as 0 | 1;
 }
@@ -277,13 +325,7 @@ function buildRigidChains<T extends RadialKnowledgeLayoutNode>(nodes: T[]): Rigi
 
     const primary = positioned.filter(isPrimaryCurrentNode);
     const axisMembers = primary.length ? primary : positioned;
-    const average = axisMembers
-      .reduce((sum, node) => sum.add(node.pos), new THREE.Vector3())
-      .multiplyScalar(1 / axisMembers.length);
-    let sourceAxis = average.lengthSq() > 1e-12
-      ? average.normalize()
-      : axisMembers[0]!.pos.clone().normalize();
-    if (sourceAxis.lengthSq() <= 1e-12) sourceAxis = new THREE.Vector3(1, 0, 0);
+    const sourceAxis = sourceAxisFromRootPlane(axisMembers);
 
     const minProjection = Math.min(...axisMembers.map(node => node.pos.dot(sourceAxis)));
     const rootPlane = axisMembers.filter(
