@@ -8,6 +8,7 @@ import {
   SUN_TRIAD_IDS,
 } from '../config/KnowledgeUiConfig';
 import { optimizeRelationLengthLayout } from './RelationLengthLayout';
+import { applyRadialChainLayout } from './RadialChainLayout';
 
 export interface UniformLayoutNode {
   id: string;
@@ -17,6 +18,9 @@ export interface UniformLayoutNode {
   vel?: THREE.Vector3;
   homePos?: THREE.Vector3;
   hidden?: boolean;
+  type?: string;
+  premises?: readonly string[];
+  lineage?: import('../../domain/KnowledgeLineage').KnowledgeLineageMeta;
 }
 
 type NonCoreLayer = Exclude<KnowledgeLayer, 'core'>;
@@ -88,6 +92,10 @@ function coreSlot(id: string): THREE.Vector3 {
  * Generates the hard uniform slot set for every node, including hidden history,
  * then only changes which same-layer node owns which slot to shorten the complete
  * historical relation graph. The slot set itself never moves.
+ *
+ * Phase-1 radial-chain placement is intentionally an overlay: standalone nodes
+ * keep these fallback slots, while reasoning chains are rewritten by the new
+ * deterministic L=5r local-chain rules. This keeps later multi-chain work isolated.
  */
 export function applyUniformLayerLayout<T extends UniformLayoutNode>(nodes: T[]): T[] {
   const groups: Record<NonCoreLayer, T[]> = {
@@ -126,5 +134,6 @@ export function applyUniformLayerLayout<T extends UniformLayoutNode>(nodes: T[])
   });
 
   optimizeRelationLengthLayout(nodes);
+  applyRadialChainLayout(nodes);
   return nodes;
 }
