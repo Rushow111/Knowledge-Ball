@@ -346,7 +346,7 @@ function preferredAnchorRadius<T extends RadialKnowledgeLayoutNode>(
 ): number {
   const layers = new Set(chain.semanticMembers.map(placementLayer).filter(Boolean));
   if (layers.has('inner')) return shells.innerSurface;
-  if (layers.has('middle')) return (shells.innerSurface + shells.middleSurface) / 2;
+  if (layers.has('middle')) return shells.innerSurface;
   if (layers.has('outer')) return shells.outerSurface;
   return shells.innerSurface;
 }
