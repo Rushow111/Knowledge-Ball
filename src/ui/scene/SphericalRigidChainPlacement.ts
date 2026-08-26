@@ -318,7 +318,7 @@ function buildRigidChains<T extends RadialKnowledgeLayoutNode>(nodes: T[]): Rigi
 function createDirectionRecords(): DirectionRecord[] {
   const records: DirectionRecord[] = [{
     index: 0,
-    direction: new THREE.Vector3(1, 0, 2).normalize(),
+    direction: new THREE.Vector3(1, 0, 0),
     uses: 0,
   }];
   const remaining = SPHERICAL_DIRECTION_COUNT - 1;
