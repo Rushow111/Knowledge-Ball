@@ -241,11 +241,15 @@ function buildRigidChains<T extends RadialKnowledgeLayoutNode>(nodes: T[]): Rigi
     for (const id of component) componentByPrimaryId.set(id, index);
   });
 
+  // A topic can begin life as an ordinary current node with no lineage metadata.
+  // Map that node's own id as its topic key too, so later history/opposition
+  // versions stay attached to the same rigid chain instead of becoming global
+  // standalone chains. Existing lineage-aware current nodes keep their topicId.
   const topicComponent = new Map<string, number>();
   for (const node of primaryMembers) {
-    if (!node.lineage) continue;
     const componentIndex = componentByPrimaryId.get(node.id);
-    if (componentIndex !== undefined) topicComponent.set(topicIdFor(node), componentIndex);
+    if (componentIndex === undefined) continue;
+    topicComponent.set(node.lineage ? topicIdFor(node) : node.id, componentIndex);
   }
 
   const assigned = new Set(primaryMembers.map(node => node.id));
