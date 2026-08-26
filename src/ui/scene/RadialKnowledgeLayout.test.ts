@@ -106,11 +106,20 @@ const p1 = byId(premiseFanIn, 'p1').pos!;
 const p2 = byId(premiseFanIn, 'p2').pos!;
 const p3 = byId(premiseFanIn, 'p3').pos!;
 const conclusion = byId(premiseFanIn, 'c1').pos!;
-near(p1.x, p2.x, 'premises stay on one radial plane');
-near(p2.x, p3.x, 'premises stay on one radial plane');
-near(conclusion.x - p1.x, RADIAL_LAYOUT_LINK_LENGTH, 'next knowledge plane still advances outward by 5R');
 const premiseCenter = mean([p1, p2, p3]);
-const lateralCenterError = new THREE.Vector2(premiseCenter.y - conclusion.y, premiseCenter.z - conclusion.z).length();
+const chainAxis = premiseCenter.clone().normalize();
+near(p1.dot(chainAxis), p2.dot(chainAxis), 'premises stay on one radial plane');
+near(p2.dot(chainAxis), p3.dot(chainAxis), 'premises stay on one radial plane');
+near(
+  conclusion.dot(chainAxis) - p1.dot(chainAxis),
+  RADIAL_LAYOUT_LINK_LENGTH,
+  'next knowledge plane still advances outward by 5R',
+);
+const centerDelta = premiseCenter.clone().sub(conclusion);
+const lateralCenterError = centerDelta
+  .clone()
+  .addScaledVector(chainAxis, -centerDelta.dot(chainAxis))
+  .length();
 assert.ok(lateralCenterError <= RADIAL_LAYOUT_LINK_LENGTH + EPSILON, 'premise group centre must stay as close as lattice quantization allows to conclusion projection');
 nearVector(
   byId(premiseFanIn, 'reasoning-1').pos!,
