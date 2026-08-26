@@ -107,7 +107,8 @@ const p2 = byId(premiseFanIn, 'p2').pos!;
 const p3 = byId(premiseFanIn, 'p3').pos!;
 const conclusion = byId(premiseFanIn, 'c1').pos!;
 const premiseCenter = mean([p1, p2, p3]);
-const chainAxis = premiseCenter.clone().normalize();
+const chainAxis = p2.clone().sub(p1).cross(p3.clone().sub(p1)).normalize();
+if (conclusion.clone().sub(premiseCenter).dot(chainAxis) < 0) chainAxis.negate();
 near(p1.dot(chainAxis), p2.dot(chainAxis), 'premises stay on one radial plane');
 near(p2.dot(chainAxis), p3.dot(chainAxis), 'premises stay on one radial plane');
 near(
