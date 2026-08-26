@@ -104,6 +104,30 @@ async function rotateSphere(page, dx, dy = 0) {
   await page.waitForTimeout(130);
 }
 
+async function readVisibleNodePoint(page, id) {
+  return page.evaluate(nodeId => {
+    const point = window.__debug?.scene?.screenPositionForNode(nodeId);
+    if (!point || point.x <= 24 || point.x >= 366 || point.y <= 88 || point.y >= 808) return null;
+    return point;
+  }, id);
+}
+
+async function findNodeByUserRotation(page, id) {
+  let point = await readVisibleNodePoint(page, id);
+  if (point) return point;
+  for (let pitchBand = 0; pitchBand < 4; pitchBand += 1) {
+    for (let yawStep = 0; yawStep < 14; yawStep += 1) {
+      await rotateSphere(page, 120, 0);
+      point = await readVisibleNodePoint(page, id);
+      if (point) return point;
+    }
+    await rotateSphere(page, 0, 120);
+    point = await readVisibleNodePoint(page, id);
+    if (point) return point;
+  }
+  return null;
+}
+
 async function findReasoningBridgeByUserRotation(page) {
   let candidate = await readVisibleReasoningBridge(page);
   if (candidate) return candidate;
@@ -354,14 +378,18 @@ try {
     assert.equal(beforeLineageDetail.oppositionPoint, null, 'Current mode must hide red rank 1 before detail opens');
     assert.equal(beforeLineageDetail.oppositionOlderPoint, null, 'Current mode must hide red rank 2 before detail opens');
 
-    let lineageCurrentPoint = await page.evaluate(id => window.__debug.scene.screenPositionForNode(id), lineageFixture.currentId);
-    assert.ok(lineageCurrentPoint, 'lineage current ball must be renderable before opening detail');
+    // Adding the test-only lineage members legitimately triggers the same full
+    // layout pass as production projection refresh. A larger rigid footprint may
+    // choose another legal sphere direction, so restore visibility only through
+    // the real user-owned whole-sphere rotation before tapping the current ball.
+    let lineageCurrentPoint = await findNodeByUserRotation(page, lineageFixture.currentId);
+    assert.ok(lineageCurrentPoint, 'lineage current ball must be reachable by ordinary sphere rotation before opening detail');
     await page.touchscreen.tap(lineageCurrentPoint.x, lineageCurrentPoint.y);
     await page.waitForTimeout(250);
     if (await page.locator(`#nodeDetailOverlay.open[data-node-id="${lineageFixture.currentId}"]`).count() === 0) {
       await page.waitForTimeout(700);
-      lineageCurrentPoint = await page.evaluate(id => window.__debug.scene.screenPositionForNode(id), lineageFixture.currentId);
-      assert.ok(lineageCurrentPoint, 'lineage current ball must remain renderable after focus');
+      lineageCurrentPoint = await findNodeByUserRotation(page, lineageFixture.currentId);
+      assert.ok(lineageCurrentPoint, 'lineage current ball must remain reachable after the first ordinary touch');
       await page.touchscreen.tap(lineageCurrentPoint.x, lineageCurrentPoint.y);
     }
 
