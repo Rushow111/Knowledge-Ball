@@ -295,10 +295,17 @@ export function applyReasoningRadialPlacement(nodes: LayoutNode[]): void {
   reasoningNodes.forEach(clearReasoningSpatialState);
 
   // Canonical topology is the authority for whether a Reasoning ball actually
-  // participates in Knowledge. A bound/lineage-looking record with zero incident
-  // edges is still an orphan and must not be given fallback geometry.
+  // participates in Knowledge. LayoutNode intentionally carries no UI title, so
+  // project only the semantic fields required by the relation index.
+  const relationNodes = nodes.map(node => ({
+    id: node.id,
+    title: node.id,
+    premises: node.premises ?? [],
+    type: node.type as Parameters<typeof createKnowledgeRelationIndex>[0][number]['type'],
+    lineage: node.lineage,
+  }));
   const connectedReasoningIds = new Set<string>();
-  for (const edge of createKnowledgeRelationIndex(nodes).edges) {
+  for (const edge of createKnowledgeRelationIndex(relationNodes).edges) {
     if (byId.get(edge.fromId)?.type === 'reasoning') connectedReasoningIds.add(edge.fromId);
     if (byId.get(edge.toId)?.type === 'reasoning') connectedReasoningIds.add(edge.toId);
   }
