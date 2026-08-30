@@ -637,23 +637,23 @@ knowledgeCreate = new KnowledgeCreateController({
   onToast: message => panel.showToast(message),
 });
 
-if (!Capacitor.isNativePlatform()) {
-  nodeDetail = new NodeDetailController({
-    getNodeById: getNodeDetailById,
-    getMetadata: id => {
-      const metadata = productionSyncAdapter?.nodeMetadata(id);
-      return metadata ? { contributor: metadata.contributor, createdAt: metadata.createdAt, actorId: metadata.actorId } : null;
-    },
-    getRelations: id => knowledgeRelationIndex.relationsFor(id),
-    getScreenPosition: id => scene.screenPositionForNode(id),
-    getActions: getNodeDetailActions,
-    onAction: launchPanelAction,
-    onSelectRelatedNode: openNode,
-    onDetailNodeChange: id => scene.setDetailNode(id),
-    onViewed: id => { void markNodeViewed(id); },
-    onClose: () => { knowledgeSurfaceState.close('detail'); },
-  });
-}
+// Product node-detail UI is Web-owned and identical in Web, Capacitor, and Electron.
+// Native shells may add OS bridges, but they must not substitute a legacy product panel.
+nodeDetail = new NodeDetailController({
+  getNodeById: getNodeDetailById,
+  getMetadata: id => {
+    const metadata = productionSyncAdapter?.nodeMetadata(id);
+    return metadata ? { contributor: metadata.contributor, createdAt: metadata.createdAt, actorId: metadata.actorId } : null;
+  },
+  getRelations: id => knowledgeRelationIndex.relationsFor(id),
+  getScreenPosition: id => scene.screenPositionForNode(id),
+  getActions: getNodeDetailActions,
+  onAction: launchPanelAction,
+  onSelectRelatedNode: openNode,
+  onDetailNodeChange: id => scene.setDetailNode(id),
+  onViewed: id => { void markNodeViewed(id); },
+  onClose: () => { knowledgeSurfaceState.close('detail'); },
+});
 
 openSettingsOverlay = () => panel.openSettingsOverlay();
 closeSettingsOverlay = () => panel.closeSettingsOverlay();
@@ -762,11 +762,6 @@ if (legend) {
     <div class="legend-div"></div>
     <div class="layer-note">第一层包括静态语义关系；第二层只表达推理结构；第三层表达争议或提交时明确声明的不确定 / 概率知识。</div>
   `;
-}
-
-if (Capacitor.isNativePlatform()) {
-  const accountButton = qOpt<HTMLButtonElement>('.avatar-btn');
-  accountButton?.addEventListener('click', () => panel.openAccountOverlay());
 }
 
 const createButton = qOpt<HTMLButtonElement>('.ai-add');
