@@ -11,61 +11,89 @@ final class KnowledgeBallUITests: XCTestCase {
         XCTAssertTrue(app.webViews.firstMatch.waitForExistence(timeout: 20), "The packaged WKWebView did not start")
     }
 
+    private func firstButton(_ webView: XCUIElement, matching predicate: NSPredicate, timeout: TimeInterval = 5) -> XCUIElement {
+        let button = webView.buttons.matching(predicate).firstMatch
+        XCTAssertTrue(button.waitForExistence(timeout: timeout), "Expected Web button is missing: \(predicate)")
+        return button
+    }
+
     func testPackagedWebParitySmoke() throws {
         let webView = app.webViews.firstMatch
         XCTAssertTrue(webView.staticTexts["KNOWLEDGE BALL"].waitForExistence(timeout: 15), "Web shell is blank")
+        XCTAssertGreaterThan(webView.descendants(matching: .any).count, 10, "The packaged Web product did not expose a populated accessibility tree")
 
-        // A canvas in the live WKWebView proves that the Web-owned Three.js surface mounted.
-        XCTAssertTrue(webView.otherElements.matching(identifier: "canvasHost").firstMatch.exists || webView.descendants(matching: .any).count > 10,
-                      "The WebGL scene did not expose a populated accessibility tree")
-
-        let settings = webView.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'Settings' OR label CONTAINS '设置'")).firstMatch
-        XCTAssertTrue(settings.waitForExistence(timeout: 10), "Settings is not visible")
+        // Settings + shared zh-CN/en product UI.
+        let settings = firstButton(webView, matching: NSPredicate(format: "label CONTAINS[c] 'Settings' OR label CONTAINS '设置'"), timeout: 10)
         settings.tap()
         XCTAssertTrue(webView.staticTexts.matching(NSPredicate(format: "label == 'Settings' OR label == '设置'")).firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(webView.staticTexts.matching(NSPredicate(format: "label == 'Language' OR label == '语言'")).firstMatch.exists, "Language control is missing")
 
-        let language = webView.staticTexts.matching(NSPredicate(format: "label == 'Language' OR label == '语言'")).firstMatch
-        XCTAssertTrue(language.exists, "Language control is missing")
         let locale = webView.popUpButtons.firstMatch
         XCTAssertTrue(locale.exists, "Language selector is not tappable")
         locale.tap()
         let picker = app.pickerWheels.firstMatch
         if picker.waitForExistence(timeout: 2) {
             picker.adjust(toPickerWheelValue: "English")
-            app.buttons["Done"].tap()
+            if app.buttons["Done"].exists { app.buttons["Done"].tap() }
         } else {
             let english = app.buttons["English"]
             XCTAssertTrue(english.waitForExistence(timeout: 2), "English locale option is missing")
             english.tap()
         }
         XCTAssertTrue(webView.staticTexts["Language"].waitForExistence(timeout: 5), "Language switch did not update Web UI")
-        webView.buttons.matching(NSPredicate(format: "label CONTAINS '❌' OR label CONTAINS[c] 'Close'")).firstMatch.tap()
+        firstButton(webView, matching: NSPredicate(format: "label CONTAINS[c] 'Back to Knowledge Ball' OR label CONTAINS[c] 'Close' OR label CONTAINS '返回知识球' OR label CONTAINS '关闭'")).tap()
 
+        // Current -> Personal -> All -> Current must be the same product state machine as Web.
+        let current = firstButton(webView, matching: NSPredicate(format: "label == 'Current' OR label == '当前'"))
+        current.tap()
+        let personal = firstButton(webView, matching: NSPredicate(format: "label == 'Personal' OR label == '个人'"))
+        personal.tap()
+        let all = firstButton(webView, matching: NSPredicate(format: "label == 'All' OR label == '全部'"))
+        all.tap()
+        XCTAssertTrue(firstButton(webView, matching: NSPredicate(format: "label == 'Current' OR label == '当前'")).exists)
+
+        // Native iOS must expose the same AccountUiController product surface.
+        let account = firstButton(webView, matching: NSPredicate(format: "label CONTAINS[c] 'Account' OR label CONTAINS '账户' OR label CONTAINS '个人'"), timeout: 8)
+        account.tap()
+        XCTAssertTrue(webView.staticTexts.matching(NSPredicate(format: "label CONTAINS[c] 'My energy' OR label CONTAINS '我的能量'")).firstMatch.waitForExistence(timeout: 8), "Shared Account UI did not open")
+        XCTAssertTrue(webView.staticTexts.matching(NSPredicate(format: "label CONTAINS[c] 'Register / Sign in' OR label CONTAINS '注册 / 登录'")).firstMatch.exists, "Shared authentication UI is missing")
+        firstButton(webView, matching: NSPredicate(format: "label CONTAINS[c] 'Back to Knowledge Ball' OR label CONTAINS[c] 'Close' OR label CONTAINS '返回知识球' OR label CONTAINS '关闭'")).tap()
+
+        // Search a seeded user-authored node instead of assuming a particular 3D label is currently inside the label budget.
         let search = webView.textFields.firstMatch
         XCTAssertTrue(search.waitForExistence(timeout: 5), "Search input is missing")
         search.tap()
-        search.typeText("gravity")
-        XCTAssertEqual(search.value as? String, "gravity")
+        search.typeText("质数的定义")
+        let searchResult = webView.staticTexts["质数的定义"].firstMatch
+        XCTAssertTrue(searchResult.waitForExistence(timeout: 10), "Seeded knowledge was not returned by search")
+        searchResult.tap()
 
-        // Exercise a real scene node through its Web-owned label rather than a native route.
-        let node = webView.staticTexts["质数的定义"]
-        XCTAssertTrue(node.waitForExistence(timeout: 15), "The seeded 3D node labels did not render")
-        node.tap()
-        XCTAssertTrue(webView.buttons.matching(NSPredicate(format: "label CONTAINS '❌' OR label CONTAINS[c] 'Close'")).firstMatch.waitForExistence(timeout: 5),
-                      "A scene node did not open its detail panel")
+        // The current near-node detail and optimization menu must be interactable inside WKWebView.
+        let edit = firstButton(webView, matching: NSPredicate(format: "label == 'Edit' OR label == '编辑'"), timeout: 8)
+        edit.tap()
+        let optimize = firstButton(webView, matching: NSPredicate(format: "label == 'Optimize' OR label == '优化'"), timeout: 5)
+        XCTAssertTrue(optimize.isHittable, "Optimization action exists but is not hittable")
+        optimize.tap()
+        XCTAssertTrue(webView.staticTexts.matching(NSPredicate(format: "label CONTAINS[c] 'Edit node' OR label CONTAINS '编辑节点'")).firstMatch.waitForExistence(timeout: 8), "Optimization did not enter the current editor")
 
-        let add = webView.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'Add knowledge' OR label CONTAINS '新增知识'")).firstMatch
-        XCTAssertTrue(add.waitForExistence(timeout: 5), "The node-detail create action is missing")
-        add.tap()
-        let submit = webView.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'Submit' OR label CONTAINS '提交'")).firstMatch
-        XCTAssertTrue(submit.waitForExistence(timeout: 5))
+        // Back out of the editor and verify create validation on the current split-create surface.
+        let editorBack = firstButton(webView, matching: NSPredicate(format: "label CONTAINS[c] 'Back' OR label CONTAINS '返回'"), timeout: 5)
+        editorBack.tap()
+        if webView.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'Back' OR label CONTAINS '返回'")).firstMatch.exists {
+            webView.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'Back' OR label CONTAINS '返回'")).firstMatch.tap()
+        }
+
+        // Keyboard shortcut exercises the same KnowledgeCreateController used by Web.
+        app.typeKey("n", modifierFlags: .control)
+        let submit = firstButton(webView, matching: NSPredicate(format: "label CONTAINS[c] 'Submit' OR label CONTAINS '提交'"), timeout: 8)
         submit.tap()
-        XCTAssertTrue(webView.staticTexts.matching(NSPredicate(format: "label CONTAINS[c] 'Enter' OR label CONTAINS '请填写'")).firstMatch.waitForExistence(timeout: 5),
-                      "Create validation feedback is not visible")
+        XCTAssertTrue(webView.staticTexts.matching(NSPredicate(format: "label CONTAINS[c] 'Enter' OR label CONTAINS '请填写'")).firstMatch.waitForExistence(timeout: 5), "Create validation feedback is not visible")
 
+        // Real app lifecycle resume must preserve the WKWebView product surface.
         XCUIDevice.shared.press(.home)
         app.activate()
         XCTAssertTrue(webView.waitForExistence(timeout: 10), "Resume replaced the Web state")
+        XCTAssertTrue(webView.staticTexts["KNOWLEDGE BALL"].exists, "Product shell disappeared after resume")
 
         let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         attachment.name = "ios-packaged-parity"
