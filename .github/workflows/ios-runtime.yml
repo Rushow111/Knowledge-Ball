@@ -1,0 +1,49 @@
+name: iOS Simulator Runtime Gate
+
+on:
+  pull_request:
+    paths:
+      - 'ios/**'
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.ts'
+      - '.github/workflows/ios-runtime.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ios/**'
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.ts'
+      - '.github/workflows/ios-runtime.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  ios-runtime:
+    runs-on: macos-15
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Run packaged iOS Simulator + XCUITest parity acceptance
+        run: bash ios/scripts/run-simulator-parity.sh
+      - name: Upload iOS simulator evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator-runtime-evidence
+          path: artifacts/ios
+          if-no-files-found: error
