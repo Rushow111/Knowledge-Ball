@@ -55,6 +55,10 @@ xcrun simctl bootstatus "$DEVICE_ID" -b
     | tee ../../artifacts/ios/xcode-ui-test.log
 )
 
+# XCUITest intentionally ends on an interaction/validation surface. Restart the
+# process before visual parity capture so both screenshots represent the same
+# clean product-start state instead of comparing a modal against the Web home.
+xcrun simctl terminate "$DEVICE_ID" org.knowledgeball.app >/dev/null 2>&1 || true
 xcrun simctl launch "$DEVICE_ID" org.knowledgeball.app | tee artifacts/ios/simulator-launch.txt
 sleep 8
 xcrun simctl io "$DEVICE_ID" screenshot artifacts/ios/ios-simulator.png
