@@ -23,6 +23,10 @@ on:
       - 'vite.config.ts'
       - '.github/workflows/ios-runtime.yml'
 
+concurrency:
+  group: ios-runtime-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
