@@ -14,17 +14,7 @@ npm run test:browser-mobile
 npx cap sync ios
 node ios/scripts/verify-packaged-assets.mjs
 
-DEVICE_ID=$(xcrun simctl list devices available -j | python3 - <<'PY'
-import json, sys
-payload = json.load(sys.stdin)
-devices = [d for group in payload.get('devices', {}).values() for d in group if d.get('isAvailable') and d.get('name', '').startswith('iPhone')]
-preferred = next((d for d in devices if d.get('name') == 'iPhone 16'), None)
-selected = preferred or (devices[0] if devices else None)
-if not selected:
-    raise SystemExit('No available iPhone simulator is installed on this runner')
-print(selected['udid'])
-PY
-)
+DEVICE_ID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; payload=json.load(sys.stdin); devices=[d for group in payload.get('devices',{}).values() for d in group if d.get('isAvailable') and d.get('name','').startswith('iPhone')]; preferred=next((d for d in devices if d.get('name')=='iPhone 16'),None); selected=preferred or (devices[0] if devices else None); selected or (_ for _ in ()).throw(SystemExit('No available iPhone simulator is installed on this runner')); print(selected['udid'])")
 
 xcrun simctl boot "$DEVICE_ID" >/dev/null 2>&1 || true
 xcrun simctl bootstatus "$DEVICE_ID" -b
