@@ -350,7 +350,9 @@ function applyPersonalKnowledgeSnapshot(states: PersonalKnowledgeStateSnapshot[]
   projection.replacePersonalMastery(masteryById);
   syncAllPersonalMasteryFromProjection();
   scene.markDirty();
-  refreshCurrentKnowledgeSurface();
+  // The near-node detail does not project mastery, so personal hydration must
+  // not replace its DOM while the user is interacting with edit controls.
+  if (knowledgeSurfaceState.snapshot().surface === 'panel') refreshCurrentKnowledgeSurface();
 }
 
 function openNode(id: string): void {
@@ -695,10 +697,14 @@ store.subscribe((event) => {
   projection.apply(event);
   if (event.type === 'NodeMasterySet') {
     // Personal mastery changes visibility/style only. They never change graph
-    // topology, lineage, layer membership, or spatial constraints.
+    // topology, lineage, layer membership, or spatial constraints. The near-node
+    // detail does not render mastery, so rebuilding it here can destroy a pressed
+    // edit control between pointerdown and click. Only the mastery-owning panel
+    // needs a surface refresh.
     syncPersonalMasteryFromProjection(event.payload.nodeId);
     scene.markDirty();
-    if (knowledgeSurfaceState.nodeId === event.payload.nodeId) refreshCurrentKnowledgeSurface();
+    const { nodeId, surface } = knowledgeSurfaceState.snapshot();
+    if (surface === 'panel' && nodeId === event.payload.nodeId) refreshCurrentKnowledgeSurface();
   } else {
     // Public/domain truth still advances event-by-event. A synchronous replay
     // burst gets one derived full-graph render/layout at the microtask boundary.
