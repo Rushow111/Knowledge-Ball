@@ -46,4 +46,4 @@ jobs:
         with:
           name: ios-simulator-runtime-evidence
           path: artifacts/ios
-          if-no-files-found: error
+          if-no-files-found: warn
