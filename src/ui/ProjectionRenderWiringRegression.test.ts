@@ -16,6 +16,10 @@ assert.match(subscriber, /event\.type === 'NodeMasterySet'/,
   'personal mastery must have an explicit non-layout path');
 assert.match(subscriber, /syncPersonalMasteryFromProjection\(event\.payload\.nodeId\)/,
   'single mastery changes must update only personal scene state');
+assert.match(subscriber, /surface === 'panel'/,
+  'mastery changes may refresh the mastery-owning panel');
+assert.doesNotMatch(subscriber, /surface === 'detail'/,
+  'mastery changes must not replace the active near-node detail DOM during pointer interaction');
 assert.match(subscriber, /projectionRenderScheduler\.request\(\)/,
   'graph-changing events must request the coalesced render boundary');
 assert.doesNotMatch(subscriber, /syncNodesFromProjection\(\)/,
@@ -26,6 +30,10 @@ const snapshotEnd = app.indexOf('\nfunction openNode', snapshotStart);
 const snapshot = app.slice(snapshotStart, snapshotEnd);
 assert.match(snapshot, /syncAllPersonalMasteryFromProjection\(\)/,
   'account hydration must update mastery without graph layout');
+assert.match(snapshot, /surface === 'panel'/,
+  'personal hydration may refresh the mastery-owning panel');
+assert.doesNotMatch(snapshot, /surface === 'detail'/,
+  'personal hydration must not rebuild the detail surface that does not display mastery');
 assert.doesNotMatch(snapshot, /syncNodesFromProjection\(\)/,
   'personal account hydration must not rebuild graph geometry');
 

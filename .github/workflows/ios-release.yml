@@ -1,0 +1,152 @@
+name: iOS Native Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release-ios:
+    if: github.ref == 'refs/heads/main'
+    runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      IOS_DISTRIBUTION_CERT_P12_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERT_P12_BASE64 }}
+      IOS_DISTRIBUTION_CERT_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERT_PASSWORD }}
+      IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+      IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+      APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_API_KEY_P8_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8_BASE64 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Require Apple distribution credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in IOS_DISTRIBUTION_CERT_P12_BASE64 IOS_DISTRIBUTION_CERT_PASSWORD IOS_PROVISIONING_PROFILE_BASE64 IOS_TEAM_ID APP_STORE_CONNECT_API_KEY_ID APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_API_KEY_P8_BASE64; do
+            if [ -z "${!name:-}" ]; then
+              echo "Missing required iOS native release secret: $name" >&2
+              exit 1
+            fi
+          done
+      - name: Install distribution certificate, provisioning profile and App Store Connect key
+        shell: bash
+        run: |
+          set -euo pipefail
+          KEYCHAIN="$RUNNER_TEMP/knowledge-ball.keychain-db"
+          KEYCHAIN_PASSWORD=$(openssl rand -hex 24)
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          printf '%s' "$IOS_DISTRIBUTION_CERT_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/distribution.p12"
+          security import "$RUNNER_TEMP/distribution.p12" -P "$IOS_DISTRIBUTION_CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security list-keychain -d user -s "$KEYCHAIN" login.keychain-db
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+
+          printf '%s' "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode > "$RUNNER_TEMP/knowledge-ball.mobileprovision"
+          security cms -D -i "$RUNNER_TEMP/knowledge-ball.mobileprovision" > "$RUNNER_TEMP/profile.plist"
+          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$RUNNER_TEMP/profile.plist")
+          PROFILE_NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' "$RUNNER_TEMP/profile.plist")
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp "$RUNNER_TEMP/knowledge-ball.mobileprovision" "$HOME/Library/MobileDevice/Provisioning Profiles/${PROFILE_UUID}.mobileprovision"
+          echo "IOS_PROFILE_NAME=$PROFILE_NAME" >> "$GITHUB_ENV"
+
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          printf '%s' "$APP_STORE_CONNECT_API_KEY_P8_BASE64" | base64 --decode > "$HOME/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
+      - name: Build current Web product and sync iOS shell
+        run: |
+          npm ci
+          npm run ios:sync
+          node ios/scripts/verify-packaged-assets.mjs
+      - name: Archive signed native app from shared release identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=$(node -p "require('./package.json').version")
+          BUILD="$GITHUB_RUN_NUMBER"
+          xcodebuild archive \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/KnowledgeBall.xcarchive" \
+            MARKETING_VERSION="$VERSION" \
+            CURRENT_PROJECT_VERSION="$BUILD" \
+            DEVELOPMENT_TEAM="$IOS_TEAM_ID" \
+            CODE_SIGN_STYLE=Manual \
+            PROVISIONING_PROFILE_SPECIFIER="$IOS_PROFILE_NAME" \
+            CODE_SIGN_IDENTITY='Apple Distribution'
+      - name: Export IPA
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>teamID</key><string>${IOS_TEAM_ID}</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>provisioningProfiles</key><dict><key>org.knowledgeball.app</key><string>${IOS_PROFILE_NAME}</string></dict>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/KnowledgeBall.xcarchive" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist"
+          test -s "$RUNNER_TEMP/export/App.ipa"
+      - name: Upload exact IPA to App Store Connect / TestFlight processing
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcrun altool --upload-app \
+            --type ios \
+            --file "$RUNNER_TEMP/export/App.ipa" \
+            --apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
+            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" \
+            | tee "$RUNNER_TEMP/app-store-upload.txt"
+      - name: Record native release identity without falsely enabling public availability
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=$(node -p "require('./package.json').version")
+          SHA=$(shasum -a 256 "$RUNNER_TEMP/export/App.ipa" | awk '{print $1}')
+          cat > ios-release.json <<JSON
+          {
+            "platform": "ios",
+            "uploaded": true,
+            "publicAvailabilityPromoted": false,
+            "distribution": "testflight",
+            "version": "${VERSION}",
+            "build": "${GITHUB_RUN_NUMBER}",
+            "commit": "${GITHUB_SHA}",
+            "checksum": "sha256:${SHA}",
+            "note": "Upload succeeded. Keep the public native-iOS manifest unavailable until a real TestFlight/App Store install URL is confirmed."
+          }
+          JSON
+      - name: Attach native release evidence to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=$(node -p "require('./package.json').version")
+          gh release view "v${VERSION}" >/dev/null 2>&1 || gh release create "v${VERSION}" --title "Knowledge Ball v${VERSION}" --notes "Platform release artifacts for Knowledge Ball v${VERSION}."
+          gh release upload "v${VERSION}" ios-release.json --clobber
+      - name: Upload iOS release evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-native-release-evidence
+          path: |
+            ios-release.json
+            ${{ runner.temp }}/app-store-upload.txt
+          if-no-files-found: warn

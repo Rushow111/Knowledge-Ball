@@ -350,7 +350,9 @@ function applyPersonalKnowledgeSnapshot(states: PersonalKnowledgeStateSnapshot[]
   projection.replacePersonalMastery(masteryById);
   syncAllPersonalMasteryFromProjection();
   scene.markDirty();
-  refreshCurrentKnowledgeSurface();
+  // The near-node detail does not project mastery, so personal hydration must
+  // not replace its DOM while the user is interacting with edit controls.
+  if (knowledgeSurfaceState.snapshot().surface === 'panel') refreshCurrentKnowledgeSurface();
 }
 
 function openNode(id: string): void {
@@ -637,23 +639,23 @@ knowledgeCreate = new KnowledgeCreateController({
   onToast: message => panel.showToast(message),
 });
 
-if (!Capacitor.isNativePlatform()) {
-  nodeDetail = new NodeDetailController({
-    getNodeById: getNodeDetailById,
-    getMetadata: id => {
-      const metadata = productionSyncAdapter?.nodeMetadata(id);
-      return metadata ? { contributor: metadata.contributor, createdAt: metadata.createdAt, actorId: metadata.actorId } : null;
-    },
-    getRelations: id => knowledgeRelationIndex.relationsFor(id),
-    getScreenPosition: id => scene.screenPositionForNode(id),
-    getActions: getNodeDetailActions,
-    onAction: launchPanelAction,
-    onSelectRelatedNode: openNode,
-    onDetailNodeChange: id => scene.setDetailNode(id),
-    onViewed: id => { void markNodeViewed(id); },
-    onClose: () => { knowledgeSurfaceState.close('detail'); },
-  });
-}
+// Product node-detail UI is Web-owned and identical in Web, Capacitor, and Electron.
+// Native shells may add OS bridges, but they must not substitute a legacy product panel.
+nodeDetail = new NodeDetailController({
+  getNodeById: getNodeDetailById,
+  getMetadata: id => {
+    const metadata = productionSyncAdapter?.nodeMetadata(id);
+    return metadata ? { contributor: metadata.contributor, createdAt: metadata.createdAt, actorId: metadata.actorId } : null;
+  },
+  getRelations: id => knowledgeRelationIndex.relationsFor(id),
+  getScreenPosition: id => scene.screenPositionForNode(id),
+  getActions: getNodeDetailActions,
+  onAction: launchPanelAction,
+  onSelectRelatedNode: openNode,
+  onDetailNodeChange: id => scene.setDetailNode(id),
+  onViewed: id => { void markNodeViewed(id); },
+  onClose: () => { knowledgeSurfaceState.close('detail'); },
+});
 
 openSettingsOverlay = () => panel.openSettingsOverlay();
 closeSettingsOverlay = () => panel.closeSettingsOverlay();
@@ -695,10 +697,14 @@ store.subscribe((event) => {
   projection.apply(event);
   if (event.type === 'NodeMasterySet') {
     // Personal mastery changes visibility/style only. They never change graph
-    // topology, lineage, layer membership, or spatial constraints.
+    // topology, lineage, layer membership, or spatial constraints. The near-node
+    // detail does not render mastery, so rebuilding it here can destroy a pressed
+    // edit control between pointerdown and click. Only the mastery-owning panel
+    // needs a surface refresh.
     syncPersonalMasteryFromProjection(event.payload.nodeId);
     scene.markDirty();
-    if (knowledgeSurfaceState.nodeId === event.payload.nodeId) refreshCurrentKnowledgeSurface();
+    const { nodeId, surface } = knowledgeSurfaceState.snapshot();
+    if (surface === 'panel' && nodeId === event.payload.nodeId) refreshCurrentKnowledgeSurface();
   } else {
     // Public/domain truth still advances event-by-event. A synchronous replay
     // burst gets one derived full-graph render/layout at the microtask boundary.
@@ -762,11 +768,6 @@ if (legend) {
     <div class="legend-div"></div>
     <div class="layer-note">第一层包括静态语义关系；第二层只表达推理结构；第三层表达争议或提交时明确声明的不确定 / 概率知识。</div>
   `;
-}
-
-if (Capacitor.isNativePlatform()) {
-  const accountButton = qOpt<HTMLButtonElement>('.avatar-btn');
-  accountButton?.addEventListener('click', () => panel.openAccountOverlay());
 }
 
 const createButton = qOpt<HTMLButtonElement>('.ai-add');
