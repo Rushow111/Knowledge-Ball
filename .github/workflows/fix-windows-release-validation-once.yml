@@ -1,0 +1,56 @@
+name: Apply Windows Release Validation Fix Once
+
+on:
+  push:
+    branches:
+      - fix/windows-release-validation
+    paths:
+      - .github/workflows/fix-windows-release-validation-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/windows-release-validation
+      - name: Replace stale Windows-unavailable assertion
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('scripts/verify-i18n-downloads-browser.mjs')
+          text = path.read_text()
+          old = """  assert.equal(await page.locator('#windowsDownload').isDisabled(), true, 'Windows action must be disabled without an authoritative artifact');
+            assert.equal(await page.locator('.windows-download-card a[href]').count(), 0, 'Windows must not expose an invented download URL');
+          """
+          new = """  const windowsManifestResponse = await fetch(new URL('downloads/latest.json', origin));
+            assert.equal(windowsManifestResponse.ok, true, 'Windows release manifest must be readable by the browser acceptance');
+            const releaseManifest = await windowsManifestResponse.json();
+            const windowsArtifact = releaseManifest.platforms?.windows;
+            const windowsUrl = windowsArtifact?.urls?.installer ?? windowsArtifact?.urls?.portable;
+            const windowsEnabled = Boolean(windowsArtifact?.available && windowsUrl);
+            assert.equal(await page.locator('#windowsDownload').isDisabled(), !windowsEnabled, 'Windows action must match authoritative release manifest availability');
+            if (windowsEnabled) {
+              assert.ok(String(windowsUrl).startsWith('https://github.com/Rushow111/Knowledge-Ball/releases/download/'), 'Published Windows action must use the authoritative GitHub Release URL');
+            } else {
+              assert.equal(await page.locator('.windows-download-card a[href]').count(), 0, 'Windows must not expose an invented download URL');
+            }
+          """
+          if old not in text:
+              raise SystemExit('Expected stale Windows assertion was not found; refusing broad edit')
+          path.write_text(text.replace(old, new, 1))
+          PY
+          node --check scripts/verify-i18n-downloads-browser.mjs
+      - name: Remove one-time patch workflow and commit only the validation fix
+        shell: bash
+        run: |
+          rm .github/workflows/fix-windows-release-validation-once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/verify-i18n-downloads-browser.mjs .github/workflows/fix-windows-release-validation-once.yml
+          git commit -m "Test: follow authoritative Windows release availability"
+          git push origin HEAD:fix/windows-release-validation
