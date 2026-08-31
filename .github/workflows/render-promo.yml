@@ -1,0 +1,81 @@
+name: Render Knowledge Ball Promo
+
+on:
+  push:
+    branches:
+      - promo/remotion-preview
+    paths:
+      - 'promo/remotion/**'
+      - '.github/workflows/render-promo.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'promo/remotion/**'
+      - '.github/workflows/render-promo.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout isolated promo branch
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Remotion dependencies
+        working-directory: promo/remotion
+        run: npm install --no-audit --no-fund
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: Prepare professional voice and music
+        working-directory: promo/remotion
+        run: bash scripts/prepare-natural-audio.sh
+
+      - name: Render silent visual MP4
+        working-directory: promo/remotion
+        run: npm run render
+
+      - name: Mix natural narration and quiet ducked background
+        working-directory: promo/remotion
+        run: |
+          mv out/knowledge-ball-promo.mp4 out/knowledge-ball-promo-silent.mp4
+          ffmpeg -hide_banner -loglevel error -y \
+            -i out/knowledge-ball-promo-silent.mp4 \
+            -ss 8 -t 24 -i out/background-professional.mp3 \
+            -i out/narration-natural.mp3 \
+            -filter_complex "\
+              [1:a]atrim=0:24,asetpts=PTS-STARTPTS,loudnorm=I=-32:TP=-4:LRA=7,afade=t=in:st=0:d=1.2,afade=t=out:st=21.5:d=2.5[bg];\
+              [2:a]loudnorm=I=-16:TP=-1.5:LRA=7,highpass=f=75,lowpass=f=12000,adelay=500|500,apad=whole_dur=24,atrim=0:24,asplit=2[vo_sc][vo_mix];\
+              [bg][vo_sc]sidechaincompress=threshold=0.018:ratio=7:attack=25:release=450[ducked];\
+              [ducked][vo_mix]amix=inputs=2:normalize=0,alimiter=limit=0.88:level=disabled[mix]" \
+            -map 0:v:0 -map "[mix]" \
+            -c:v copy -c:a aac -b:a 192k -t 24 \
+            out/knowledge-ball-promo-natural.mp4
+
+      - name: Validate final media streams and loudness
+        working-directory: promo/remotion
+        run: |
+          ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,width,height,r_frame_rate -of default=nw=1 out/knowledge-ball-promo-natural.mp4
+          ffprobe -v error -select_streams a:0 -show_entries stream=codec_name,sample_rate,channels -of default=nw=1 out/knowledge-ball-promo-natural.mp4
+          ffmpeg -hide_banner -nostats -i out/knowledge-ball-promo-natural.mp4 -filter_complex ebur128=peak=true -f null - 2>&1 | tail -n 20
+
+      - name: Upload rendered promo
+        uses: actions/upload-artifact@v4
+        with:
+          name: knowledge-ball-promo-natural-voice
+          path: promo/remotion/out/knowledge-ball-promo-natural.mp4
+          if-no-files-found: error
+          retention-days: 7
